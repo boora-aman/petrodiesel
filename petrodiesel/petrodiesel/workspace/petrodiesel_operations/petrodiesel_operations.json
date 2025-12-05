@@ -1,0 +1,276 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"YmQPm8dYCU\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>\u26a1 Daily Operations Center</b></span>\",\"col\":12}},{\"id\":\"nrYHzjkR7p\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nozzle Shift Reading\",\"col\":3}},{\"id\":\"4Bqx-lTEZG\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tank Dip Reading\",\"col\":3}},{\"id\":\"pRmz3FCkVj\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Credit Sale\",\"col\":3}},{\"id\":\"wH1dN5AoXK\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tanker Receipt\",\"col\":3}},{\"id\":\"kTLp9sWhBv\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"qZxM2rJnDf\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today's Fuel Sales\",\"col\":3}},{\"id\":\"vEoC7tKpRm\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today's Total Collection\",\"col\":3}},{\"id\":\"jPwX6fNqSh\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Current Stock (Liters)\",\"col\":3}},{\"id\":\"lYbG4hMzTw\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"This Week Shifts\",\"col\":3}},{\"id\":\"aFnK8uIxVy\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"eZfO2yMBXC\",\"type\":\"paragraph\",\"data\":{\"text\":\"<b>\ud83d\udcdd Quick Entry Forms</b>\",\"col\":12}},{\"id\":\"fAgP3zNcYD\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nozzle Shift Reading\",\"col\":2}},{\"id\":\"gBhQ4AOdZE\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tank Dip Reading\",\"col\":2}},{\"id\":\"hCiR5BPeAF\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Credit Sale\",\"col\":2}},{\"id\":\"iDjS6CQfBG\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Tanker Receipt\",\"col\":2}},{\"id\":\"jEkT7DRgCH\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":2}},{\"id\":\"kFlU8EShDI\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Employee\",\"col\":2}},{\"id\":\"lGmV9FTiEJ\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"mHnW0GUjFK\",\"type\":\"paragraph\",\"data\":{\"text\":\"<b>\ud83d\udcca Quick Reports</b>\",\"col\":12}},{\"id\":\"nIoX1HVkGL\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Daily Summary Report\",\"col\":3}},{\"id\":\"oJpY2IWlHM\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Nozzle-wise Sales Report\",\"col\":3}},{\"id\":\"pKqZ3JXmIN\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Payment Mode Analysis\",\"col\":3}},{\"id\":\"qLrA4KYnJO\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Stock Balance\",\"col\":3}},{\"id\":\"rMsB5LZoPP\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"aaa1111\",\"type\":\"paragraph\",\"data\":{\"text\":\"<b>\ud83d\udccb Recent Transactions</b>\",\"col\":12}},{\"id\":\"sNtC6MApQQ\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Recent Shifts\",\"col\":4}},{\"id\":\"tOuD7NBqRR\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Recent Tank Dips\",\"col\":4}},{\"id\":\"bbb2222\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Recent Credit Sales\",\"col\":4}}]",
+ "creation": "2025-12-04 16:30:00",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "activity",
+ "idx": 0,
+ "indicator_color": "orange",
+ "is_hidden": 0,
+ "label": "Petrodiesel Operations",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Nozzle Shift Reading",
+   "link_count": 0,
+   "link_to": "Nozzle Shift Reading",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tank Dip Reading",
+   "link_count": 0,
+   "link_to": "Tank Dip Reading",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Credit Sale",
+   "link_count": 0,
+   "link_to": "Credit Sale",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tanker Receipt",
+   "link_count": 0,
+   "link_to": "Tanker Receipt",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer",
+   "link_count": 0,
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily Summary Report",
+   "link_count": 0,
+   "link_to": "Daily Summary Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Nozzle-wise Sales Report",
+   "link_count": 0,
+   "link_to": "Nozzle-wise Sales Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Payment Mode Analysis",
+   "link_count": 0,
+   "link_to": "Payment Mode Analysis",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Balance",
+   "link_count": 0,
+   "link_to": "Stock Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-12-04 16:56:49.144324",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Petrodiesel Operations",
+ "number_cards": [
+  {
+   "label": "Today's Fuel Sales",
+   "number_card_name": "Today's Fuel Sales"
+  },
+  {
+   "label": "Today's Total Collection",
+   "number_card_name": "Today's Total Collection"
+  },
+  {
+   "label": "Current Stock (Liters)",
+   "number_card_name": "Current Stock (Liters)"
+  },
+  {
+   "label": "This Week Shifts",
+   "number_card_name": "This Week Shifts"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Nozzle Shift Reading",
+   "label": "Recent Shifts",
+   "quick_list_filter": "[[\"Nozzle Shift Reading\",\"docstatus\",\"=\",1,false]]"
+  },
+  {
+   "document_type": "Tank Dip Reading",
+   "label": "Recent Tank Dips",
+   "quick_list_filter": "[[\"Tank Dip Reading\",\"docstatus\",\"=\",1,false]]"
+  },
+  {
+   "document_type": "Credit Sale",
+   "label": "Recent Credit Sales",
+   "quick_list_filter": "[[\"Credit Sale\",\"docstatus\",\"=\",1,false]]"
+  }
+ ],
+ "roles": [],
+ "sequence_id": 34.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "New",
+   "label": "New Shift",
+   "link_to": "Nozzle Shift Reading",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "New",
+   "label": "New Tank Dip",
+   "link_to": "Tank Dip Reading",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "New",
+   "label": "New Credit Sale",
+   "link_to": "Credit Sale",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "New",
+   "label": "New Tanker",
+   "link_to": "Tanker Receipt",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Nozzle Shift Reading",
+   "link_to": "Nozzle Shift Reading",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Tank Dip Reading",
+   "link_to": "Tank Dip Reading",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "Credit Sale",
+   "link_to": "Credit Sale",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "label": "Tanker Receipt",
+   "link_to": "Tanker Receipt",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "New",
+   "label": "Customer",
+   "link_to": "Customer",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "New",
+   "label": "Employee",
+   "link_to": "Employee",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Daily Summary Report",
+   "link_to": "Daily Summary Report",
+   "report_ref_doctype": "Nozzle Shift Reading",
+   "type": "Report"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Nozzle-wise Sales Report",
+   "link_to": "Nozzle-wise Sales Report",
+   "report_ref_doctype": "Nozzle Shift Reading",
+   "type": "Report"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "Payment Mode Analysis",
+   "link_to": "Payment Mode Analysis",
+   "report_ref_doctype": "Nozzle Shift Reading",
+   "type": "Report"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "label": "Stock Balance",
+   "link_to": "Stock Balance",
+   "report_ref_doctype": "Stock Ledger Entry",
+   "type": "Report"
+  }
+ ],
+ "title": "Petrodiesel Operations"
+}

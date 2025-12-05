@@ -1,0 +1,79 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-22 03:44:36.705795",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tank",
+  "fuel_item",
+  "dip_height_mm",
+  "calculated_quantity_liters",
+  "temperature_celsius",
+  "density"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "tank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tank",
+   "options": "Fuel Tank Master",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "fuel_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fuel Item",
+   "options": "Item"
+  },
+  {
+   "columns": 2,
+   "fieldname": "dip_height_mm",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Dip Height (mm)",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "calculated_quantity_liters",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Calculated Qty (L)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "temperature_celsius",
+   "fieldtype": "Float",
+   "label": "Temperature (\u00b0C)",
+   "precision": "1"
+  },
+  {
+   "fieldname": "density",
+   "fieldtype": "Float",
+   "label": "Density",
+   "precision": "4"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-22 03:47:12.518191",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Tank Dip Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

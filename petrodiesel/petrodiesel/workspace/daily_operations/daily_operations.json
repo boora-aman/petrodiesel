@@ -1,0 +1,213 @@
+{
+ "charts": [
+  {
+   "chart_name": "7 Day Sales Trend",
+   "label": "7 Day Sales Trend"
+  }
+ ],
+ "content": "[{\"id\":\"qEK4bJwqUi\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Daily Operations</span>\",\"col\":12}},{\"id\":\"05i_2ca9gm\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today's Fuel Sales\",\"col\":4}},{\"id\":\"9Ag0oiuP1g\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Current Stock (Liters)\",\"col\":4}},{\"id\":\"HugVcHxIBE\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today's Total Collection\",\"col\":4}},{\"id\":\"EVpJYVhGCv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"New Shift Reading\",\"col\":3}},{\"id\":\"xuUfXAiWPP\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"New Tanker Receipt\",\"col\":3}},{\"id\":\"Jp02E_k2Hv\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"New Credit Sale\",\"col\":3}},{\"id\":\"exDBMoD-xd\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"New Tank Dip\",\"col\":3}},{\"id\":\"1K7s5Jci43\",\"type\":\"chart\",\"data\":{\"chart_name\":\"7 Day Sales Trend\",\"col\":12}},{\"id\":\"tuhdI8vxqM\",\"type\":\"quick_list\",\"data\":{\"quick_list_name\":\"Nozzle Shift Reading\",\"col\":6}},{\"id\":\"ZDaw2abE4h\",\"type\":\"card\",\"data\":{\"card_name\":\"View Reports\",\"col\":6}},{\"id\":\"LWSxWDtU-a\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"K7VTD5qClp\",\"type\":\"card\",\"data\":{\"card_name\":\"Quick Entry\",\"col\":6}},{\"id\":\"C3F4NUQf2r\",\"type\":\"card\",\"data\":{\"card_name\":\"Masters\",\"col\":6}}]",
+ "creation": "2025-12-01 12:31:06.176669",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "Daily Operations",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "View Reports",
+   "link_count": 3,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Nozzle-wise Sales Report",
+   "link_count": 0,
+   "link_to": "Nozzle-wise Sales Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily Summary Report",
+   "link_count": 0,
+   "link_to": "Daily Summary Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Balance",
+   "link_count": 0,
+   "link_to": "Stock Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quick Entry",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tank Dip Reading",
+   "link_count": 0,
+   "link_to": "Tank Dip Reading",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Credit Sale",
+   "link_count": 0,
+   "link_to": "Credit Sale",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tanker Receipt",
+   "link_count": 0,
+   "link_to": "Tanker Receipt",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Masters",
+   "link_count": 4,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fuel Tank Master",
+   "link_count": 0,
+   "link_to": "Fuel Tank Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fuel Nozzle Master",
+   "link_count": 0,
+   "link_to": "Fuel Nozzle Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Shift Master",
+   "link_count": 0,
+   "link_to": "Shift Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fuel Price Update",
+   "link_count": 0,
+   "link_to": "Fuel Price Update",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2025-12-04 15:14:45.768321",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Daily Operations",
+ "number_cards": [
+  {
+   "label": "Today's Fuel Sales",
+   "number_card_name": "Today's Fuel Sales"
+  },
+  {
+   "label": "Current Stock (Liters)",
+   "number_card_name": "Current Stock (Liters)"
+  },
+  {
+   "label": "Today's Total Collection",
+   "number_card_name": "Today's Total Collection"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "Petrols_Diesels",
+ "public": 1,
+ "quick_lists": [
+  {
+   "document_type": "Nozzle Shift Reading",
+   "label": "Nozzle Shift Reading",
+   "quick_list_filter": "[]"
+  }
+ ],
+ "roles": [],
+ "sequence_id": 25.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "New",
+   "label": "New Shift Reading",
+   "link_to": "Nozzle Shift Reading",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "New",
+   "label": "New Tank Dip",
+   "link_to": "Tank Dip Reading",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "New",
+   "label": "New Credit Sale",
+   "link_to": "Credit Sale",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Pink",
+   "doc_view": "New",
+   "label": "New Tanker Receipt",
+   "link_to": "Tanker Receipt",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Daily Operations"
+}

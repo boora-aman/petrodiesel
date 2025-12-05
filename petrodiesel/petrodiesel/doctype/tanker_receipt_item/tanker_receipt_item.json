@@ -1,0 +1,124 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-11-22 04:11:14.771287",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tank",
+  "fuel_item",
+  "invoiced_quantity",
+  "dip_before_unloading",
+  "dip_after_unloading",
+  "calculated_received_qty",
+  "shortage_excess",
+  "rate_per_liter",
+  "amount",
+  "temperature",
+  "density"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "tank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tank",
+   "options": "Fuel Tank Master",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "tank.fuel_item",
+   "fieldname": "fuel_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fuel Item",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "invoiced_quantity",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Invoiced Qty (L)",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "dip_before_unloading",
+   "fieldtype": "Float",
+   "label": "Dip Before (mm)",
+   "precision": "2"
+  },
+  {
+   "columns": 1,
+   "fieldname": "dip_after_unloading",
+   "fieldtype": "Float",
+   "label": "Dip After (mm)",
+   "precision": "2"
+  },
+  {
+   "columns": 1,
+   "fieldname": "calculated_received_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty (L)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "shortage_excess",
+   "fieldtype": "Float",
+   "label": "Shortage/Excess (L)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "rate_per_liter",
+   "fieldtype": "Currency",
+   "label": "Rate/L",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "temperature",
+   "fieldtype": "Float",
+   "label": "Temperature (\u00b0C)",
+   "precision": "1"
+  },
+  {
+   "fieldname": "density",
+   "fieldtype": "Float",
+   "label": "Density",
+   "precision": "4"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-11-22 04:11:14.771287",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Tanker Receipt Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,199 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:tank_id",
+ "creation": "2025-11-22 03:46:39.268119",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tank_id",
+  "tank_name",
+  "column_break_1",
+  "fuel_item",
+  "warehouse",
+  "section_break_specs",
+  "capacity_in_liters",
+  "tank_type",
+  "column_break_2",
+  "diameter_mm",
+  "length_mm",
+  "section_break_calib",
+  "calibration_chart",
+  "calibration_data",
+  "section_break_dates",
+  "installation_date",
+  "last_calibration_date",
+  "column_break_3",
+  "next_calibration_due",
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "tank_id",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tank ID",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "tank_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Tank Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fuel_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fuel Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_specs",
+   "fieldtype": "Section Break",
+   "label": "Tank Specifications"
+  },
+  {
+   "fieldname": "capacity_in_liters",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Capacity (Liters)",
+   "reqd": 1
+  },
+  {
+   "default": "Underground",
+   "fieldname": "tank_type",
+   "fieldtype": "Select",
+   "label": "Tank Type",
+   "options": "Underground\nOverhead\nHorizontal\nVertical"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "diameter_mm",
+   "fieldtype": "Float",
+   "label": "Diameter (mm)"
+  },
+  {
+   "fieldname": "length_mm",
+   "fieldtype": "Float",
+   "label": "Length (mm)"
+  },
+  {
+   "fieldname": "section_break_calib",
+   "fieldtype": "Section Break",
+   "label": "Calibration Details"
+  },
+  {
+   "fieldname": "calibration_chart",
+   "fieldtype": "Attach",
+   "label": "Calibration Chart (PDF)"
+  },
+  {
+   "fieldname": "calibration_data",
+   "fieldtype": "Table",
+   "label": "Calibration Data",
+   "options": "Tank Calibration Chart"
+  },
+  {
+   "fieldname": "section_break_dates",
+   "fieldtype": "Section Break",
+   "label": "Dates"
+  },
+  {
+   "fieldname": "installation_date",
+   "fieldtype": "Date",
+   "label": "Installation Date"
+  },
+  {
+   "fieldname": "last_calibration_date",
+   "fieldtype": "Date",
+   "label": "Last Calibration Date"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "next_calibration_due",
+   "fieldtype": "Date",
+   "label": "Next Calibration Due"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nInactive\nUnder Maintenance",
+   "reqd": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-11-22 03:46:39.268119",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Fuel Tank Master",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

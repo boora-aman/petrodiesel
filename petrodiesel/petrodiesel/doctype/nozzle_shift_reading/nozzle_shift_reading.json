@@ -1,0 +1,360 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-12-01 23:33:46.456563",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "posting_date",
+  "shift",
+  "cb1",
+  "shift_start_time",
+  "shift_end_time",
+  "sb_emp",
+  "cashier",
+  "cb2",
+  "supervisor",
+  "sb_readings",
+  "nozzle_readings",
+  "sb_summary",
+  "total_fuel_sales_qty",
+  "total_fuel_sales_amount",
+  "cb_sum1",
+  "lubricant_sales_amount",
+  "accessories_sales_amount",
+  "cb_sum2",
+  "total_sales_amount",
+  "sb_payment",
+  "cash_received",
+  "cb_pay1",
+  "credit_sales_amount",
+  "cb_pay2",
+  "expected_cash_collection",
+  "cash_shortage",
+  "cash_excess",
+  "sb_online",
+  "online_payment_details",
+  "total_online_collection",
+  "sb_advances",
+  "employee_advances",
+  "total_employee_advances",
+  "cb_adv",
+  "advance_note",
+  "sb_linked",
+  "stock_entry",
+  "cb_link",
+  "sales_invoice",
+  "sb_remarks",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "NSR-V2-.YYYY.-.MM.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Series",
+   "options": "NSR-V2-.YYYY.-.MM.-.####",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shift",
+   "options": "Shift Master",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shift_start_time",
+   "fieldtype": "Time",
+   "label": "Shift Start Time"
+  },
+  {
+   "fieldname": "shift_end_time",
+   "fieldtype": "Time",
+   "label": "Shift End Time"
+  },
+  {
+   "fieldname": "sb_emp",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Cashier",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supervisor",
+   "fieldtype": "Link",
+   "label": "Supervisor",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "sb_readings",
+   "fieldtype": "Section Break",
+   "label": "Nozzle Reading Details"
+  },
+  {
+   "fieldname": "nozzle_readings",
+   "fieldtype": "Table",
+   "label": "Nozzle Readings",
+   "options": "Nozzle Reading Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "sb_summary",
+   "fieldtype": "Section Break",
+   "label": "Sales Summary"
+  },
+  {
+   "fieldname": "total_fuel_sales_qty",
+   "fieldtype": "Float",
+   "label": "Total Fuel Sales (Liters)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_fuel_sales_amount",
+   "fieldtype": "Currency",
+   "label": "Total Fuel Sales Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_sum1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "lubricant_sales_amount",
+   "fieldtype": "Currency",
+   "label": "Lubricant Sales Amount"
+  },
+  {
+   "fieldname": "accessories_sales_amount",
+   "fieldtype": "Currency",
+   "label": "Accessories Sales Amount"
+  },
+  {
+   "fieldname": "cb_sum2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_sales_amount",
+   "fieldtype": "Currency",
+   "label": "Total Sales Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_payment",
+   "fieldtype": "Section Break",
+   "label": "Payment Collection & Reconciliation"
+  },
+  {
+   "fieldname": "cash_received",
+   "fieldtype": "Currency",
+   "label": "Cash Received",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_pay1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "credit_sales_amount",
+   "fieldtype": "Currency",
+   "label": "Credit Sales Amount"
+  },
+  {
+   "fieldname": "cb_pay2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expected_cash_collection",
+   "fieldtype": "Currency",
+   "label": "Expected Cash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cash_shortage",
+   "fieldtype": "Currency",
+   "label": "Cash Shortage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cash_excess",
+   "fieldtype": "Currency",
+   "label": "Cash Excess",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_online",
+   "fieldtype": "Section Break",
+   "label": "Online Payments"
+  },
+  {
+   "fieldname": "online_payment_details",
+   "fieldtype": "Table",
+   "label": "Online Payment Details",
+   "options": "Online Payment Detail"
+  },
+  {
+   "fieldname": "total_online_collection",
+   "fieldtype": "Currency",
+   "label": "Total Online Collection",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_advances",
+   "fieldtype": "Section Break",
+   "label": "Employee Advances & Expenses"
+  },
+  {
+   "fieldname": "employee_advances",
+   "fieldtype": "Table",
+   "label": "Employee Advances",
+   "options": "Shift Employee Advance"
+  },
+  {
+   "fieldname": "total_employee_advances",
+   "fieldtype": "Currency",
+   "label": "Total Advances Given",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_adv",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Cash advances reduce expected collection and will be deducted from employee salary.",
+   "fieldname": "advance_note",
+   "fieldtype": "Small Text",
+   "label": "Note",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_linked",
+   "fieldtype": "Section Break",
+   "label": "Linked Documents"
+  },
+  {
+   "fieldname": "stock_entry",
+   "fieldtype": "Link",
+   "label": "Stock Entry",
+   "options": "Stock Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_link",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_remarks",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Nozzle Shift Reading",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-01 23:33:46.456563",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Nozzle Shift Reading",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Cashier",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

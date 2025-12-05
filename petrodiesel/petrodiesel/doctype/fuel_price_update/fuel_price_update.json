@@ -1,0 +1,172 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-11-22 04:11:43.594159",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "effective_date",
+  "effective_time",
+  "column_break_1",
+  "notification_source",
+  "approved_by",
+  "section_break_prices",
+  "price_updates",
+  "section_break_apply",
+  "price_list",
+  "column_break_2",
+  "applied_to_price_list",
+  "section_break_remarks",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "FP-UPD-.YYYY.-.MM.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "FP-UPD-.YYYY.-.MM.-.####",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "effective_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Effective Date",
+   "reqd": 1
+  },
+  {
+   "default": "06:00:00",
+   "fieldname": "effective_time",
+   "fieldtype": "Time",
+   "label": "Effective Time"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Oil Company",
+   "fieldname": "notification_source",
+   "fieldtype": "Select",
+   "label": "Notification Source",
+   "options": "Oil Company\nGovernment\nManual"
+  },
+  {
+   "fieldname": "approved_by",
+   "fieldtype": "Link",
+   "label": "Approved By",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "section_break_prices",
+   "fieldtype": "Section Break",
+   "label": "Price Update Details"
+  },
+  {
+   "fieldname": "price_updates",
+   "fieldtype": "Table",
+   "label": "Price Updates",
+   "options": "Fuel Price Update Item",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_apply",
+   "fieldtype": "Section Break",
+   "label": "Application Status"
+  },
+  {
+   "default": "Retail Fuel Prices",
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "applied_to_price_list",
+   "fieldtype": "Check",
+   "label": "Applied to Price List",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_remarks",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Fuel Price Update",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Fuel Price Update",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-11-22 04:40:11.007052",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Fuel Price Update",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
