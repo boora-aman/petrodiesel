@@ -1,0 +1,73 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-05 18:05:51.962052",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "shift_reading",
+  "posting_date",
+  "shift",
+  "advance_type",
+  "amount",
+  "reason"
+ ],
+ "fields": [
+  {
+   "columns": 3,
+   "fieldname": "shift_reading",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shift Reading",
+   "options": "Nozzle Shift Reading"
+  },
+  {
+   "columns": 2,
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date"
+  },
+  {
+   "columns": 2,
+   "fieldname": "shift",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Shift"
+  },
+  {
+   "columns": 2,
+   "fieldname": "advance_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Type"
+  },
+  {
+   "columns": 2,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "label": "Reason"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-05 18:05:51.962052",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Salary Slip Shift Advance",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

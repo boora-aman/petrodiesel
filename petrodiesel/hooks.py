@@ -26,7 +26,7 @@ app_license = "mit"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/petrodiesel/css/petrodiesel.css"
-# app_include_js = "/assets/petrodiesel/js/petrodiesel.js"
+app_include_js = "/assets/petrodiesel/js/desk_customizations.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/petrodiesel/css/petrodiesel.css"

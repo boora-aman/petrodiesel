@@ -1,0 +1,245 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "creation": "2025-12-05 17:49:31.753217",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "posting_date",
+  "posting_time",
+  "cb1",
+  "customer",
+  "customer_name",
+  "outstanding_section",
+  "total_credit_sales",
+  "cb_out",
+  "total_paid_before",
+  "cb_out2",
+  "outstanding_amount",
+  "payment_section",
+  "payment_mode",
+  "amount_received",
+  "cb2",
+  "reference_no",
+  "reference_date",
+  "after_payment_section",
+  "outstanding_after_payment",
+  "remarks_section",
+  "remarks",
+  "amended_from",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "CPE-.YYYY.-.MM.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CPE-.YYYY.-.MM.-.####",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Payment Date",
+   "reqd": 1
+  },
+  {
+   "default": "now",
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Payment Time"
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "outstanding_section",
+   "fieldtype": "Section Break",
+   "label": "Outstanding Details"
+  },
+  {
+   "fieldname": "total_credit_sales",
+   "fieldtype": "Currency",
+   "label": "Total Credit Sales",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_out",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_paid_before",
+   "fieldtype": "Currency",
+   "label": "Total Paid (Before)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_out2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "outstanding_amount",
+   "fieldtype": "Currency",
+   "label": "Outstanding Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "payment_section",
+   "fieldtype": "Section Break",
+   "label": "Payment Details"
+  },
+  {
+   "default": "Cash",
+   "fieldname": "payment_mode",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Payment Mode",
+   "options": "Cash\nCheque\nOnline Transfer\nUPI\nCard",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amount_received",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount Received",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "label": "Reference No / Transaction ID"
+  },
+  {
+   "fieldname": "reference_date",
+   "fieldtype": "Date",
+   "label": "Reference Date"
+  },
+  {
+   "fieldname": "after_payment_section",
+   "fieldtype": "Section Break",
+   "label": "After This Payment"
+  },
+  {
+   "bold": 1,
+   "fieldname": "outstanding_after_payment",
+   "fieldtype": "Currency",
+   "label": "Outstanding After Payment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks_section",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Customer Payment Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Customer Payment Entry",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-05 17:49:31.753217",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Customer Payment Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Cashier",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
