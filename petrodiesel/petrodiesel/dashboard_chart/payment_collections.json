@@ -1,0 +1,18 @@
+{
+ "name": "Payment Collections",
+ "chart_name": "Payment Collections",
+ "chart_type": "Line",
+ "document_type": "Customer Payment Entry",
+ "based_on": "posting_date",
+ "value_based_on": "paid_amount",
+ "filters_json": "[[\"Customer Payment Entry\", \"docstatus\", \"=\", 1]]",
+ "time_interval": "Daily",
+ "timespan": "Last Week",
+ "timeseries": 1,
+ "module": "Petrodiesel",
+ "doctype": "Dashboard Chart",
+ "type": "Sum",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "color": "#29CD42"
+}

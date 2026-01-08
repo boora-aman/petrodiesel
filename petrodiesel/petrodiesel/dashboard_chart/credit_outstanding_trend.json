@@ -1,0 +1,18 @@
+{
+ "name": "Credit Outstanding Trend",
+ "chart_name": "Credit Outstanding Trend",
+ "chart_type": "Line",
+ "document_type": "Credit Sale",
+ "based_on": "posting_date",
+ "value_based_on": "outstanding_amount",
+ "filters_json": "[[\"Credit Sale\", \"docstatus\", \"=\", 1], [\"Credit Sale\", \"outstanding_amount\", \">\", 0]]",
+ "time_interval": "Daily",
+ "timespan": "Last Month",
+ "timeseries": 1,
+ "module": "Petrodiesel",
+ "doctype": "Dashboard Chart",
+ "type": "Sum",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "color": "#FF5858"
+}

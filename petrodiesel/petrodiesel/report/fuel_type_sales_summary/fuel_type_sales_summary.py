@@ -5,156 +5,237 @@ import frappe
 from frappe import _
 
 def execute(filters=None):
-    columns = get_columns(filters)
+    columns = get_columns()
     data = get_data(filters)
-    chart = get_chart_data(data, filters)
-    return columns, data, None, chart
+    chart = get_chart_data(data)
+    summary = get_summary(data)
+    return columns, data, None, chart, summary
 
-def get_columns(filters):
-    columns = [
+def get_columns():
+    return [
         {
+            "label": _("Fuel Item"),
             "fieldname": "fuel_item",
-            "label": _("Fuel Type"),
             "fieldtype": "Link",
             "options": "Item",
             "width": 150
         },
         {
-            "fieldname": "total_quantity",
-            "label": _("Total Quantity (L)"),
+            "label": _("Fuel Name"),
+            "fieldname": "fuel_name",
+            "fieldtype": "Data",
+            "width": 150
+        },
+        {
+            "label": _("Total Qty (L)"),
+            "fieldname": "total_qty",
             "fieldtype": "Float",
-            "width": 130,
-            "precision": 2
-        },
-        {
-            "fieldname": "testing_quantity",
-            "label": _("Testing (L)"),
-            "fieldtype": "Float",
-            "width": 100,
-            "precision": 2
-        },
-        {
-            "fieldname": "actual_sale_qty",
-            "label": _("Actual Sale (L)"),
-            "fieldtype": "Float",
-            "width": 130,
-            "precision": 2
-        },
-        {
-            "fieldname": "avg_rate",
-            "label": _("Avg Rate/L"),
-            "fieldtype": "Currency",
-            "width": 110,
-            "precision": 2
-        },
-        {
-            "fieldname": "total_amount",
-            "label": _("Total Amount"),
-            "fieldtype": "Currency",
-            "width": 140,
-            "precision": 2
-        },
-        {
-            "fieldname": "percentage",
-            "label": _("% Contribution"),
-            "fieldtype": "Percent",
             "width": 120,
             "precision": 2
+        },
+        {
+            "label": _("Total Amount"),
+            "fieldname": "total_amount",
+            "fieldtype": "Currency",
+            "width": 130
+        },
+        {
+            "label": _("Avg Rate/L"),
+            "fieldname": "avg_rate",
+            "fieldtype": "Currency",
+            "width": 110
+        },
+        {
+            "label": _("Min Rate/L"),
+            "fieldname": "min_rate",
+            "fieldtype": "Currency",
+            "width": 110
+        },
+        {
+            "label": _("Max Rate/L"),
+            "fieldname": "max_rate",
+            "fieldtype": "Currency",
+            "width": 110
+        },
+        {
+            "label": _("Transactions"),
+            "fieldname": "transaction_count",
+            "fieldtype": "Int",
+            "width": 100
+        },
+        {
+            "label": _("% of Total"),
+            "fieldname": "sales_percentage",
+            "fieldtype": "Percent",
+            "width": 110
         }
     ]
-    
-    # Add date column if grouping by date
-    if filters.get("group_by") == "Date":
-        columns.insert(0, {
-            "fieldname": "posting_date",
-            "label": _("Date"),
-            "fieldtype": "Date",
-            "width": 100
-        })
-    
-    return columns
 
 def get_data(filters):
-    conditions = get_conditions(filters)
+    if not filters:
+        filters = {}
     
-    # Determine grouping
-    group_by = ""
-    if filters.get("group_by") == "Date":
-        group_by = "nsr.posting_date, nrd.fuel_item"
-    else:
-        group_by = "nrd.fuel_item"
+    if not filters.get("from_date") or not filters.get("to_date"):
+        frappe.throw(_("Please select From Date and To Date"))
     
-    # Build query
-    data = frappe.db.sql(f"""
+    conditions_sse = get_conditions_sse(filters)
+    conditions_cwsse = get_conditions_cwsse(filters)
+    
+    # Query 1: Shift Sale Entry → Fuel Type Sales Summary
+    sse_query = f"""
         SELECT 
-            {f'nsr.posting_date,' if filters.get("group_by") == "Date" else ''}
-            nrd.fuel_item,
-            SUM(nrd.total_sale_qty) as total_quantity,
-            SUM(nrd.testing_qty) as testing_quantity,
-            SUM(nrd.actual_sale_qty) as actual_sale_qty,
-            AVG(nrd.rate_per_liter) as avg_rate,
-            SUM(nrd.amount) as total_amount
-        FROM 
-            `tabNozzle Shift Reading` nsr
-        INNER JOIN 
-            `tabNozzle Reading Detail` nrd ON nrd.parent = nsr.name
-        WHERE 
-            nsr.docstatus = 1
-            {conditions}
-        GROUP BY 
-            {group_by}
-        ORDER BY 
-            {f'nsr.posting_date DESC,' if filters.get("group_by") == "Date" else ''} 
-            total_amount DESC
-    """, filters, as_dict=1)
+            ftss.fuel_item,
+            SUM(ftss.total_qty) as total_qty,
+            SUM(ftss.total_amount) as total_amount,
+            AVG(ftss.rate) as avg_rate,
+            MIN(ftss.rate) as min_rate,
+            MAX(ftss.rate) as max_rate,
+            COUNT(*) as transaction_count
+        FROM `tabFuel Type Sales Summary` ftss
+        INNER JOIN `tabShift Sale Entry` sse ON ftss.parent = sse.name
+        WHERE sse.docstatus = 1
+        {conditions_sse}
+        GROUP BY ftss.fuel_item
+    """
     
-    # Calculate percentage contribution
-    total_amount = sum(row.total_amount for row in data)
+    # Query 2: Cashier Wise Shift Sale Entry → Nozzle Reading Detail
+    cwsse_query = f"""
+        SELECT 
+            nrd.fuel_item,
+            SUM(nrd.actual_sale_qty) as total_qty,
+            SUM(nrd.amount) as total_amount,
+            AVG(nrd.rate_per_liter) as avg_rate,
+            MIN(nrd.rate_per_liter) as min_rate,
+            MAX(nrd.rate_per_liter) as max_rate,
+            COUNT(*) as transaction_count
+        FROM `tabNozzle Reading Detail` nrd
+        INNER JOIN `tabCashier Wise Shift Sale Entry` cwsse ON nrd.parent = cwsse.name
+        WHERE cwsse.docstatus = 1
+        {conditions_cwsse}
+        GROUP BY nrd.fuel_item
+    """
+    
+    # Combine both queries
+    combined_query = f"""
+        SELECT 
+            fuel_item,
+            SUM(total_qty) as total_qty,
+            SUM(total_amount) as total_amount,
+            AVG(avg_rate) as avg_rate,
+            MIN(min_rate) as min_rate,
+            MAX(max_rate) as max_rate,
+            SUM(transaction_count) as transaction_count
+        FROM (
+            ({sse_query})
+            UNION ALL
+            ({cwsse_query})
+        ) combined
+        GROUP BY fuel_item
+        ORDER BY total_amount DESC
+    """
+    
+    data = frappe.db.sql(combined_query, filters, as_dict=1)
+    
+    if not data:
+        return []
+    
+    # Calculate total for percentage
+    total_sales = sum(d.get("total_amount", 0) for d in data)
+    
+    # Add fuel names and percentage
     for row in data:
-        row.percentage = (row.total_amount / total_amount * 100) if total_amount else 0
+        row["fuel_name"] = frappe.db.get_value("Item", row.get("fuel_item"), "item_name") or row.get("fuel_item", "")
+        row["sales_percentage"] = (row.get("total_amount", 0) / total_sales * 100) if total_sales > 0 else 0
     
     return data
 
-def get_conditions(filters):
+def get_conditions_sse(filters):
     conditions = ""
     
     if filters.get("from_date"):
-        conditions += " AND nsr.posting_date >= %(from_date)s"
+        conditions += f" AND sse.posting_date >= '{filters.get('from_date')}'"
     
     if filters.get("to_date"):
-        conditions += " AND nsr.posting_date <= %(to_date)s"
+        conditions += f" AND sse.posting_date <= '{filters.get('to_date')}'"
     
     if filters.get("fuel_item"):
-        conditions += " AND nrd.fuel_item = %(fuel_item)s"
+        conditions += f" AND ftss.fuel_item = '{filters.get('fuel_item')}'"
     
     if filters.get("shift"):
-        conditions += " AND nsr.shift = %(shift)s"
+        conditions += f" AND sse.shift = '{filters.get('shift')}'"
     
     return conditions
 
-def get_chart_data(data, filters):
+def get_conditions_cwsse(filters):
+    conditions = ""
+    
+    if filters.get("from_date"):
+        conditions += f" AND cwsse.posting_date >= '{filters.get('from_date')}'"
+    
+    if filters.get("to_date"):
+        conditions += f" AND cwsse.posting_date <= '{filters.get('to_date')}'"
+    
+    if filters.get("fuel_item"):
+        conditions += f" AND nrd.fuel_item = '{filters.get('fuel_item')}'"
+    
+    if filters.get("shift"):
+        conditions += f" AND cwsse.shift = '{filters.get('shift')}'"
+    
+    return conditions
+
+def get_chart_data(data):
     if not data:
         return None
     
-    # Group data for chart
-    chart_data = {}
-    for row in data:
-        fuel = row.fuel_item
-        if fuel not in chart_data:
-            chart_data[fuel] = 0
-        chart_data[fuel] += row.total_amount
+    labels = [d.get("fuel_name", "") or d.get("fuel_item", "") for d in data]
+    values = [d.get("total_amount", 0) for d in data]
     
     return {
         "data": {
-            "labels": list(chart_data.keys()),
+            "labels": labels,
             "datasets": [
                 {
                     "name": "Sales Amount",
-                    "values": list(chart_data.values())
+                    "values": values
                 }
             ]
         },
-        "type": "donut" if filters.get("group_by") != "Date" else "bar",
-        "colors": ["#29CD42", "#5E64FF", "#F683AE"],
-        "height": 300
+        "type": "donut",
+        "height": 300,
+        "colors": ["#29CD42", "#4C78FF", "#ffa00a", "#743ee2", "#ff5858"]
     }
+
+def get_summary(data):
+    if not data:
+        return []
+    
+    total_qty = sum(d.get("total_qty", 0) for d in data)
+    total_amount = sum(d.get("total_amount", 0) for d in data)
+    total_transactions = sum(d.get("transaction_count", 0) for d in data)
+    
+    return [
+        {
+            "value": total_qty,
+            "label": "Total Quantity (L)",
+            "datatype": "Float",
+            "indicator": "Blue"
+        },
+        {
+            "value": total_amount,
+            "label": "Total Sales Amount",
+            "datatype": "Currency",
+            "indicator": "Green"
+        },
+        {
+            "value": total_transactions,
+            "label": "Total Transactions",
+            "datatype": "Int",
+            "indicator": "Orange"
+        },
+        {
+            "value": len(data),
+            "label": "Fuel Types",
+            "datatype": "Int",
+            "indicator": "Purple"
+        }
+    ]

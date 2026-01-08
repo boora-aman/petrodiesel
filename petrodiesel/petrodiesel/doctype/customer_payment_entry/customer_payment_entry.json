@@ -14,22 +14,18 @@
   "customer",
   "customer_name",
   "outstanding_section",
-  "total_credit_sales",
   "cb_out",
-  "total_paid_before",
   "cb_out2",
   "outstanding_amount",
   "payment_section",
   "payment_mode",
-  "amount_received",
+  "paid_amount",
   "cb2",
   "reference_no",
   "reference_date",
   "after_payment_section",
-  "outstanding_after_payment",
   "remarks_section",
   "remarks",
-  "amended_from",
   "amended_from"
  ],
  "fields": [
@@ -82,20 +78,8 @@
    "label": "Outstanding Details"
   },
   {
-   "fieldname": "total_credit_sales",
-   "fieldtype": "Currency",
-   "label": "Total Credit Sales",
-   "read_only": 1
-  },
-  {
    "fieldname": "cb_out",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "total_paid_before",
-   "fieldtype": "Currency",
-   "label": "Total Paid (Before)",
-   "read_only": 1
   },
   {
    "fieldname": "cb_out2",
@@ -123,13 +107,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "amount_received",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Amount Received",
-   "reqd": 1
-  },
-  {
    "fieldname": "cb2",
    "fieldtype": "Column Break"
   },
@@ -147,13 +124,6 @@
    "fieldname": "after_payment_section",
    "fieldtype": "Section Break",
    "label": "After This Payment"
-  },
-  {
-   "bold": 1,
-   "fieldname": "outstanding_after_payment",
-   "fieldtype": "Currency",
-   "label": "Outstanding After Payment",
-   "read_only": 1
   },
   {
    "fieldname": "remarks_section",
@@ -181,15 +151,21 @@
    "no_copy": 1,
    "options": "Customer Payment Entry",
    "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
+   "read_only": 1
+  },
+  {
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Paid Amount",
+   "reqd": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-05 17:49:31.753217",
+ "modified": "2025-12-21 12:59:25.522907",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Customer Payment Entry",

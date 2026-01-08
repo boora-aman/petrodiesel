@@ -3,144 +3,128 @@
 
 import frappe
 from frappe.model.document import Document
-from frappe import _
-
+from frappe.utils import flt, nowdate
 
 class CustomerPaymentEntry(Document):
     def validate(self):
-        """Validate before saving"""
-        self.calculate_outstanding_after_payment()
-    
-    def calculate_outstanding_after_payment(self):
-        """Calculate outstanding after this payment"""
-        if self.outstanding_amount and self.amount_received:
-            self.outstanding_after_payment = (self.outstanding_amount or 0) - (self.amount_received or 0)
+        if not self.paid_amount or self.paid_amount <= 0:
+            frappe.throw("Paid Amount must be greater than 0")
     
     def on_submit(self):
-        """Update customer outstanding when submitted"""
-        if self.customer and self.amount_received:
-            # Get customer's current outstanding from Credit Sales
-            current_outstanding = get_customer_outstanding(self.customer)
-            
-            # Payment reduces outstanding
-            # We'll update each unpaid credit sale
-            self.allocate_payment_to_credit_sales()
+        self.update_customer_balance()
+        frappe.msgprint(f'Payment of ₹{self.paid_amount} recorded for {self.customer}', alert=True, indicator='green')
     
     def on_cancel(self):
-        """Reverse payment allocation on cancel"""
-        if self.customer and self.amount_received:
-            self.reverse_payment_allocation()
+        self.update_customer_balance()
     
-    def allocate_payment_to_credit_sales(self):
-        """Allocate payment to oldest credit sales first (FIFO)"""
-        remaining_amount = self.amount_received
+    def update_customer_balance(self):
+        """Update customer outstanding balance"""
+        outstanding = get_customer_total_outstanding(self.customer)
         
-        # Get unpaid credit sales for this customer (oldest first)
-        credit_sales = frappe.get_all(
-            "Credit Sale",
-            filters={
-                "customer": self.customer,
-                "docstatus": 1,
-                "outstanding_amount": [">", 0]
-            },
-            fields=["name", "outstanding_amount"],
-            order_by="posting_date asc"
-        )
-        
-        for sale in credit_sales:
-            if remaining_amount <= 0:
-                break
-            
-            # How much to allocate to this credit sale
-            allocated = min(remaining_amount, sale.outstanding_amount)
-            
-            # Update credit sale's outstanding
-            new_outstanding = sale.outstanding_amount - allocated
-            frappe.db.set_value("Credit Sale", sale.name, "outstanding_amount", new_outstanding)
-            
-            remaining_amount -= allocated
-            
-            # Create a link/comment
-            frappe.get_doc({
-                "doctype": "Comment",
-                "comment_type": "Info",
-                "reference_doctype": "Credit Sale",
-                "reference_name": sale.name,
-                "content": f"Payment of ₹{allocated:,.2f} received via {self.name}"
-            }).insert(ignore_permissions=True)
-        
-        frappe.db.commit()
-    
-    def reverse_payment_allocation(self):
-        """Reverse payment allocation (used on cancel)"""
-        remaining_amount = self.amount_received
-        
-        # Get paid credit sales for this customer (newest first for reversal)
-        credit_sales = frappe.get_all(
-            "Credit Sale",
-            filters={
-                "customer": self.customer,
-                "docstatus": 1
-            },
-            fields=["name", "outstanding_amount", "total_amount"],
-            order_by="posting_date desc"
-        )
-        
-        for sale in credit_sales:
-            if remaining_amount <= 0:
-                break
-            
-            # How much can we reverse from this sale
-            paid_amount = sale.total_amount - sale.outstanding_amount
-            reverse_amount = min(remaining_amount, paid_amount)
-            
-            if reverse_amount > 0:
-                # Update credit sale's outstanding
-                new_outstanding = sale.outstanding_amount + reverse_amount
-                frappe.db.set_value("Credit Sale", sale.name, "outstanding_amount", new_outstanding)
-                
-                remaining_amount -= reverse_amount
-        
-        frappe.db.commit()
+        # Try to update Customer's credit_balance field if it exists
+        try:
+            if frappe.db.exists('Customer', self.customer):
+                if frappe.db.has_column('Customer', 'credit_balance'):
+                    frappe.db.set_value('Customer', self.customer, 'credit_balance', outstanding, update_modified=False)
+        except Exception as e:
+            frappe.log_error(f'Could not update customer credit_balance: {str(e)}')
 
-
-# Whitelisted methods
 
 @frappe.whitelist()
-def get_customer_outstanding_details(customer):
-    """Get customer's total credit sales, paid amount, and outstanding"""
-    if not customer:
-        return {}
-    
-    # Total credit sales for this customer
-    total_credit = frappe.db.sql("""
-        SELECT 
-            IFNULL(SUM(total_amount), 0) as total_sales,
-            IFNULL(SUM(outstanding_amount), 0) as outstanding
-        FROM `tabCredit Sale`
-        WHERE customer = %s AND docstatus = 1
-    """, customer, as_dict=1)[0]
-    
-    total_sales = total_credit.get("total_sales", 0)
-    outstanding = total_credit.get("outstanding", 0)
-    total_paid = total_sales - outstanding
-    
-    return {
-        "total_credit_sales": total_sales,
-        "total_paid_before": total_paid,
-        "outstanding_amount": outstanding
-    }
-
-
-def get_customer_outstanding(customer):
-    """Get customer's total outstanding amount"""
+def get_customer_total_outstanding(customer):
+    """Get total outstanding for customer across all credit entries"""
     if not customer:
         return 0
     
-    outstanding = frappe.db.sql("""
-        SELECT IFNULL(SUM(outstanding_amount), 0) as outstanding
+    # Get total credit sales from Credit Sale doctype
+    credit_sales = frappe.db.sql("""
+        SELECT COALESCE(SUM(outstanding_amount), 0)
         FROM `tabCredit Sale`
-        WHERE customer = %s AND docstatus = 1
-    """, customer)[0][0]
+        WHERE customer = %s
+        AND docstatus = 1
+    """, customer)
     
-    return outstanding or 0
+    credit_sale_outstanding = flt(credit_sales[0][0]) if credit_sales else 0
+    
+    # Get total credit from Shift Credit Sale (aggregated from shifts)
+    shift_credits = frappe.db.sql("""
+        SELECT COALESCE(SUM(scs.amount), 0)
+        FROM `tabShift Credit Sale` scs
+        INNER JOIN `tabShift Sale Entry` sse ON sse.name = scs.parent
+        WHERE scs.customer = %s
+        AND sse.docstatus = 1
+    """, customer)
+    
+    shift_credit_total = flt(shift_credits[0][0]) if shift_credits else 0
+    
+    # Get total payments
+    total_payments = frappe.db.sql("""
+        SELECT COALESCE(SUM(paid_amount), 0)
+        FROM `tabCustomer Payment Entry`
+        WHERE customer = %s
+        AND docstatus = 1
+    """, customer)
+    
+    payments = flt(total_payments[0][0]) if total_payments else 0
+    
+    # Calculate outstanding: (Credit Sales + Shift Credits) - Payments
+    total_outstanding = (credit_sale_outstanding + shift_credit_total) - payments
+    
+    return total_outstanding
+
+
+@frappe.whitelist()
+def get_customer_credit_summary(customer):
+    """Get detailed credit summary for customer"""
+    if not customer:
+        return {}
+    
+    # Credit Sale entries
+    credit_sales = frappe.db.sql("""
+        SELECT 
+            name, posting_date, total_amount, 
+            COALESCE(outstanding_amount, total_amount) as outstanding_amount,
+            COALESCE(payment_status, 'Unpaid') as payment_status
+        FROM `tabCredit Sale`
+        WHERE customer = %s
+        AND docstatus = 1
+        ORDER BY posting_date DESC
+        LIMIT 50
+    """, customer, as_dict=1)
+    
+    # Shift credit entries - USE CORRECT FIELD NAMES
+    shift_credits = frappe.db.sql("""
+        SELECT 
+            scs.parent as shift_entry,
+            sse.posting_date,
+            scs.vehicle_number,
+            scs.fuel_item,
+            scs.quantity_liters as quantity,
+            scs.rate_per_liter as rate,
+            scs.amount
+        FROM `tabShift Credit Sale` scs
+        INNER JOIN `tabShift Sale Entry` sse ON sse.name = scs.parent
+        WHERE scs.customer = %s
+        AND sse.docstatus = 1
+        ORDER BY sse.posting_date DESC
+        LIMIT 50
+    """, customer, as_dict=1)
+    
+    # Payment entries
+    payments = frappe.db.sql("""
+        SELECT 
+            name, posting_date, paid_amount, payment_mode, 
+            COALESCE(reference_no, '-') as reference_no
+        FROM `tabCustomer Payment Entry`
+        WHERE customer = %s
+        AND docstatus = 1
+        ORDER BY posting_date DESC
+        LIMIT 50
+    """, customer, as_dict=1)
+    
+    return {
+        'credit_sales': credit_sales,
+        'shift_credits': shift_credits,
+        'payments': payments,
+        'total_outstanding': get_customer_total_outstanding(customer)
+    }

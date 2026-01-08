@@ -1,0 +1,12 @@
+{
+ "name": "Total Advance Given",
+ "label": "Total Advance Given",
+ "function": "get_total_advance_given",
+ "document_type": "Shift Sale Entry",
+ "type": "Custom",
+ "module": "Petrodiesel",
+ "doctype": "Number Card",
+ "color": "#FFA00A",
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Monthly"
+}

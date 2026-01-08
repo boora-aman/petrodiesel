@@ -1,4 +1,4 @@
-# Copyright (c) 2025, Aman Boora and contributors
+# Copyright (c) 2025, AlfaStack and contributors
 # For license information, please see license.txt
 
 import frappe
@@ -8,118 +8,199 @@ def execute(filters=None):
     columns = get_columns()
     data = get_data(filters)
     chart = get_chart_data(data)
-    return columns, data, None, chart
+    summary = get_summary(data)
+    return columns, data, None, chart, summary
 
 def get_columns():
     return [
         {
-            "fieldname": "posting_date",
-            "label": _("Date"),
-            "fieldtype": "Date",
-            "width": 100
+            "label": _("Payment Method"),
+            "fieldname": "payment_method",
+            "fieldtype": "Data",
+            "width": 150
         },
         {
-            "fieldname": "shift",
-            "label": _("Shift"),
-            "fieldtype": "Link",
-            "options": "Shift Master",
-            "width": 120
+            "label": _("Transaction Count"),
+            "fieldname": "transaction_count",
+            "fieldtype": "Int",
+            "width": 130
         },
         {
-            "fieldname": "cash_received",
-            "label": _("Cash"),
-            "fieldtype": "Currency",
-            "width": 120
-        },
-        {
-            "fieldname": "paytm",
-            "label": _("Paytm"),
-            "fieldtype": "Currency",
-            "width": 100
-        },
-        {
-            "fieldname": "phonepe",
-            "label": _("PhonePe"),
-            "fieldtype": "Currency",
-            "width": 100
-        },
-        {
-            "fieldname": "googlepay",
-            "label": _("Google Pay"),
-            "fieldtype": "Currency",
-            "width": 110
-        },
-        {
-            "fieldname": "card",
-            "label": _("Card"),
-            "fieldtype": "Currency",
-            "width": 100
-        },
-        {
-            "fieldname": "other",
-            "label": _("Other"),
-            "fieldtype": "Currency",
-            "width": 100
-        },
-        {
-            "fieldname": "total_online",
-            "label": _("Total Online"),
-            "fieldtype": "Currency",
-            "width": 120
-        },
-        {
-            "fieldname": "credit_sales",
-            "label": _("Credit"),
-            "fieldtype": "Currency",
-            "width": 110
-        },
-        {
-            "fieldname": "total_collection",
-            "label": _("Total Collection"),
+            "label": _("Total Amount"),
+            "fieldname": "total_amount",
             "fieldtype": "Currency",
             "width": 140
+        },
+        {
+            "label": _("Avg Transaction"),
+            "fieldname": "avg_transaction",
+            "fieldtype": "Currency",
+            "width": 130
+        },
+        {
+            "label": _("Min Amount"),
+            "fieldname": "min_amount",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Max Amount"),
+            "fieldname": "max_amount",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("% of Total"),
+            "fieldname": "percentage",
+            "fieldtype": "Percent",
+            "width": 110
         }
     ]
 
 def get_data(filters):
-    conditions = ""
+    if not filters:
+        filters = {}
     
+    if not filters.get("from_date") or not filters.get("to_date"):
+        frappe.throw(_("Please select From Date and To Date"))
+    
+    # Date conditions only (no payment_method filter in subqueries)
+    date_conditions_sse = ""
     if filters.get("from_date"):
-        conditions += " AND nsr.posting_date >= %(from_date)s"
-    
+        date_conditions_sse += f" AND sse.posting_date >= '{filters.get('from_date')}'"
     if filters.get("to_date"):
-        conditions += " AND nsr.posting_date <= %(to_date)s"
-    
+        date_conditions_sse += f" AND sse.posting_date <= '{filters.get('to_date')}'"
     if filters.get("shift"):
-        conditions += " AND nsr.shift = %(shift)s"
+        date_conditions_sse += f" AND sse.shift = '{filters.get('shift')}'"
     
-    # Get data with proper field names
-    data = frappe.db.sql(f"""
+    date_conditions_cwsse = ""
+    if filters.get("from_date"):
+        date_conditions_cwsse += f" AND cwsse.posting_date >= '{filters.get('from_date')}'"
+    if filters.get("to_date"):
+        date_conditions_cwsse += f" AND cwsse.posting_date <= '{filters.get('to_date')}'"
+    if filters.get("shift"):
+        date_conditions_cwsse += f" AND cwsse.shift = '{filters.get('shift')}'"
+    
+    # Query 1: Shift Sale Entry → Shift Online Payment
+    sse_query = f"""
         SELECT 
-            nsr.posting_date,
-            nsr.shift,
-            nsr.cash_received,
-            SUM(CASE WHEN opd.payment_method = 'Paytm' THEN opd.amount ELSE 0 END) as paytm,
-            SUM(CASE WHEN opd.payment_method = 'PhonePe' THEN opd.amount ELSE 0 END) as phonepe,
-            SUM(CASE WHEN opd.payment_method = 'Google Pay' THEN opd.amount ELSE 0 END) as googlepay,
-            SUM(CASE WHEN opd.payment_method = 'Card' THEN opd.amount ELSE 0 END) as card,
-            SUM(CASE WHEN opd.payment_method NOT IN ('Paytm', 'PhonePe', 'Google Pay', 'Card') 
-                AND opd.payment_method IS NOT NULL THEN opd.amount ELSE 0 END) as other,
-            nsr.total_online_collection as total_online,
-            nsr.credit_sales_amount as credit_sales,
-            (nsr.cash_received + nsr.total_online_collection) as total_collection
-        FROM 
-            `tabNozzle Shift Reading` nsr
-        LEFT JOIN 
-            `tabOnline Payment Detail` opd ON opd.parent = nsr.name
-        WHERE 
-            nsr.docstatus = 1
-            {conditions}
-        GROUP BY 
-            nsr.name, nsr.posting_date, nsr.shift
-        ORDER BY 
-            nsr.posting_date DESC, nsr.shift
-    """, filters, as_dict=1)
+            sop.payment_method,
+            COUNT(*) as transaction_count,
+            SUM(sop.amount) as total_amount,
+            AVG(sop.amount) as avg_transaction,
+            MIN(sop.amount) as min_amount,
+            MAX(sop.amount) as max_amount
+        FROM `tabShift Online Payment` sop
+        INNER JOIN `tabShift Sale Entry` sse ON sop.parent = sse.name
+        WHERE sse.docstatus = 1
+        {date_conditions_sse}
+        GROUP BY sop.payment_method
+    """
+    
+    # Query 2: Cashier Wise Shift Sale Entry → Online Payment Detail
+    cwsse_query = f"""
+        SELECT 
+            opd.payment_method,
+            COUNT(*) as transaction_count,
+            SUM(opd.amount) as total_amount,
+            AVG(opd.amount) as avg_transaction,
+            MIN(opd.amount) as min_amount,
+            MAX(opd.amount) as max_amount
+        FROM `tabOnline Payment Detail` opd
+        INNER JOIN `tabCashier Wise Shift Sale Entry` cwsse ON opd.parent = cwsse.name
+        WHERE cwsse.docstatus = 1
+        {date_conditions_cwsse}
+        GROUP BY opd.payment_method
+    """
+    
+    # Query 3: Customer Payment Entry
+    cpe_conditions = ""
+    if filters.get("from_date"):
+        cpe_conditions += f" AND cpe.posting_date >= '{filters.get('from_date')}'"
+    if filters.get("to_date"):
+        cpe_conditions += f" AND cpe.posting_date <= '{filters.get('to_date')}'"
+    
+    cpe_query = f"""
+        SELECT 
+            cpe.payment_mode as payment_method,
+            COUNT(*) as transaction_count,
+            SUM(cpe.paid_amount) as total_amount,
+            AVG(cpe.paid_amount) as avg_transaction,
+            MIN(cpe.paid_amount) as min_amount,
+            MAX(cpe.paid_amount) as max_amount
+        FROM `tabCustomer Payment Entry` cpe
+        WHERE cpe.docstatus = 1
+        {cpe_conditions}
+        GROUP BY cpe.payment_mode
+    """
+    
+    # Query 4: Cash from Shift Sale Entry
+    sse_cash = f"""
+        SELECT 
+            'Cash' as payment_method,
+            COUNT(*) as transaction_count,
+            SUM(sse.cash_received) as total_amount,
+            AVG(sse.cash_received) as avg_transaction,
+            MIN(sse.cash_received) as min_amount,
+            MAX(sse.cash_received) as max_amount
+        FROM `tabShift Sale Entry` sse
+        WHERE sse.docstatus = 1
+        AND sse.cash_received > 0
+        {date_conditions_sse}
+    """
+    
+    # Query 5: Cash from Cashier Wise Shift Sale Entry
+    cwsse_cash = f"""
+        SELECT 
+            'Cash' as payment_method,
+            COUNT(*) as transaction_count,
+            SUM(cwsse.cash_received) as total_amount,
+            AVG(cwsse.cash_received) as avg_transaction,
+            MIN(cwsse.cash_received) as min_amount,
+            MAX(cwsse.cash_received) as max_amount
+        FROM `tabCashier Wise Shift Sale Entry` cwsse
+        WHERE cwsse.docstatus = 1
+        AND cwsse.cash_received > 0
+        {date_conditions_cwsse}
+    """
+    
+    # Combine all queries and aggregate
+    combined_query = f"""
+        SELECT 
+            payment_method,
+            SUM(transaction_count) as transaction_count,
+            SUM(total_amount) as total_amount,
+            AVG(avg_transaction) as avg_transaction,
+            MIN(min_amount) as min_amount,
+            MAX(max_amount) as max_amount
+        FROM (
+            ({sse_query})
+            UNION ALL
+            ({cwsse_query})
+            UNION ALL
+            ({cpe_query})
+            UNION ALL
+            ({sse_cash})
+            UNION ALL
+            ({cwsse_cash})
+        ) combined
+        GROUP BY payment_method
+        ORDER BY total_amount DESC
+    """
+    
+    data = frappe.db.sql(combined_query, as_dict=1)
+    
+    if not data:
+        return []
+    
+    # Apply payment_method filter at Python level (after aggregation)
+    if filters.get("payment_method"):
+        data = [d for d in data if d.get("payment_method") == filters.get("payment_method")]
+    
+    # Calculate percentage
+    total_amount = sum(d.get("total_amount", 0) for d in data)
+    for row in data:
+        row["percentage"] = (row.get("total_amount", 0) / total_amount * 100) if total_amount > 0 else 0
     
     return data
 
@@ -127,31 +208,58 @@ def get_chart_data(data):
     if not data:
         return None
     
-    # Aggregate totals across all rows
-    totals = {
-        "Cash": sum(row.cash_received or 0 for row in data),
-        "Paytm": sum(row.paytm or 0 for row in data),
-        "PhonePe": sum(row.phonepe or 0 for row in data),
-        "Google Pay": sum(row.googlepay or 0 for row in data),
-        "Card": sum(row.card or 0 for row in data),
-        "Other": sum(row.other or 0 for row in data),
-        "Credit": sum(row.credit_sales or 0 for row in data)
-    }
-    
-    # Filter out zero values
-    totals = {k: v for k, v in totals.items() if v > 0}
+    labels = [d.get("payment_method", "") for d in data]
+    values = [d.get("total_amount", 0) for d in data]
     
     return {
         "data": {
-            "labels": list(totals.keys()),
+            "labels": labels,
             "datasets": [
                 {
                     "name": "Amount",
-                    "values": list(totals.values())
+                    "values": values
                 }
             ]
         },
-        "type": "donut",
-        "colors": ["#29CD42", "#5E64FF", "#F683AE", "#FFA00A", "#FF5858", "#A78BFA", "#8B5CF6"],
-        "height": 300
+        "type": "pie",
+        "height": 300,
+        "colors": ["#29CD42", "#4C78FF", "#ffa00a", "#743ee2", "#ff5858", "#2ecc71"]
     }
+
+def get_summary(data):
+    if not data:
+        return []
+    
+    total_transactions = sum(d.get("transaction_count", 0) for d in data)
+    total_amount = sum(d.get("total_amount", 0) for d in data)
+    payment_methods = len(data)
+    
+    # Find most used method
+    most_used = max(data, key=lambda x: x.get("transaction_count", 0)) if data else {}
+    
+    return [
+        {
+            "value": total_amount,
+            "label": "Total Payment Amount",
+            "datatype": "Currency",
+            "indicator": "Green"
+        },
+        {
+            "value": total_transactions,
+            "label": "Total Transactions",
+            "datatype": "Int",
+            "indicator": "Blue"
+        },
+        {
+            "value": payment_methods,
+            "label": "Payment Methods Used",
+            "datatype": "Int",
+            "indicator": "Orange"
+        },
+        {
+            "value": most_used.get("payment_method", "N/A"),
+            "label": "Most Used Method",
+            "datatype": "Data",
+            "indicator": "Purple"
+        }
+    ]

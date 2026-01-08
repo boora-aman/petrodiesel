@@ -1,0 +1,411 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "format:{SSE}-{YYYY}-{MM}-{DD}-{shift}-{##}",
+ "creation": "2025-12-21 02:53:00.379090",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "posting_date",
+  "shift_start_time",
+  "cb1",
+  "shift",
+  "shift_end_time",
+  "cb2",
+  "supervisor",
+  "sb_nozzle",
+  "nozzle_readings",
+  "sb_fuel_summary",
+  "fuel_type_summary",
+  "sb_tank_summary",
+  "tank_consumption",
+  "sb_other",
+  "other_sales",
+  "sb_credit",
+  "credit_fuel_sales",
+  "sb_driver_cash",
+  "driver_cash_advances",
+  "sb_online",
+  "online_payments",
+  "sb_emp_adv",
+  "employee_advances",
+  "sb_totals",
+  "total_fuel_sales",
+  "total_other_sales",
+  "cb_tot1",
+  "total_credit_fuel",
+  "total_driver_cash",
+  "cb_tot2",
+  "total_online",
+  "total_emp_advances",
+  "cb_tot3",
+  "total_sales",
+  "sb_cash",
+  "cash_received",
+  "cb_cash",
+  "expected_cash",
+  "cash_variance",
+  "sb_remarks",
+  "remarks",
+  "amended_from",
+  "sb_expenses",
+  "shift_expenses",
+  "total_expenses",
+  "sb_cash_handover",
+  "previous_shift_cash",
+  "cb_handover1",
+  "cash_given_to_next_shift",
+  "cb_handover2",
+  "balance_with_shift_incharge",
+  "cb_handover3",
+  "balance_with_pump_cashier"
+ ],
+ "fields": [
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shift",
+   "options": "Shift Master",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "shift.start_time",
+   "fieldname": "shift_start_time",
+   "fieldtype": "Time",
+   "label": "Start Time",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "shift.end_time",
+   "fieldname": "shift_end_time",
+   "fieldtype": "Time",
+   "label": "End Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supervisor",
+   "fieldtype": "Link",
+   "label": "Supervisor",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "sb_nozzle",
+   "fieldtype": "Section Break",
+   "label": "Nozzle Readings (Cashier-wise)"
+  },
+  {
+   "fieldname": "nozzle_readings",
+   "fieldtype": "Table",
+   "label": "Readings",
+   "options": "Shift Nozzle Reading"
+  },
+  {
+   "fieldname": "sb_fuel_summary",
+   "fieldtype": "Section Break",
+   "label": "Fuel Type Sales Summary"
+  },
+  {
+   "fieldname": "fuel_type_summary",
+   "fieldtype": "Table",
+   "label": "Fuel Summary",
+   "options": "Fuel Type Sales Summary",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_tank_summary",
+   "fieldtype": "Section Break",
+   "label": "Tank Consumption Summary"
+  },
+  {
+   "fieldname": "tank_consumption",
+   "fieldtype": "Table",
+   "label": "Tank Summary",
+   "options": "Tank Consumption Summary",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_other",
+   "fieldtype": "Section Break",
+   "label": "Other Items Sales"
+  },
+  {
+   "fieldname": "other_sales",
+   "fieldtype": "Table",
+   "label": "Lubricants & Accessories",
+   "options": "Shift Other Sales"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_credit",
+   "fieldtype": "Section Break",
+   "label": "Credit Fuel Sales"
+  },
+  {
+   "fieldname": "credit_fuel_sales",
+   "fieldtype": "Table",
+   "label": "Credit Sales",
+   "options": "Shift Credit Sale"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_driver_cash",
+   "fieldtype": "Section Break",
+   "label": "Driver Cash Advances"
+  },
+  {
+   "fieldname": "driver_cash_advances",
+   "fieldtype": "Table",
+   "label": "Cash to Drivers",
+   "options": "Shift Driver Cash"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_online",
+   "fieldtype": "Section Break",
+   "label": "Online Payments"
+  },
+  {
+   "fieldname": "online_payments",
+   "fieldtype": "Table",
+   "label": "Online Payments",
+   "options": "Shift Online Payment"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_emp_adv",
+   "fieldtype": "Section Break",
+   "label": "Employee Advances"
+  },
+  {
+   "fieldname": "employee_advances",
+   "fieldtype": "Table",
+   "label": "Employee Advances",
+   "options": "Shift Employee Advance"
+  },
+  {
+   "fieldname": "sb_totals",
+   "fieldtype": "Section Break",
+   "label": "Summary"
+  },
+  {
+   "bold": 1,
+   "fieldname": "total_fuel_sales",
+   "fieldtype": "Currency",
+   "label": "Fuel Sales",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_other_sales",
+   "fieldtype": "Currency",
+   "label": "Other Sales",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_tot1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_credit_fuel",
+   "fieldtype": "Currency",
+   "label": "Credit Fuel",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_driver_cash",
+   "fieldtype": "Currency",
+   "label": "Driver Cash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_tot2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_online",
+   "fieldtype": "Currency",
+   "label": "Online",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_emp_advances",
+   "fieldtype": "Currency",
+   "label": "Emp Advances",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_tot3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "bold": 1,
+   "fieldname": "total_sales",
+   "fieldtype": "Currency",
+   "label": "TOTAL SALES",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_cash",
+   "fieldtype": "Section Break",
+   "label": "Cash Reconciliation"
+  },
+  {
+   "fieldname": "cash_received",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Cash Received",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cb_cash",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expected_cash",
+   "fieldtype": "Currency",
+   "label": "Expected Cash",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cash_variance",
+   "fieldtype": "Currency",
+   "label": "Variance",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_remarks",
+   "fieldtype": "Section Break",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Shift Sale Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Shift Sale Entry",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_expenses",
+   "fieldtype": "Section Break",
+   "label": "Shift Expenses"
+  },
+  {
+   "fieldname": "shift_expenses",
+   "fieldtype": "Table",
+   "label": "Expenses",
+   "options": "Shift Expense Detail"
+  },
+  {
+   "fieldname": "total_expenses",
+   "fieldtype": "Currency",
+   "label": "Total Expenses",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_cash_handover",
+   "fieldtype": "Section Break",
+   "label": "Cash Handover"
+  },
+  {
+   "description": "Opening cash from previous shift",
+   "fieldname": "previous_shift_cash",
+   "fieldtype": "Currency",
+   "label": "Previous Shift Cash"
+  },
+  {
+   "fieldname": "cb_handover1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Closing cash handed to next shift",
+   "fieldname": "cash_given_to_next_shift",
+   "fieldtype": "Currency",
+   "label": "Cash to Next Shift"
+  },
+  {
+   "fieldname": "cb_handover2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Cash kept by shift supervisor",
+   "fieldname": "balance_with_shift_incharge",
+   "fieldtype": "Currency",
+   "label": "Balance with Shift Incharge"
+  },
+  {
+   "fieldname": "cb_handover3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Cash kept in cashier drawer",
+   "fieldname": "balance_with_pump_cashier",
+   "fieldtype": "Currency",
+   "label": "Balance with Pump Cashier"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-21 11:49:41.703582",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Shift Sale Entry",
+ "naming_rule": "Expression",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

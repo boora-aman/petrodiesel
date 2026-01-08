@@ -6,15 +6,16 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "vehicle_number",
-  "driver_name",
-  "fuel_item",
   "nozzle",
+  "vehicle_number",
+  "slip_number",
+  "fuel_item",
   "quantity_liters",
   "rate_per_liter",
   "amount",
-  "odometer_reading",
-  "slip_number"
+  "driver_name",
+  "customer_name",
+  "odometer_reading"
  ],
  "fields": [
   {
@@ -45,6 +46,7 @@
    "columns": 1,
    "fieldname": "nozzle",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Nozzle",
    "options": "Fuel Nozzle Master"
   },
@@ -55,41 +57,52 @@
    "in_list_view": 1,
    "label": "Quantity (L)",
    "precision": "2",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "rate_per_liter",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Rate/L",
    "precision": "2",
+   "read_only": 1,
    "reqd": 1
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
    "precision": "2",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fieldname": "odometer_reading",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Odometer (km)"
   },
   {
    "fieldname": "slip_number",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Slip Number"
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-11-22 03:47:32.339306",
+ "modified": "2025-12-21 12:47:39.798024",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Credit Sale Item",

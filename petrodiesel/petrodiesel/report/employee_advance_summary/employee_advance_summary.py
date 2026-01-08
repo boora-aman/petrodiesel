@@ -3,95 +3,130 @@
 
 import frappe
 from frappe import _
-from frappe.utils import getdate
 
 def execute(filters=None):
-    columns = get_columns()
+    columns = get_columns(filters)
     data = get_data(filters)
-    chart = get_chart_data(data)
+    chart = get_chart_data(data, filters)
     return columns, data, None, chart
 
-def get_columns():
+def get_columns(filters):
     return [
         {
-            "fieldname": "employee",
             "label": _("Employee"),
+            "fieldname": "employee",
             "fieldtype": "Link",
             "options": "Employee",
-            "width": 150
+            "width": 120
         },
         {
-            "fieldname": "employee_name",
             "label": _("Employee Name"),
+            "fieldname": "employee_name",
             "fieldtype": "Data",
-            "width": 180
-        },
-        {
-            "fieldname": "total_advances",
-            "label": _("Total Advances"),
-            "fieldtype": "Currency",
-            "width": 130
-        },
-        {
-            "fieldname": "total_expenses",
-            "label": _("Total Expenses"),
-            "fieldtype": "Currency",
-            "width": 130
-        },
-        {
-            "fieldname": "total_loans",
-            "label": _("Total Loans"),
-            "fieldtype": "Currency",
-            "width": 130
-        },
-        {
-            "fieldname": "total_shortage",
-            "label": _("Total Cash Shortage"),
-            "fieldtype": "Currency",
             "width": 150
         },
         {
-            "fieldname": "total_deductions",
-            "label": _("Total to Deduct"),
+            "label": _("Advance"),
+            "fieldname": "advance_amount",
             "fieldtype": "Currency",
-            "width": 140
+            "width": 120
+        },
+        {
+            "label": _("Expense"),
+            "fieldname": "expense_amount",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Loan"),
+            "fieldname": "loan_amount",
+            "fieldtype": "Currency",
+            "width": 120
+        },
+        {
+            "label": _("Total Amount"),
+            "fieldname": "total_amount",
+            "fieldtype": "Currency",
+            "width": 130
+        },
+        {
+            "label": _("Transaction Count"),
+            "fieldname": "transaction_count",
+            "fieldtype": "Int",
+            "width": 120
+        },
+        {
+            "label": _("Last Transaction"),
+            "fieldname": "last_transaction_date",
+            "fieldtype": "Date",
+            "width": 120
         }
     ]
 
 def get_data(filters):
+    if not filters.get("from_date") or not filters.get("to_date"):
+        frappe.throw(_("Please select From Date and To Date"))
+    
+    # Query both Shift Sale Entry and Cashier Wise Shift Sale Entry
     conditions = get_conditions(filters)
     
-    data = frappe.db.sql(f"""
+    # Get data from Shift Sale Entry → Shift Employee Advance
+    sse_query = f"""
         SELECT 
-            e.name as employee,
-            e.employee_name,
-            COALESCE(SUM(CASE WHEN sea.advance_type = 'Advance' THEN sea.amount ELSE 0 END), 0) as total_advances,
-            COALESCE(SUM(CASE WHEN sea.advance_type = 'Expense' THEN sea.amount ELSE 0 END), 0) as total_expenses,
-            COALESCE(SUM(CASE WHEN sea.advance_type = 'Loan' THEN sea.amount ELSE 0 END), 0) as total_loans,
-            COALESCE(SUM(nsr.cash_shortage), 0) as total_shortage,
-            (
-                COALESCE(SUM(CASE WHEN sea.advance_type = 'Advance' THEN sea.amount ELSE 0 END), 0) +
-                COALESCE(SUM(CASE WHEN sea.advance_type = 'Expense' THEN sea.amount ELSE 0 END), 0) +
-                COALESCE(SUM(CASE WHEN sea.advance_type = 'Loan' THEN sea.amount ELSE 0 END), 0) +
-                COALESCE(SUM(nsr.cash_shortage), 0)
-            ) as total_deductions
-        FROM 
-            `tabEmployee` e
-        LEFT JOIN 
-            `tabNozzle Shift Reading` nsr ON (nsr.cashier = e.name OR nsr.supervisor = e.name)
-            AND nsr.docstatus = 1
-            {conditions}
-        LEFT JOIN 
-            `tabShift Employee Advance` sea ON sea.parent = nsr.name
-        WHERE 
-            e.status = 'Active'
-        GROUP BY 
-            e.name, e.employee_name
-        HAVING 
-            total_deductions > 0
-        ORDER BY 
-            total_deductions DESC
-    """, filters, as_dict=1)
+            sea.employee,
+            sea.employee_name,
+            SUM(CASE WHEN sea.advance_type = 'Advance' THEN sea.amount ELSE 0 END) as advance_amount,
+            SUM(CASE WHEN sea.advance_type = 'Expense' THEN sea.amount ELSE 0 END) as expense_amount,
+            SUM(CASE WHEN sea.advance_type = 'Loan' THEN sea.amount ELSE 0 END) as loan_amount,
+            SUM(sea.amount) as total_amount,
+            COUNT(*) as transaction_count,
+            MAX(sse.posting_date) as last_transaction_date
+        FROM `tabShift Employee Advance` sea
+        INNER JOIN `tabShift Sale Entry` sse ON sea.parent = sse.name
+        WHERE sse.docstatus = 1
+        {conditions}
+        GROUP BY sea.employee, sea.employee_name
+    """
+    
+    # Get data from Cashier Wise Shift Sale Entry → Shift Employee Advance
+    cwsse_query = f"""
+        SELECT 
+            sea.employee,
+            sea.employee_name,
+            SUM(CASE WHEN sea.advance_type = 'Advance' THEN sea.amount ELSE 0 END) as advance_amount,
+            SUM(CASE WHEN sea.advance_type = 'Expense' THEN sea.amount ELSE 0 END) as expense_amount,
+            SUM(CASE WHEN sea.advance_type = 'Loan' THEN sea.amount ELSE 0 END) as loan_amount,
+            SUM(sea.amount) as total_amount,
+            COUNT(*) as transaction_count,
+            MAX(cwsse.posting_date) as last_transaction_date
+        FROM `tabShift Employee Advance` sea
+        INNER JOIN `tabCashier Wise Shift Sale Entry` cwsse ON sea.parent = cwsse.name
+        WHERE cwsse.docstatus = 1
+        {conditions.replace('sse.', 'cwsse.')}
+        GROUP BY sea.employee, sea.employee_name
+    """
+    
+    # Combine results from both
+    combined_query = f"""
+        SELECT 
+            employee,
+            employee_name,
+            SUM(advance_amount) as advance_amount,
+            SUM(expense_amount) as expense_amount,
+            SUM(loan_amount) as loan_amount,
+            SUM(total_amount) as total_amount,
+            SUM(transaction_count) as transaction_count,
+            MAX(last_transaction_date) as last_transaction_date
+        FROM (
+            ({sse_query})
+            UNION ALL
+            ({cwsse_query})
+        ) combined
+        GROUP BY employee, employee_name
+        ORDER BY total_amount DESC
+    """
+    
+    data = frappe.db.sql(combined_query, filters, as_dict=1)
     
     return data
 
@@ -99,45 +134,46 @@ def get_conditions(filters):
     conditions = ""
     
     if filters.get("from_date"):
-        conditions += " AND nsr.posting_date >= %(from_date)s"
+        conditions += " AND sse.posting_date >= %(from_date)s"
     
     if filters.get("to_date"):
-        conditions += " AND nsr.posting_date <= %(to_date)s"
+        conditions += " AND sse.posting_date <= %(to_date)s"
     
     if filters.get("employee"):
-        conditions += " AND e.name = %(employee)s"
+        conditions += " AND sea.employee = %(employee)s"
+    
+    if filters.get("advance_type"):
+        conditions += " AND sea.advance_type = %(advance_type)s"
     
     return conditions
 
-def get_chart_data(data):
-    if not data or len(data) == 0:
+def get_chart_data(data, filters):
+    if not data:
         return None
     
-    # Top 10 employees by total deductions
-    top_10 = data[:10]
+    labels = [d.employee_name for d in data[:10]]  # Top 10 employees
+    advance_values = [d.advance_amount for d in data[:10]]
+    expense_values = [d.expense_amount for d in data[:10]]
+    loan_values = [d.loan_amount for d in data[:10]]
     
     return {
         "data": {
-            "labels": [d.employee_name for d in top_10],
+            "labels": labels,
             "datasets": [
                 {
-                    "name": "Advances",
-                    "values": [d.total_advances for d in top_10]
+                    "name": "Advance",
+                    "values": advance_values
                 },
                 {
-                    "name": "Expenses",
-                    "values": [d.total_expenses for d in top_10]
+                    "name": "Expense",
+                    "values": expense_values
                 },
                 {
-                    "name": "Shortage",
-                    "values": [d.total_shortage for d in top_10]
+                    "name": "Loan",
+                    "values": loan_values
                 }
             ]
         },
         "type": "bar",
-        "colors": ["#5E64FF", "#FFA00A", "#FF5858"],
-        "height": 300,
-        "barOptions": {
-            "stacked": 1
-        }
+        "colors": ["#29CD42", "#ffa00a", "#4C78FF"]
     }

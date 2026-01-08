@@ -1,0 +1,12 @@
+{
+ "name": "Today's Fuel Sales",
+ "label": "Today's Fuel Sales",
+ "function": "get_today_fuel_sales",
+ "document_type": "Shift Sale Entry",
+ "type": "Custom",
+ "module": "Petrodiesel",
+ "doctype": "Number Card",
+ "color": "#29CD42",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily"
+}

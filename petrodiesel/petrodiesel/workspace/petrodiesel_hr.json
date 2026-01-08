@@ -1,0 +1,46 @@
+{
+  "doctype": "Workspace",
+  "label": "Petrodiesel HR",
+  "title": "HR & Advances",
+  "module": "Petrodiesel",
+  "icon": "users",
+  "is_standard": 1,
+  "public": 1,
+  "sequence_id": 4,
+
+  "content": [
+    {
+      "type": "number_card",
+      "data": {
+        "label": "Employee Advances",
+        "document_type": "Shift Employee Advance",
+        "function": "Sum",
+        "aggregate_on_field": "amount"
+      }
+    },
+
+    {
+      "type": "chart",
+      "data": {
+        "chart_type": "Report",
+        "report_name": "Employee Advance Summary"
+      }
+    },
+    {
+      "type": "chart",
+      "data": {
+        "chart_type": "Report",
+        "report_name": "Cashier Performance Report"
+      }
+    },
+
+    {
+      "type": "shortcut",
+      "data": {
+        "label": "Employee Advance",
+        "type": "DocType",
+        "link_to": "Shift Employee Advance"
+      }
+    }
+  ]
+}

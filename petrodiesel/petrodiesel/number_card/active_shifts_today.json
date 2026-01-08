@@ -1,0 +1,12 @@
+{
+ "name": "Active Shifts Today",
+ "label": "Active Shifts Today",
+ "function": "get_active_shifts_today",
+ "document_type": "Shift Sale Entry",
+ "type": "Custom",
+ "module": "Petrodiesel",
+ "doctype": "Number Card",
+ "color": "#5E64FF",
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily"
+}

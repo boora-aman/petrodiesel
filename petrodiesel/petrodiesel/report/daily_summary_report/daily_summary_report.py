@@ -3,6 +3,7 @@
 
 import frappe
 from frappe import _
+from frappe.utils import flt
 
 def execute(filters=None):
     columns = get_columns()
@@ -19,125 +20,165 @@ def get_columns():
             "width": 120
         },
         {
-            "fieldname": "total_fuel_sales_qty",
-            "label": _("Total Fuel Qty (L)"),
-            "fieldtype": "Float",
-            "width": 150,
-            "precision": 2
-        },
-        {
-            "fieldname": "total_fuel_sales_amount",
+            "fieldname": "total_fuel_sales",
             "label": _("Fuel Sales (₹)"),
             "fieldtype": "Currency",
-            "width": 150,
-            "precision": 2
+            "width": 150
         },
         {
-            "fieldname": "lubricant_sales",
-            "label": _("Lubricant Sales (₹)"),
+            "fieldname": "other_product_sales",
+            "label": _("Other Products (₹)"),
             "fieldtype": "Currency",
-            "width": 150,
-            "precision": 2
-        },
-        {
-            "fieldname": "accessories_sales",
-            "label": _("Accessories (₹)"),
-            "fieldtype": "Currency",
-            "width": 150,
-            "precision": 2
+            "width": 150
         },
         {
             "fieldname": "total_sales",
             "label": _("Total Sales (₹)"),
             "fieldtype": "Currency",
-            "width": 150,
-            "precision": 2
+            "width": 150
         },
         {
-            "fieldname": "cash_collection",
-            "label": _("Cash (₹)"),
+            "fieldname": "cash_received",
+            "label": _("Cash Received (₹)"),
             "fieldtype": "Currency",
-            "width": 120,
-            "precision": 2
-        },
-        {
-            "fieldname": "online_collection",
-            "label": _("Online (₹)"),
-            "fieldtype": "Currency",
-            "width": 120,
-            "precision": 2
+            "width": 130
         },
         {
             "fieldname": "credit_sales",
             "label": _("Credit (₹)"),
             "fieldtype": "Currency",
-            "width": 120,
-            "precision": 2
+            "width": 130
         },
         {
-            "fieldname": "variance",
-            "label": _("Shortage/Excess (₹)"),
+            "fieldname": "digital_payment",
+            "label": _("Online/Digital (₹)"),
             "fieldtype": "Currency",
-            "width": 150,
-            "precision": 2
+            "width": 130
+        },
+        {
+            "fieldname": "driver_cash",
+            "label": _("Driver Cash (₹)"),
+            "fieldtype": "Currency",
+            "width": 130
+        },
+        {
+            "fieldname": "expenses",
+            "label": _("Expenses (₹)"),
+            "fieldtype": "Currency",
+            "width": 130
+        },
+        {
+            "fieldname": "net_cash",
+            "label": _("Net Cash (₹)"),
+            "fieldtype": "Currency",
+            "width": 150
         }
     ]
 
 def get_data(filters):
     conditions = ""
+    params = {}
     
     if filters.get("from_date"):
         conditions += " AND posting_date >= %(from_date)s"
+        params["from_date"] = filters.get("from_date")
     
     if filters.get("to_date"):
         conditions += " AND posting_date <= %(to_date)s"
+        params["to_date"] = filters.get("to_date")
     
-    data = frappe.db.sql(f"""
-        SELECT 
-            posting_date,
-            SUM(total_fuel_sales_qty) as total_fuel_sales_qty,
-            SUM(total_fuel_sales_amount) as total_fuel_sales_amount,
-            SUM(lubricant_sales_amount) as lubricant_sales,
-            SUM(accessories_sales_amount) as accessories_sales,
-            SUM(total_sales_amount) as total_sales,
-            SUM(cash_received) as cash_collection,
-            SUM(total_online_collection) as online_collection,
-            SUM(credit_sales_amount) as credit_sales,
-            SUM(cash_shortage) - SUM(cash_excess) as variance
-        FROM 
-            `tabNozzle Shift Reading`
-        WHERE 
-            docstatus = 1
-            {conditions}
-        GROUP BY 
-            posting_date
-        ORDER BY 
-            posting_date DESC
-    """, filters, as_dict=1)
+    # Get all dates with shifts
+    dates = frappe.db.sql("""
+        SELECT DISTINCT posting_date
+        FROM `tabShift Sale Entry`
+        WHERE docstatus = 1
+        {conditions}
+        ORDER BY posting_date
+    """.format(conditions=conditions), params, as_dict=1)
+    
+    data = []
+    
+    for date_row in dates:
+        date = date_row.posting_date
+        
+        # Get all shifts for this date
+        shifts = frappe.db.sql("""
+            SELECT 
+                name,
+                total_fuel_sales,
+                total_other_sales,
+                total_sales,
+                cash_received,
+                total_credit_fuel,
+                total_online,
+                total_driver_cash,
+                total_expenses
+            FROM `tabShift Sale Entry`
+            WHERE posting_date = %(date)s
+            AND docstatus = 1
+        """, {"date": date}, as_dict=1)
+        
+        # Aggregate all shifts for this date
+        total_fuel_sales = 0
+        other_product_sales = 0
+        total_sales = 0
+        cash_received = 0
+        credit_sales = 0
+        digital_payment = 0
+        driver_cash = 0
+        expenses = 0
+        
+        for shift in shifts:
+            total_fuel_sales += flt(shift.total_fuel_sales)
+            other_product_sales += flt(shift.total_other_sales)
+            total_sales += flt(shift.total_sales)
+            cash_received += flt(shift.cash_received)
+            credit_sales += flt(shift.total_credit_fuel)
+            digital_payment += flt(shift.total_online)
+            driver_cash += flt(shift.total_driver_cash)
+            expenses += flt(shift.total_expenses)
+        
+        net_cash = cash_received - expenses
+        
+        data.append({
+            "posting_date": date,
+            "total_fuel_sales": total_fuel_sales,
+            "other_product_sales": other_product_sales,
+            "total_sales": total_sales,
+            "cash_received": cash_received,
+            "credit_sales": credit_sales,
+            "digital_payment": digital_payment,
+            "driver_cash": driver_cash,
+            "expenses": expenses,
+            "net_cash": net_cash
+        })
     
     return data
 
 def get_chart_data(data):
+    """Generate chart showing sales trend"""
+    
     if not data:
         return None
     
-    labels = [row.posting_date.strftime('%Y-%m-%d') for row in data]
-    labels.reverse()
-    
-    sales_data = [row.total_sales for row in data]
-    sales_data.reverse()
-    
     return {
         "data": {
-            "labels": labels,
+            "labels": [d["posting_date"].strftime("%d-%b") if hasattr(d["posting_date"], "strftime") else str(d["posting_date"]) for d in data],
             "datasets": [
                 {
                     "name": "Total Sales",
-                    "values": sales_data
+                    "values": [d["total_sales"] for d in data]
+                },
+                {
+                    "name": "Cash Received",
+                    "values": [d["cash_received"] for d in data]
+                },
+                {
+                    "name": "Credit Sales",
+                    "values": [d["credit_sales"] for d in data]
                 }
             ]
         },
         "type": "line",
-        "colors": ["#32a852"],
-        "height": 250
+        "colors": ["#7cd6fd", "#5e64ff", "#fc4f51"]
     }

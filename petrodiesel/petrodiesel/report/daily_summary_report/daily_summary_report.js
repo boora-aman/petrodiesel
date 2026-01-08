@@ -1,10 +1,13 @@
+// Copyright (c) 2025, Aman Boora and contributors
+// For license information, please see license.txt
+
 frappe.query_reports["Daily Summary Report"] = {
     "filters": [
         {
             "fieldname": "from_date",
             "label": __("From Date"),
             "fieldtype": "Date",
-            "default": frappe.datetime.add_days(frappe.datetime.get_today(), -30),
+            "default": frappe.datetime.add_months(frappe.datetime.get_today(), -1),
             "reqd": 1
         },
         {

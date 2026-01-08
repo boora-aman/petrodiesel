@@ -1,0 +1,75 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-12-21 01:56:14.154263",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "vehicle_number",
+  "driver_name",
+  "customer",
+  "cash_amount",
+  "reason",
+  "slip_number"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "vehicle_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vehicle Number"
+  },
+  {
+   "columns": 2,
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Driver Name"
+  },
+  {
+   "columns": 2,
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "columns": 2,
+   "fieldname": "cash_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Cash Amount"
+  },
+  {
+   "columns": 3,
+   "fieldname": "reason",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Reason"
+  },
+  {
+   "columns": 2,
+   "fieldname": "slip_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Slip Number"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-12-21 01:56:14.154263",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Driver Cash Advance",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

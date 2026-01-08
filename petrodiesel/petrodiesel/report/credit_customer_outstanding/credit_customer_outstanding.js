@@ -1,3 +1,6 @@
+// Copyright (c) 2025, Aman Boora and contributors
+// For license information, please see license.txt
+
 frappe.query_reports["Credit Customer Outstanding"] = {
     "filters": [
         {
@@ -22,7 +25,14 @@ frappe.query_reports["Credit Customer Outstanding"] = {
             "fieldname": "fuel_type",
             "label": __("Fuel Type"),
             "fieldtype": "Link",
-            "options": "Item"
+            "options": "Item",
+            "get_query": function() {
+                return {
+                    "filters": {
+                        "item_group": ["in", ["Petrol", "Diesel", "Fuel"]]
+                    }
+                };
+            }
         },
         {
             "fieldname": "min_outstanding",
@@ -34,12 +44,12 @@ frappe.query_reports["Credit Customer Outstanding"] = {
     "formatter": function(value, row, column, data, default_formatter) {
         value = default_formatter(value, row, column, data);
         
-        if (column.fieldname == "days_outstanding" && data && data.days_outstanding > 30) {
-            value = `<span style="color: red; font-weight: bold;">${data.days_outstanding}</span>`;
+        if (column.fieldname == "days_overdue" && data && data.days_overdue > 30) {
+            value = '<span style="color: red; font-weight: bold;">' + data.days_overdue + '</span>';
         }
         
         if (column.fieldname == "outstanding_amount" && data && data.outstanding_amount > 50000) {
-            value = `<span style="color: red; font-weight: bold;">${value}</span>`;
+            value = '<span style="color: red; font-weight: bold;">' + value + '</span>';
         }
         
         return value;

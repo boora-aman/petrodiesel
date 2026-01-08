@@ -30,7 +30,9 @@
   "sales_invoice",
   "section_break_remarks",
   "remarks",
-  "amended_from"
+  "amended_from",
+  "paid_amount",
+  "payment_status"
  ],
  "fields": [
   {
@@ -187,13 +189,28 @@
    "no_copy": 1,
    "options": "Credit Sale",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount",
+   "read_only": 1
+  },
+  {
+   "default": "Unpaid",
+   "fieldname": "payment_status",
+   "fieldtype": "Select",
+   "label": "Payment Status",
+   "options": "Unpaid\nPartial\nPaid",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-22 04:40:58.537183",
+ "modified": "2025-12-21 12:47:39.635174",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Credit Sale",
