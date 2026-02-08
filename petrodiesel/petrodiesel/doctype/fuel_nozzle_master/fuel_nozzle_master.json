@@ -23,7 +23,10 @@
   "last_calibration_date",
   "current_reading",
   "column_break_3",
-  "status"
+  "status",
+  "last_shift",
+  "last_cashier",
+  "last_updated_on"
  ],
  "fields": [
   {
@@ -125,12 +128,32 @@
    "label": "Status",
    "options": "Active\nFaulty\nUnder Repair\nInactive",
    "reqd": 1
+  },
+  {
+   "fieldname": "last_shift",
+   "fieldtype": "Link",
+   "label": "Last Shift",
+   "options": "Shift Master",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_cashier",
+   "fieldtype": "Link",
+   "label": "Last Cashier",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_updated_on",
+   "fieldtype": "Date",
+   "label": "Last Updated On",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-22 03:46:51.340458",
+ "modified": "2026-02-01 15:37:14.172014",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Fuel Nozzle Master",

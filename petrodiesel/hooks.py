@@ -83,7 +83,7 @@ app_include_js = "/assets/petrodiesel/js/desk_customizations.js"
 # ------------
 
 # before_install = "petrodiesel.install.before_install"
-# after_install = "petrodiesel.install.after_install"
+after_install = "petrodiesel.petrodiesel.hooks_custom_fields.after_install"
 
 # Uninstallation
 # ------------
@@ -137,13 +137,17 @@ app_include_js = "/assets/petrodiesel/js/desk_customizations.js"
 # ---------------
 # Hook on document methods and events
 
-# doc_events = {
-# 	"*": {
-# 		"on_update": "method",
-# 		"on_cancel": "method",
-# 		"on_trash": "method"
-# 	}
-# }
+doc_events = {
+	"Credit Sale": {
+		"on_submit": "petrodiesel.petrodiesel.custom_fields.update_customer_outstanding_balance",
+		"on_cancel": "petrodiesel.petrodiesel.custom_fields.update_customer_outstanding_balance",
+		"on_update_after_submit": "petrodiesel.petrodiesel.custom_fields.update_customer_outstanding_balance"
+	},
+	"Customer Payment Entry": {
+		"on_submit": "petrodiesel.petrodiesel.custom_fields.update_customer_outstanding_balance",
+		"on_cancel": "petrodiesel.petrodiesel.custom_fields.update_customer_outstanding_balance"
+	}
+}
 
 # Scheduled Tasks
 # ---------------
@@ -242,3 +246,10 @@ app_include_js = "/assets/petrodiesel/js/desk_customizations.js"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+# Fixtures
+# ------------------
+fixtures = [
+	{"doctype": "Workspace", "filters": [["module", "=", "Petrodiesel"]]},
+	{"doctype": "Number Card", "filters": [["module", "=", "Petrodiesel"]]},
+	{"doctype": "Dashboard Chart", "filters": [["module", "=", "Petrodiesel"]]},
+]

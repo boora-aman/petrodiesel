@@ -16,7 +16,7 @@
  "name": "Cashier Performance Report",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Shift Sale Entry",
+ "ref_doctype": "Cashier Wise Shift Sale Entry",
  "report_name": "Cashier Performance Report",
  "report_type": "Script Report",
  "roles": [

@@ -99,6 +99,26 @@ frappe.ui.form.on('Shift Other Sales', {
 
 // SHIFT CREDIT SALE
 frappe.ui.form.on('Shift Credit Sale', {
+    nozzle: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (row.nozzle) {
+            frappe.call({
+                method: 'petrodiesel.petrodiesel.doctype.shift_sale_entry.shift_sale_entry.get_nozzle_details',
+                args: { nozzle: row.nozzle },
+                callback: function(r) {
+                    if (r.message) {
+                        frappe.model.set_value(cdt, cdn, 'fuel_item', r.message.fuel_item);
+                        
+                        // Auto-fetch price after fuel_item is set
+                        setTimeout(function() {
+                            frm.script_manager.trigger('fuel_item', cdt, cdn);
+                        }, 300);
+                    }
+                }
+            });
+        }
+    },
+    
     fuel_item: function(frm, cdt, cdn) {
         let row = locals[cdt][cdn];
         if (row.fuel_item) {
@@ -119,6 +139,12 @@ frappe.ui.form.on('Shift Credit Sale', {
     
     amount: function(frm, cdt, cdn) { calculate_credit_row(frm, cdt, cdn); },
     rate_per_liter: function(frm, cdt, cdn) { calculate_credit_row(frm, cdt, cdn); },
+    quantity_liters: function(frm, cdt, cdn) { 
+        let row = locals[cdt][cdn];
+        if (row.quantity_liters && row.rate_per_liter) {
+            frappe.model.set_value(cdt, cdn, 'amount', row.quantity_liters * row.rate_per_liter);
+        }
+    },
     
     credit_fuel_sales_remove: function(frm) { calculate_all_totals(frm); }
 });
@@ -257,10 +283,12 @@ function calculate_all_totals(frm) {
 }
 
 function calculate_cash_reconciliation(frm) {
-    // Expected = Previous Cash + Sales - Deductions
+    // Expected = Previous Cash + Cash Sales - Cash Outflows
+    // Credit sales don't generate cash, so exclude them
     let expected = (frm.doc.previous_shift_cash || 0) +
                   (frm.doc.total_fuel_sales || 0) + 
                   (frm.doc.total_other_sales || 0) - 
+                  (frm.doc.total_credit_fuel || 0) -  // Exclude credit sales
                   (frm.doc.total_online || 0) - 
                   (frm.doc.total_driver_cash || 0) - 
                   (frm.doc.total_emp_advances || 0) -

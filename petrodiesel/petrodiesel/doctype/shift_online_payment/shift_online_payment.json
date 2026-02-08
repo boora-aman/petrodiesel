@@ -8,6 +8,7 @@
  "field_order": [
   "cashier",
   "payment_method",
+  "machine_number",
   "account_id",
   "amount",
   "reference_number"
@@ -28,6 +29,13 @@
    "in_list_view": 1,
    "label": "Method",
    "options": "UPI\nCard\nPaytm\nPhonePe\nGoogle Pay"
+  },
+  {
+   "columns": 1,
+   "fieldname": "machine_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Machine No"
   },
   {
    "columns": 2,

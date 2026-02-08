@@ -26,7 +26,13 @@
   "last_calibration_date",
   "column_break_3",
   "next_calibration_due",
-  "status"
+  "status",
+  "current_stock_level",
+  "last_receipt_date",
+  "last_dip_height_mm",
+  "last_dip_reading_date",
+  "last_dip_reading_time",
+  "last_updated_on"
  ],
  "fields": [
   {
@@ -143,12 +149,51 @@
    "label": "Status",
    "options": "Active\nInactive\nUnder Maintenance",
    "reqd": 1
+  },
+  {
+   "description": "Current stock in Kiloliters",
+   "fieldname": "current_stock_level",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Current Stock Level (KL)",
+   "precision": "3"
+  },
+  {
+   "fieldname": "last_receipt_date",
+   "fieldtype": "Date",
+   "label": "Last Receipt Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_dip_height_mm",
+   "fieldtype": "Float",
+   "label": "Last Dip Height (mm)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_dip_reading_date",
+   "fieldtype": "Date",
+   "label": "Last Dip Reading Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_dip_reading_time",
+   "fieldtype": "Time",
+   "label": "Last Dip Reading Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "last_updated_on",
+   "fieldtype": "Date",
+   "label": "Last Updated On",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-11-22 03:46:39.268119",
+ "modified": "2026-02-01 15:37:13.868071",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Fuel Tank Master",

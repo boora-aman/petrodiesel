@@ -4,11 +4,14 @@
 import frappe
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
+from petrodiesel.utils import get_customer_total_outstanding
+
 
 class CreditSale(Document):
     def validate(self):
         self.calculate_totals()
-        self.update_outstanding()
+        if self.docstatus == 0:
+            self.update_outstanding()
     
     def on_submit(self):
         self.update_customer_balance()
@@ -25,30 +28,36 @@ class CreditSale(Document):
         total_amount = 0
         
         for row in self.items:
-            row.amount = flt(row.quantity) * flt(row.rate)
-            total_qty += flt(row.quantity)
+            row.amount = flt(row.quantity_liters) * flt(row.rate_per_liter)
+            total_qty += flt(row.quantity_liters)
             total_amount += flt(row.amount)
         
         self.total_quantity = total_qty
         self.total_amount = total_amount
         
-        # Calculate outstanding
-        self.outstanding_amount = flt(self.total_amount) - flt(self.paid_amount)
+        # Initial outstanding equals total amount
+        if not self.outstanding_amount:
+            self.outstanding_amount = flt(self.total_amount)
     
     def update_outstanding(self):
-        """Update outstanding based on payments"""
+        """
+        Update outstanding based on payments.
+        Called from:
+        1. validate() for draft documents
+        2. recalculate_outstanding() after payment submission
+        """
         if not self.name:
             return
         
         # Get total paid from Customer Payment Entry
         total_paid = frappe.db.sql("""
-            SELECT SUM(paid_amount)
+            SELECT COALESCE(SUM(paid_amount), 0)
             FROM `tabCustomer Payment Entry`
             WHERE credit_sale = %s
             AND docstatus = 1
         """, self.name)
         
-        self.paid_amount = flt(total_paid[0][0]) if total_paid and total_paid[0][0] else 0
+        self.paid_amount = flt(total_paid[0][0]) if total_paid else 0
         self.outstanding_amount = flt(self.total_amount) - flt(self.paid_amount)
         
         # Update payment status
@@ -59,16 +68,35 @@ class CreditSale(Document):
         else:
             self.payment_status = 'Unpaid'
     
+    def recalculate_outstanding(self):
+        """
+        Public method to recalculate outstanding after payment.
+        Called from Customer Payment Entry on submit/cancel.
+        """
+        self.update_outstanding()
+        self.db_set('paid_amount', self.paid_amount)
+        self.db_set('outstanding_amount', self.outstanding_amount)
+        self.db_set('payment_status', self.payment_status)
+    
     def update_customer_balance(self):
         """Update customer outstanding balance"""
         if not self.customer:
             return
         
-        outstanding = get_customer_outstanding(self.customer)
+        # Calculate total outstanding for this customer
+        outstanding = get_customer_total_outstanding(self.customer)
         
-        # Update in Customer master if field exists
-        if frappe.db.exists('Customer', self.customer):
-            frappe.db.set_value('Customer', self.customer, 'credit_balance', outstanding, update_modified=False)
+        # Update in Customer master if custom field exists
+        try:
+            if frappe.db.exists('Customer', self.customer):
+                frappe.db.set_value('Customer', self.customer, {
+                    'custom_credit_balance': outstanding,
+                    'custom_last_credit_date': self.posting_date
+                }, update_modified=False)
+                
+                frappe.msgprint(_(f"Customer {self.customer} outstanding balance updated to {outstanding}"), alert=True)
+        except Exception as e:
+            frappe.log_error(f"Failed to update customer balance: {str(e)}")
     
     def reverse_customer_balance(self):
         """Reverse customer balance on cancel"""
@@ -82,12 +110,11 @@ class CreditSale(Document):
         items = []
         for row in self.items:
             items.append({
-                'item_code': row.item_code,
-                'item_name': row.item_name,
-                'qty': row.quantity,
-                'rate': row.rate,
+                'item_code': row.fuel_item,
+                'qty': row.quantity_liters,
+                'rate': row.rate_per_liter,
                 'amount': row.amount,
-                'uom': row.uom or 'Nos'
+                'uom': 'Litre'
             })
         
         si = frappe.get_doc({
@@ -95,13 +122,12 @@ class CreditSale(Document):
             'customer': self.customer,
             'posting_date': self.posting_date,
             'company': frappe.defaults.get_user_default('Company'),
-            'reference_doctype': 'Credit Sale',
-            'reference_name': self.name,
             'items': items
         })
         
         try:
-            si.insert(ignore_permissions=True)
+            si.flags.ignore_permissions = True
+            si.insert()
             si.submit()
             
             self.db_set('sales_invoice', si.name)
@@ -115,6 +141,7 @@ class CreditSale(Document):
             try:
                 si = frappe.get_doc('Sales Invoice', self.sales_invoice)
                 if si.docstatus == 1:
+                    si.flags.ignore_permissions = True
                     si.cancel()
                 self.db_set('sales_invoice', None)
             except Exception as e:
@@ -124,17 +151,7 @@ class CreditSale(Document):
 @frappe.whitelist()
 def get_customer_outstanding(customer):
     """Get total outstanding for customer"""
-    if not customer:
-        return 0
-    
-    outstanding = frappe.db.sql("""
-        SELECT SUM(outstanding_amount)
-        FROM `tabCredit Sale`
-        WHERE customer = %s
-        AND docstatus = 1
-    """, customer)
-    
-    return flt(outstanding[0][0]) if outstanding and outstanding[0][0] else 0
+    return get_customer_total_outstanding(customer)
 
 
 @frappe.whitelist()
@@ -156,7 +173,7 @@ def get_customer_ledger(customer):
     
     payments = frappe.db.sql("""
         SELECT 
-            name, posting_date, paid_amount, payment_mode, credit_sale
+            name, posting_date, paid_amount, payment_mode
         FROM `tabCustomer Payment Entry`
         WHERE customer = %s
         AND docstatus = 1

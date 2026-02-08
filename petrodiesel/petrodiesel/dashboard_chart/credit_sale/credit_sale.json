@@ -1,0 +1,18 @@
+{
+ "name": "Credit sale",
+ "chart_name": "Credit sale",
+ "chart_type": "Line",
+ "document_type": "Credit Sale",
+ "based_on": "posting_date",
+ "value_based_on": "name",
+ "filters_json": "[[\"Credit Sale\", \"docstatus\", \"=\", 1]]",
+ "time_interval": "Daily",
+ "timespan": "Last Week",
+ "timeseries": 1,
+ "module": "Petrodiesel",
+ "doctype": "Dashboard Chart",
+ "type": "Count",
+ "number_of_groups": 0,
+ "is_public": 1,
+ "color": "#7575FF"
+}

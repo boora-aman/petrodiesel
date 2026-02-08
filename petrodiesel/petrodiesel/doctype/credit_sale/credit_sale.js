@@ -54,14 +54,65 @@ frappe.ui.form.on('Credit Sale', {
 });
 
 frappe.ui.form.on('Credit Sale Item', {
-    quantity: function(frm, cdt, cdn) { calculate_item(frm, cdt, cdn); },
-    rate: function(frm, cdt, cdn) { calculate_item(frm, cdt, cdn); },
+    nozzle: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (row.nozzle) {
+            frappe.call({
+                method: 'frappe.client.get_value',
+                args: {
+                    doctype: 'Fuel Nozzle Master',
+                    filters: { name: row.nozzle },
+                    fieldname: ['fuel_item', 'source_tank', 'current_reading']
+                },
+                callback: function(r) {
+                    if (r.message) {
+                        frappe.model.set_value(cdt, cdn, 'fuel_item', r.message.fuel_item);
+                        frappe.model.set_value(cdt, cdn, 'item_code', r.message.fuel_item);
+                        
+                        setTimeout(function() {
+                            frm.script_manager.trigger('fuel_item', cdt, cdn);
+                        }, 300);
+                    }
+                }
+            });
+        }
+    },
+    
+    fuel_item: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (row.fuel_item && !row.rate_per_liter) {
+            frappe.call({
+                method: 'petrodiesel.petrodiesel.doctype.shift_sale_entry.shift_sale_entry.get_latest_fuel_price',
+                args: {
+                    fuel_item: row.fuel_item,
+                    posting_date: frm.doc.posting_date
+                },
+                callback: function(r) {
+                    if (r.message) {
+                        frappe.model.set_value(cdt, cdn, 'rate_per_liter', r.message);
+                    }
+                }
+            });
+        }
+    },
+    
+    quantity_liters: function(frm, cdt, cdn) { calculate_item(frm, cdt, cdn); },
+    rate_per_liter: function(frm, cdt, cdn) { calculate_item(frm, cdt, cdn); },
+    amount: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (row.amount && row.rate_per_liter && !row.quantity_liters) {
+            frappe.model.set_value(cdt, cdn, 'quantity_liters', row.amount / row.rate_per_liter);
+        }
+        calculate_totals(frm);
+    },
     items_remove: function(frm) { calculate_totals(frm); }
 });
 
 function calculate_item(frm, cdt, cdn) {
     let row = locals[cdt][cdn];
-    row.amount = flt(row.quantity) * flt(row.rate);
+    if (row.quantity_liters && row.rate_per_liter) {
+        row.amount = flt(row.quantity_liters) * flt(row.rate_per_liter);
+    }
     frm.refresh_field('items');
     calculate_totals(frm);
 }
@@ -71,7 +122,7 @@ function calculate_totals(frm) {
     let total_amount = 0;
     
     $.each(frm.doc.items || [], function(i, row) {
-        total_qty += flt(row.quantity);
+        total_qty += flt(row.quantity_liters);
         total_amount += flt(row.amount);
     });
     

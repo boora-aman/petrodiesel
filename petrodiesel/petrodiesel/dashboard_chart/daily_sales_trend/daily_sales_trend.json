@@ -1,0 +1,10 @@
+{
+ "name": "Daily Sales Trend",
+ "chart_name": "Daily Sales Trend",
+ "chart_type": "Custom",
+ "method": "petrodiesel.petrodiesel.number_card.get_daily_sales_trend",
+ "module": "Petrodiesel",
+ "doctype": "Dashboard Chart",
+ "is_public": 1,
+ "color": "#29CD42"
+}

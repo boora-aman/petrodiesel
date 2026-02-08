@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "payment_method",
+  "machine_number",
   "account_id",
   "amount",
   "reference_number"
@@ -20,6 +21,13 @@
    "label": "Payment Method",
    "options": "Paytm\nPhonePe\nGPay\nCredit Card\nDebit Card\nUPI\nOther",
    "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "machine_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Machine No"
   },
   {
    "columns": 3,

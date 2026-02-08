@@ -1,0 +1,12 @@
+{
+ "name": "Week Revenue",
+ "label": "Week Revenue",
+ "document_type": "Shift Sale Entry",
+ "type": "Custom",
+ "module": "Petrodiesel",
+ "doctype": "Number Card",
+ "color": "#29CD42",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Weekly",
+ "method": "petrodiesel.petrodiesel.number_card.get_week_revenue"
+}

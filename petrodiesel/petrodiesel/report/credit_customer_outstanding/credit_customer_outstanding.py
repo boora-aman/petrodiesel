@@ -21,20 +21,8 @@ def get_columns():
             "width": 200
         },
         {
-            "fieldname": "total_shift_credits",
-            "label": _("Shift Credit Sales"),
-            "fieldtype": "Currency",
-            "width": 150
-        },
-        {
-            "fieldname": "total_direct_credits",
-            "label": _("Direct Credit Sales"),
-            "fieldtype": "Currency",
-            "width": 150
-        },
-        {
             "fieldname": "total_credit_sales",
-            "label": _("Total Credit"),
+            "label": _("Total Credit Sales"),
             "fieldtype": "Currency",
             "width": 150
         },
@@ -46,7 +34,7 @@ def get_columns():
         },
         {
             "fieldname": "outstanding_amount",
-            "label": _("Outstanding"),
+            "label": _("Outstanding Amount"),
             "fieldtype": "Currency",
             "width": 150
         },
@@ -59,98 +47,65 @@ def get_columns():
     ]
 
 def get_data(filters):
+    """
+    SINGLE SOURCE OF TRUTH: Only query Credit Sale documents.
+    Credit Sales are auto-created from Shift entries.
+    """
     customers = get_customers_with_credit(filters)
     data = []
     
     for customer in customers:
-        # Skip if specific customer filter doesn't match
         if filters.get("customer") and customer != filters.get("customer"):
             continue
         
-        # Build conditions and params
         params = {"customer": customer}
-        
-        # Date conditions
-        date_condition_shift = ""
-        date_condition_credit = ""
-        date_condition_payment = ""
+        date_condition = ""
         
         if filters.get("from_date"):
-            date_condition_shift += " AND sse.posting_date >= %(from_date)s"
-            date_condition_credit += " AND posting_date >= %(from_date)s"
-            date_condition_payment += " AND posting_date >= %(from_date)s"
+            date_condition += " AND cs.posting_date >= %(from_date)s"
             params["from_date"] = filters.get("from_date")
         
         if filters.get("to_date"):
-            date_condition_shift += " AND sse.posting_date <= %(to_date)s"
-            date_condition_credit += " AND posting_date <= %(to_date)s"
-            date_condition_payment += " AND posting_date <= %(to_date)s"
+            date_condition += " AND cs.posting_date <= %(to_date)s"
             params["to_date"] = filters.get("to_date")
         
-        # Fuel type condition
-        fuel_condition_shift = ""
-        fuel_condition_credit = ""
-        
+        # Fuel type filter
+        fuel_condition = ""
         if filters.get("fuel_type"):
-            fuel_condition_shift = " AND scs.fuel_item = %(fuel_type)s"
-            fuel_condition_credit = " AND csi.item_code = %(fuel_type)s"
+            fuel_condition = " AND csi.item_code = %(fuel_type)s"
             params["fuel_type"] = filters.get("fuel_type")
         
-        # Get shift credit sales
-        shift_credits = frappe.db.sql("""
-            SELECT COALESCE(SUM(scs.amount), 0) as total
-            FROM `tabShift Credit Sale` scs
-            INNER JOIN `tabShift Sale Entry` sse ON sse.name = scs.parent
-            WHERE scs.customer = %(customer)s
-            AND sse.docstatus = 1
-            {date_condition}
-            {fuel_condition}
-        """.format(
-            date_condition=date_condition_shift,
-            fuel_condition=fuel_condition_shift
-        ), params)
-        
-        shift_credit_total = flt(shift_credits[0][0]) if shift_credits else 0
-        
-        # Get direct credit sales
+        # Get credit sales from Credit Sale documents ONLY
         if filters.get("fuel_type"):
-            # Need to join with items if filtering by fuel
-            direct_credits = frappe.db.sql("""
-                SELECT COALESCE(SUM(csi.amount), 0) as total
-                FROM `tabCredit Sale Item` csi
-                INNER JOIN `tabCredit Sale` cs ON cs.name = csi.parent
+            credit_query = """
+                SELECT 
+                    COALESCE(SUM(csi.amount), 0) as total_credit,
+                    COALESCE(SUM(cs.paid_amount), 0) as total_paid
+                FROM `tabCredit Sale` cs
+                INNER JOIN `tabCredit Sale Item` csi ON csi.parent = cs.name
                 WHERE cs.customer = %(customer)s
                 AND cs.docstatus = 1
                 {date_condition}
                 {fuel_condition}
-            """.format(
-                date_condition=date_condition_credit,
-                fuel_condition=fuel_condition_credit
-            ), params)
+            """.format(date_condition=date_condition, fuel_condition=fuel_condition)
         else:
-            direct_credits = frappe.db.sql("""
-                SELECT COALESCE(SUM(outstanding_amount), 0) as total
-                FROM `tabCredit Sale`
-                WHERE customer = %(customer)s
-                AND docstatus = 1
+            credit_query = """
+                SELECT 
+                    COALESCE(SUM(total_amount), 0) as total_credit,
+                    COALESCE(SUM(paid_amount), 0) as total_paid
+                FROM `tabCredit Sale` cs
+                WHERE cs.customer = %(customer)s
+                AND cs.docstatus = 1
                 {date_condition}
-            """.format(date_condition=date_condition_credit), params)
+            """.format(date_condition=date_condition)
         
-        direct_credit_total = flt(direct_credits[0][0]) if direct_credits else 0
+        result = frappe.db.sql(credit_query, params, as_dict=1)
         
-        # Get total payments
-        payments = frappe.db.sql("""
-            SELECT COALESCE(SUM(paid_amount), 0) as total
-            FROM `tabCustomer Payment Entry`
-            WHERE customer = %(customer)s
-            AND docstatus = 1
-            {date_condition}
-        """.format(date_condition=date_condition_payment), params)
+        if not result:
+            continue
         
-        total_paid = flt(payments[0][0]) if payments else 0
-        
-        # Calculate outstanding
-        total_credit = shift_credit_total + direct_credit_total
+        total_credit = flt(result[0].get('total_credit', 0))
+        total_paid = flt(result[0].get('total_paid', 0))
         outstanding = total_credit - total_paid
         
         # Apply minimum outstanding filter
@@ -160,19 +115,13 @@ def get_data(filters):
         
         # Only show customers with outstanding
         if outstanding > 0.01:
-            # Get days overdue (from oldest unpaid transaction)
+            # Get days overdue from oldest unpaid Credit Sale
             oldest_date = frappe.db.sql("""
                 SELECT MIN(posting_date)
-                FROM (
-                    SELECT sse.posting_date
-                    FROM `tabShift Credit Sale` scs
-                    INNER JOIN `tabShift Sale Entry` sse ON sse.name = scs.parent
-                    WHERE scs.customer = %(customer)s AND sse.docstatus = 1
-                    UNION ALL
-                    SELECT posting_date
-                    FROM `tabCredit Sale`
-                    WHERE customer = %(customer)s AND docstatus = 1 AND outstanding_amount > 0
-                ) as combined
+                FROM `tabCredit Sale`
+                WHERE customer = %(customer)s 
+                AND docstatus = 1 
+                AND outstanding_amount > 0
             """, params)
             
             days_overdue = 0
@@ -181,8 +130,6 @@ def get_data(filters):
             
             data.append({
                 "customer": customer,
-                "total_shift_credits": shift_credit_total,
-                "total_direct_credits": direct_credit_total,
                 "total_credit_sales": total_credit,
                 "total_paid": total_paid,
                 "outstanding_amount": outstanding,
@@ -195,50 +142,32 @@ def get_data(filters):
     return data
 
 def get_customers_with_credit(filters):
-    """Get all customers who have credit transactions"""
+    """Get all customers who have credit transactions - ONLY from Credit Sale"""
     
-    conditions_shift = ""
-    conditions_credit = ""
+    conditions = ""
     params = {}
     
-    # Add date filters
     if filters.get("from_date"):
-        conditions_shift += " AND sse.posting_date >= %(from_date)s"
-        conditions_credit += " AND posting_date >= %(from_date)s"
+        conditions += " AND posting_date >= %(from_date)s"
         params["from_date"] = filters.get("from_date")
     
     if filters.get("to_date"):
-        conditions_shift += " AND sse.posting_date <= %(to_date)s"
-        conditions_credit += " AND posting_date <= %(to_date)s"
+        conditions += " AND posting_date <= %(to_date)s"
         params["to_date"] = filters.get("to_date")
     
-    # Add customer filter
     if filters.get("customer"):
-        conditions_shift += " AND scs.customer = %(customer)s"
-        conditions_credit += " AND customer = %(customer)s"
+        conditions += " AND customer = %(customer)s"
         params["customer"] = filters.get("customer")
     
-    # Customers from Shift Credit Sales
-    shift_customers = frappe.db.sql("""
-        SELECT DISTINCT scs.customer
-        FROM `tabShift Credit Sale` scs
-        INNER JOIN `tabShift Sale Entry` sse ON sse.name = scs.parent
-        WHERE sse.docstatus = 1
-        {conditions}
-    """.format(conditions=conditions_shift), params, as_list=1)
-    
-    # Customers from Credit Sale
-    direct_customers = frappe.db.sql("""
+    # Get customers from Credit Sale documents only
+    customers = frappe.db.sql("""
         SELECT DISTINCT customer
         FROM `tabCredit Sale`
         WHERE docstatus = 1
         {conditions}
-    """.format(conditions=conditions_credit), params, as_list=1)
+    """.format(conditions=conditions), params, as_list=1)
     
-    # Combine and deduplicate
-    all_customers = set([c[0] for c in shift_customers] + [c[0] for c in direct_customers])
-    
-    return list(all_customers)
+    return [c[0] for c in customers]
 
 def get_chart_data(data):
     """Generate chart for top 10 customers by outstanding"""

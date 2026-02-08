@@ -32,7 +32,10 @@
   "remarks",
   "amended_from",
   "paid_amount",
-  "payment_status"
+  "payment_status",
+  "amended_from",
+  "reference_type",
+  "reference_name"
  ],
  "fields": [
   {
@@ -183,14 +186,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Credit Sale",
-   "read_only": 1
-  },
-  {
    "default": "0",
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
@@ -204,13 +199,27 @@
    "label": "Payment Status",
    "options": "Unpaid\nPartial\nPaid",
    "read_only": 1
+  },
+  {
+   "fieldname": "reference_type",
+   "fieldtype": "Link",
+   "label": "Reference Type",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Name",
+   "options": "reference_type",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-21 12:47:39.635174",
+ "modified": "2026-02-01 15:37:14.380979",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Credit Sale",

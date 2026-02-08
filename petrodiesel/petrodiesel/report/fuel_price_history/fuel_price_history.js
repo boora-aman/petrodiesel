@@ -1,4 +1,4 @@
-// Copyright (c) 2025, AlfaStack and contributors
+// Copyright (c) 2025, Aman Boora and contributors
 // For license information, please see license.txt
 
 frappe.query_reports["Fuel Price History"] = {

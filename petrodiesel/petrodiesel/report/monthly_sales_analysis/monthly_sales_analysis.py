@@ -94,7 +94,14 @@ def get_data(filters):
     
     query = query.format(shift_filter_sse=shift_filter_sse, shift_filter_cwsse=shift_filter_cwsse)
     
-    data = frappe.db.sql(query, filters, as_dict=1)
+    params = {
+        "from_date": filters.get("from_date"),
+        "to_date": filters.get("to_date"),
+    }
+    if filters.get("shift"):
+        params["shift"] = filters.get("shift")
+    
+    data = frappe.db.sql(query, params, as_dict=1)
     
     if not data:
         return []

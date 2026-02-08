@@ -1,4 +1,4 @@
-# Copyright (c) 2025, AlfaStack and contributors
+# Copyright (c) 2025, Aman Boora and contributors
 # For license information, please see license.txt
 
 import frappe
@@ -110,7 +110,8 @@ def get_data(filters):
     if not filters.get("from_date") or not filters.get("to_date"):
         frappe.throw(_("Please select From Date and To Date"))
     
-    conditions = get_conditions(filters)
+    params = {}
+    conditions = get_conditions(filters, params)
     
     # Get Tank Dip Reading with details
     query = f"""
@@ -135,7 +136,7 @@ def get_data(filters):
         ORDER BY tdr.posting_date DESC, tdd.tank
     """
     
-    data = frappe.db.sql(query, filters, as_dict=1)
+    data = frappe.db.sql(query, params, as_dict=1)
     
     if not data:
         return []
@@ -156,23 +157,28 @@ def get_data(filters):
     return data
 
 
-def get_conditions(filters):
+def get_conditions(filters, params):
     conditions = ""
     
     if filters.get("from_date"):
-        conditions += f" AND tdr.posting_date >= '{filters.get('from_date')}'"
+        conditions += " AND tdr.posting_date >= %(from_date)s"
+        params["from_date"] = filters.get("from_date")
     
     if filters.get("to_date"):
-        conditions += f" AND tdr.posting_date <= '{filters.get('to_date')}'"
+        conditions += " AND tdr.posting_date <= %(to_date)s"
+        params["to_date"] = filters.get("to_date")
     
     if filters.get("tank"):
-        conditions += f" AND tdd.tank = '{filters.get('tank')}'"
+        conditions += " AND tdd.tank = %(tank)s"
+        params["tank"] = filters.get("tank")
     
     if filters.get("fuel_item"):
-        conditions += f" AND tdd.fuel_item = '{filters.get('fuel_item')}'"
+        conditions += " AND tdd.fuel_item = %(fuel_item)s"
+        params["fuel_item"] = filters.get("fuel_item")
     
     if filters.get("shift"):
-        conditions += f" AND tdr.shift = '{filters.get('shift')}'"
+        conditions += " AND tdr.shift = %(shift)s"
+        params["shift"] = filters.get("shift")
     
     if filters.get("show_variance_only"):
         conditions += " AND ABS(tdr.variance) > 0"

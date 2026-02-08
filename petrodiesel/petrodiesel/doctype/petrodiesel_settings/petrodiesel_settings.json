@@ -1,0 +1,82 @@
+{
+ "actions": [],
+ "creation": "2026-02-01 16:11:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "cash_variance_threshold",
+  "credit_limit_warning_percentage",
+  "auto_create_sales_invoice",
+  "default_fuel_price_list",
+  "enable_tank_stock_validation",
+  "enable_credit_limit_validation"
+ ],
+ "fields": [
+  {
+   "default": "500",
+   "description": "Alert when cash variance exceeds this amount",
+   "fieldname": "cash_variance_threshold",
+   "fieldtype": "Currency",
+   "label": "Cash Variance Threshold"
+  },
+  {
+   "default": "80",
+   "description": "Warn when credit utilization exceeds this percentage",
+   "fieldname": "credit_limit_warning_percentage",
+   "fieldtype": "Percent",
+   "label": "Credit Limit Warning %"
+  },
+  {
+   "default": "0",
+   "description": "Automatically create Sales Invoice for Credit Sales",
+   "fieldname": "auto_create_sales_invoice",
+   "fieldtype": "Check",
+   "label": "Auto Create Sales Invoice"
+  },
+  {
+   "fieldname": "default_fuel_price_list",
+   "fieldtype": "Link",
+   "label": "Default Fuel Price List",
+   "options": "Price List"
+  },
+  {
+   "default": "1",
+   "description": "Validate tank stock before allowing sales",
+   "fieldname": "enable_tank_stock_validation",
+   "fieldtype": "Check",
+   "label": "Enable Tank Stock Validation"
+  },
+  {
+   "default": "1",
+   "description": "Validate customer credit limit before credit sales",
+   "fieldname": "enable_credit_limit_validation",
+   "fieldtype": "Check",
+   "label": "Enable Credit Limit Validation"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-02-01 16:11:00.000000",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Petrodiesel Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

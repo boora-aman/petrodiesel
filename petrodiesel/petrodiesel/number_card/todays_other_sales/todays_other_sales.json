@@ -1,0 +1,12 @@
+{
+ "name": "Today's Other Sales",
+ "label": "Today's Other Sales",
+ "method": "petrodiesel.petrodiesel.number_card.get_today_other_sales",
+ "document_type": "Shift Sale Entry",
+ "type": "Custom",
+ "module": "Petrodiesel",
+ "doctype": "Number Card",
+ "color": "#7575FF",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily"
+}

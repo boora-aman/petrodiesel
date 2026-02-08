@@ -1,0 +1,107 @@
+[
+  {
+    "source_doctype": "Fuel Tank Master",
+    "target_doctype": "Warehouse",
+    "field_name": "warehouse",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'warehouse' references non-existent doctype 'Warehouse'"
+  },
+  {
+    "source_doctype": "Internal Stock Transfer",
+    "target_doctype": "Warehouse",
+    "field_name": "from_warehouse",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'from_warehouse' references non-existent doctype 'Warehouse'"
+  },
+  {
+    "source_doctype": "Internal Stock Transfer",
+    "target_doctype": "Warehouse",
+    "field_name": "to_warehouse",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'to_warehouse' references non-existent doctype 'Warehouse'"
+  },
+  {
+    "source_doctype": "Internal Stock Transfer",
+    "target_doctype": "Stock Entry",
+    "field_name": "stock_entry",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'stock_entry' references non-existent doctype 'Stock Entry'"
+  },
+  {
+    "source_doctype": "Fuel Price Update",
+    "target_doctype": "Price List",
+    "field_name": "price_list",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'price_list' references non-existent doctype 'Price List'"
+  },
+  {
+    "source_doctype": "Tanker Receipt Item",
+    "target_doctype": "UOM",
+    "field_name": "uom",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'uom' references non-existent doctype 'UOM'"
+  },
+  {
+    "source_doctype": "Tanker Receipt Item",
+    "target_doctype": "Warehouse",
+    "field_name": "warehouse",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'warehouse' references non-existent doctype 'Warehouse'"
+  },
+  {
+    "source_doctype": "Internal Stock Transfer Item",
+    "target_doctype": "UOM",
+    "field_name": "uom",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'uom' references non-existent doctype 'UOM'"
+  },
+  {
+    "source_doctype": "Product Purchase Item",
+    "target_doctype": "Warehouse",
+    "field_name": "warehouse",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'warehouse' references non-existent doctype 'Warehouse'"
+  },
+  {
+    "source_doctype": "Product Purchase Item",
+    "target_doctype": "UOM",
+    "field_name": "uom",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'uom' references non-existent doctype 'UOM'"
+  },
+  {
+    "source_doctype": "Tanker Receipt",
+    "target_doctype": "Stock Entry",
+    "field_name": "stock_entry",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'stock_entry' references non-existent doctype 'Stock Entry'"
+  },
+  {
+    "source_doctype": "Simple Purchase Entry",
+    "target_doctype": "Stock Entry",
+    "field_name": "stock_entry",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'stock_entry' references non-existent doctype 'Stock Entry'"
+  },
+  {
+    "source_doctype": "Product Purchase Entry",
+    "target_doctype": "Stock Entry",
+    "field_name": "stock_entry",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'stock_entry' references non-existent doctype 'Stock Entry'"
+  },
+  {
+    "source_doctype": "Simple Purchase Item",
+    "target_doctype": "Warehouse",
+    "field_name": "warehouse",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'warehouse' references non-existent doctype 'Warehouse'"
+  },
+  {
+    "source_doctype": "Simple Purchase Item",
+    "target_doctype": "UOM",
+    "field_name": "uom",
+    "issue_type": "MISSING_TARGET",
+    "description": "Link field 'uom' references non-existent doctype 'UOM'"
+  }
+]

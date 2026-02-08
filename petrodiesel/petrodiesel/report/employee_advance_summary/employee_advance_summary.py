@@ -68,7 +68,8 @@ def get_data(filters):
         frappe.throw(_("Please select From Date and To Date"))
     
     # Query both Shift Sale Entry and Cashier Wise Shift Sale Entry
-    conditions = get_conditions(filters)
+    params = {}
+    conditions = get_conditions(filters, params)
     
     # Get data from Shift Sale Entry → Shift Employee Advance
     sse_query = f"""
@@ -126,24 +127,28 @@ def get_data(filters):
         ORDER BY total_amount DESC
     """
     
-    data = frappe.db.sql(combined_query, filters, as_dict=1)
+    data = frappe.db.sql(combined_query, params, as_dict=1)
     
     return data
 
-def get_conditions(filters):
+def get_conditions(filters, params):
     conditions = ""
     
     if filters.get("from_date"):
         conditions += " AND sse.posting_date >= %(from_date)s"
+        params["from_date"] = filters.get("from_date")
     
     if filters.get("to_date"):
         conditions += " AND sse.posting_date <= %(to_date)s"
+        params["to_date"] = filters.get("to_date")
     
     if filters.get("employee"):
         conditions += " AND sea.employee = %(employee)s"
+        params["employee"] = filters.get("employee")
     
     if filters.get("advance_type"):
         conditions += " AND sea.advance_type = %(advance_type)s"
+        params["advance_type"] = filters.get("advance_type")
     
     return conditions
 

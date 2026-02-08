@@ -16,18 +16,26 @@
   "cashier",
   "cb2",
   "supervisor",
+  "tab_break_fuel",
   "sb_fuel",
   "fuel_sales",
+  "tab_break_sales",
   "sb_other",
   "other_sales",
   "sb_credit_fuel",
   "credit_fuel_sales",
+  "tab_break_cash",
   "sb_driver_cash",
   "driver_cash_advances",
   "sb_online",
   "online_payments",
   "sb_emp_adv",
   "employee_advances",
+  "tab_break_expenses",
+  "sb_expenses",
+  "shift_expenses",
+  "total_expenses",
+  "tab_break_totals",
   "sb_totals",
   "total_fuel_sales",
   "total_other_sales",
@@ -38,17 +46,12 @@
   "total_emp_advances",
   "cb_tot2",
   "total_sales",
+  "tab_break_reconciliation",
   "sb_cash",
   "cash_received",
   "cb_cash",
   "expected_cash",
   "cash_variance",
-  "sb_remarks",
-  "remarks",
-  "amended_from",
-  "sb_expenses",
-  "shift_expenses",
-  "total_expenses",
   "sb_cash_handover",
   "previous_shift_cash",
   "cb_handover1",
@@ -56,7 +59,10 @@
   "cb_handover2",
   "balance_with_shift_incharge",
   "cb_handover3",
-  "balance_with_pump_cashier"
+  "balance_with_pump_cashier",
+  "sb_remarks",
+  "remarks",
+  "amended_from"
  ],
  "fields": [
   {
@@ -117,6 +123,11 @@
    "options": "Employee"
   },
   {
+   "fieldname": "tab_break_fuel",
+   "fieldtype": "Tab Break",
+   "label": "Fuel Sales"
+  },
+  {
    "collapsible": 1,
    "fieldname": "sb_fuel",
    "fieldtype": "Section Break",
@@ -127,6 +138,11 @@
    "fieldtype": "Table",
    "label": "Nozzle Readings",
    "options": "Nozzle Reading Detail"
+  },
+  {
+   "fieldname": "tab_break_sales",
+   "fieldtype": "Tab Break",
+   "label": "Other Sales"
   },
   {
    "collapsible": 1,
@@ -151,6 +167,11 @@
    "fieldtype": "Table",
    "label": "Credit Sales",
    "options": "Credit Sale Item"
+  },
+  {
+   "fieldname": "tab_break_cash",
+   "fieldtype": "Tab Break",
+   "label": "Cash & Payments"
   },
   {
    "collapsible": 1,
@@ -187,6 +208,34 @@
    "fieldtype": "Table",
    "label": "Advances to Employees",
    "options": "Shift Employee Advance"
+  },
+  {
+   "fieldname": "tab_break_expenses",
+   "fieldtype": "Tab Break",
+   "label": "Expenses"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_expenses",
+   "fieldtype": "Section Break",
+   "label": "Shift Expenses"
+  },
+  {
+   "fieldname": "shift_expenses",
+   "fieldtype": "Table",
+   "label": "Expenses",
+   "options": "Shift Expense Detail"
+  },
+  {
+   "fieldname": "total_expenses",
+   "fieldtype": "Currency",
+   "label": "Total Expenses",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tab_break_totals",
+   "fieldtype": "Tab Break",
+   "label": "Summary"
   },
   {
    "fieldname": "sb_totals",
@@ -243,6 +292,11 @@
    "fieldtype": "Currency",
    "label": "TOTAL SALES",
    "read_only": 1
+  },
+  {
+   "fieldname": "tab_break_reconciliation",
+   "fieldtype": "Tab Break",
+   "label": "Cash Reconciliation"
   },
   {
    "fieldname": "sb_cash",

@@ -24,6 +24,9 @@ def get_columns():
     ]
 
 def get_data(filters):
+    if not filters.get("shift"):
+        frappe.throw("Please select a Shift")
+    
     shift_entry = frappe.get_doc('Shift Sale Entry', filters.get("shift"))
     data = []
     
@@ -39,9 +42,21 @@ def get_data(filters):
     
     # SALES SUMMARY
     data.append({"category": "<b>SALES SUMMARY</b>", "detail_1": "", "detail_2": "", "qty": "", "amount": None})
-    data.append({"category": "Fuel Sales", "detail_1": "Petrol + Diesel", "detail_2": "", "qty": "", "amount": flt(shift_entry.total_fuel_sales, 2)})
-    data.append({"category": "Other Products", "detail_1": "Oil, Lubricants, etc", "detail_2": "", "qty": "", "amount": flt(shift_entry.total_other_sales, 2)})
-    data.append({"category": "<b>TOTAL SALES</b>", "detail_1": "", "detail_2": "", "qty": "", "amount": flt(shift_entry.total_sales, 2)})
+    
+    # Get comprehensive data for the date
+    date = shift_entry.posting_date
+    
+    # Fuel Sales
+    fuel_data = get_fuel_sales_for_shift(date, filters.get("shift"))
+    total_fuel = sum([flt(item.get('amount', 0)) for item in fuel_data])
+    data.append({"category": "Fuel Sales", "detail_1": "Petrol + Diesel", "detail_2": f"{len(fuel_data)} transactions", "qty": "", "amount": flt(total_fuel, 2)})
+    
+    # Other Sales
+    other_data = get_other_sales_for_shift(date, filters.get("shift"))
+    total_other = sum([flt(item.get('amount', 0)) for item in other_data])
+    data.append({"category": "Other Products", "detail_1": "Oil, Lubricants, etc", "detail_2": f"{len(other_data)} transactions", "qty": "", "amount": flt(total_other, 2)})
+    
+    data.append({"category": "<b>TOTAL SALES</b>", "detail_1": "", "detail_2": "", "qty": "", "amount": flt(total_fuel + total_other, 2)})
     data.append({"category": "", "detail_1": "", "detail_2": "", "qty": "", "amount": None})
     
     # PAYMENT BREAKDOWN
@@ -242,3 +257,35 @@ def get_data(filters):
         data.append({"category": "<b>TOTAL ADVANCES</b>", "detail_1": "", "detail_2": "", "qty": "", "amount": flt(shift_entry.total_emp_advances, 2)})
     
     return data
+
+def get_fuel_sales_for_shift(date, shift_name):
+    """Get fuel sales data for specific shift"""
+    result = frappe.db.sql("""
+        SELECT 
+            fuel_item,
+            SUM(actual_sale_qty) as quantity,
+            SUM(amount) as amount,
+            COUNT(*) as count
+        FROM `tabShift Nozzle Reading` snr
+        INNER JOIN `tabShift Sale Entry` sse ON snr.parent = sse.name
+        WHERE sse.posting_date = %s AND sse.name = %s AND sse.docstatus = 1
+        GROUP BY fuel_item
+        ORDER BY amount DESC
+    """, (date, shift_name), as_dict=1)
+    return result
+
+def get_other_sales_for_shift(date, shift_name):
+    """Get other sales data for specific shift"""
+    result = frappe.db.sql("""
+        SELECT 
+            item_code,
+            SUM(quantity) as quantity,
+            SUM(amount) as amount,
+            COUNT(*) as count
+        FROM `tabShift Other Sales` sos
+        INNER JOIN `tabShift Sale Entry` sse ON sos.parent = sse.name
+        WHERE sse.posting_date = %s AND sse.name = %s AND sse.docstatus = 1
+        GROUP BY item_code
+        ORDER BY amount DESC
+    """, (date, shift_name), as_dict=1)
+    return result

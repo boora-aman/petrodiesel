@@ -3,8 +3,31 @@
 
 frappe.ui.form.on('Cashier Wise Shift Sale Entry', {
     refresh: function(frm) {
-        // Add top bar indicators for live totals
         update_indicators(frm);
+    },
+    
+    cashier: function(frm) {
+        if (frm.doc.cashier && frm.doc.fuel_sales && frm.doc.fuel_sales.length === 0) {
+            // Auto-fetch nozzles assigned to this cashier
+            frappe.call({
+                method: 'petrodiesel.petrodiesel.doctype.cashier_wise_shift_sale_entry.cashier_wise_shift_sale_entry.get_cashier_nozzles',
+                args: { cashier: frm.doc.cashier },
+                callback: function(r) {
+                    if (r.message && r.message.length > 0) {
+                        r.message.forEach(function(nozzle) {
+                            let row = frm.add_child('fuel_sales');
+                            row.nozzle = nozzle.name;
+                            row.fuel_item = nozzle.fuel_item;
+                        });
+                        frm.refresh_field('fuel_sales');
+                        frappe.show_alert({
+                            message: __('Nozzles loaded for cashier'),
+                            indicator: 'green'
+                        });
+                    }
+                }
+            });
+        }
     },
     
     cash_received: function(frm) {
@@ -27,22 +50,23 @@ frappe.ui.form.on('Nozzle Reading Detail', {
     nozzle: function(frm, cdt, cdn) {
         let row = locals[cdt][cdn];
         if (row.nozzle) {
-            // Auto-fetch opening reading
+            // Auto-fetch all nozzle details
             frappe.call({
-                method: 'petrodiesel.petrodiesel.doctype.cashier_wise_shift_sale_entry.cashier_wise_shift_sale_entry.get_nozzle_opening_reading',
+                method: 'petrodiesel.petrodiesel.doctype.cashier_wise_shift_sale_entry.cashier_wise_shift_sale_entry.get_nozzle_details',
                 args: { nozzle: row.nozzle },
                 callback: function(r) {
                     if (r.message) {
-                        frappe.model.set_value(cdt, cdn, 'opening_reading', r.message);
+                        frappe.model.set_value(cdt, cdn, 'fuel_item', r.message.fuel_item);
+                        frappe.model.set_value(cdt, cdn, 'tank', r.message.source_tank);
+                        frappe.model.set_value(cdt, cdn, 'opening_reading', r.message.current_reading);
+                        
+                        // Auto-fetch price after fuel_item is set
+                        setTimeout(function() {
+                            frm.script_manager.trigger('fuel_item', cdt, cdn);
+                        }, 300);
                     }
                 }
             });
-            
-            // Fuel item will auto-fetch from DocType fetch_from
-            // Then trigger fuel_item to get price
-            setTimeout(function() {
-                frm.script_manager.trigger('fuel_item', cdt, cdn);
-            }, 500);
         }
     },
     
@@ -100,6 +124,18 @@ frappe.ui.form.on('Other Product Sales Detail', {
 
 // CREDIT FUEL SALES
 frappe.ui.form.on('Credit Sale Item', {
+    nozzle: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (row.nozzle) {
+            frappe.db.get_value('Fuel Nozzle Master', row.nozzle, ['fuel_item', 'current_reading'])
+                .then(r => {
+                    if (r.message) {
+                        frappe.model.set_value(cdt, cdn, 'fuel_item', r.message.fuel_item);
+                    }
+                });
+        }
+    },
+    
     fuel_item: function(frm, cdt, cdn) {
         let row = locals[cdt][cdn];
         if (row.fuel_item) {
@@ -118,8 +154,21 @@ frappe.ui.form.on('Credit Sale Item', {
         }
     },
     
+    customer_name: function(frm, cdt, cdn) {
+        let row = locals[cdt][cdn];
+        if (row.customer_name) {
+            frappe.db.get_value('Customer', {'customer_name': row.customer_name}, 'name')
+                .then(r => {
+                    if (r.message && r.message.name) {
+                        row.customer = r.message.name;
+                    }
+                });
+        }
+    },
+    
     amount: function(frm, cdt, cdn) { calculate_credit_row_from_amount(frm, cdt, cdn); },
     rate_per_liter: function(frm, cdt, cdn) { calculate_credit_row_from_amount(frm, cdt, cdn); },
+    quantity_liters: function(frm, cdt, cdn) { calculate_credit_row_from_qty(frm, cdt, cdn); },
     
     credit_fuel_sales_remove: function(frm) { calculate_all_totals(frm); }
 });
@@ -189,6 +238,18 @@ function calculate_credit_row_from_amount(frm, cdt, cdn) {
     // Calculate quantity from amount (reverse calculation)
     if (row.amount && row.rate_per_liter) {
         row.quantity_liters = row.amount / row.rate_per_liter;
+    }
+    
+    frm.refresh_field('credit_fuel_sales');
+    calculate_all_totals(frm);
+}
+
+function calculate_credit_row_from_qty(frm, cdt, cdn) {
+    let row = locals[cdt][cdn];
+    
+    // Calculate amount from quantity
+    if (row.quantity_liters && row.rate_per_liter) {
+        row.amount = row.quantity_liters * row.rate_per_liter;
     }
     
     frm.refresh_field('credit_fuel_sales');

@@ -96,7 +96,16 @@ def get_data(filters):
         ORDER BY posting_date DESC, shift, cashier
     """
     
-    data = frappe.db.sql(combined_query, filters, as_dict=1)
+    params = {
+        "from_date": filters.get("from_date"),
+        "to_date": filters.get("to_date"),
+    }
+    if filters.get("shift"):
+        params["shift"] = filters.get("shift")
+    if filters.get("cashier"):
+        params["cashier"] = filters.get("cashier")
+
+    data = frappe.db.sql(combined_query, params, as_dict=1)
     
     if not data:
         return []

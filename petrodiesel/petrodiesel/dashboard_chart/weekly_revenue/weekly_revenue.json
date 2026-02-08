@@ -1,0 +1,10 @@
+{
+ "name": "Weekly Revenue",
+ "chart_name": "Weekly Revenue",
+ "chart_type": "Custom",
+ "method": "petrodiesel.petrodiesel.number_card.get_weekly_revenue_trend",
+ "module": "Petrodiesel",
+ "doctype": "Dashboard Chart",
+ "is_public": 1,
+ "color": "#FFA00A"
+}

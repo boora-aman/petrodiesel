@@ -1,0 +1,1409 @@
+[
+  {
+    "doctype": "Customer Bill Payment",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.000117
+  },
+  {
+    "doctype": "Customer Bill Payment",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Customer Bill Payment",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Customer Bill Payment",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Customer Bill Payment",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Fuel Tank Master",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.3e-05
+  },
+  {
+    "doctype": "Fuel Tank Master",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Fuel Tank Master",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Fuel Tank Master",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 5e-06
+  },
+  {
+    "doctype": "Fuel Tank Master",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: tank_id, tank_name, capacity_in_liters",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Other Product Sales Detail",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.4e-05
+  },
+  {
+    "doctype": "Other Product Sales Detail",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Other Product Sales Detail",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Other Product Sales Detail",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Other Product Sales Detail",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: quantity, rate",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Internal Stock Transfer",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.000578
+  },
+  {
+    "doctype": "Internal Stock Transfer",
+    "test_name": "submittable_methods",
+    "status": "PASS",
+    "message": "All required submittable methods present",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Internal Stock Transfer",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Internal Stock Transfer",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Internal Stock Transfer",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Internal Stock Transfer",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: naming_series, items",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Salary Slip Shift Advance",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.6e-05
+  },
+  {
+    "doctype": "Salary Slip Shift Advance",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Salary Slip Shift Advance",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Salary Slip Shift Advance",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Salary Slip Shift Advance",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Fuel Nozzle Master",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.5e-05
+  },
+  {
+    "doctype": "Fuel Nozzle Master",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Fuel Nozzle Master",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Fuel Nozzle Master",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Fuel Nozzle Master",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: nozzle_id, nozzle_number, nozzle_name",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Driver Cash Advance",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.3e-05
+  },
+  {
+    "doctype": "Driver Cash Advance",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Driver Cash Advance",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Driver Cash Advance",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Driver Cash Advance",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Online Payment Detail",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.4e-05
+  },
+  {
+    "doctype": "Online Payment Detail",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Online Payment Detail",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Online Payment Detail",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Online Payment Detail",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: payment_method, amount",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Customer Bill Credit Item",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.4e-05
+  },
+  {
+    "doctype": "Customer Bill Credit Item",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Customer Bill Credit Item",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Customer Bill Credit Item",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Customer Bill Credit Item",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 0.0
+  },
+  {
+    "doctype": "Fuel Price Update",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.1e-05
+  },
+  {
+    "doctype": "Fuel Price Update",
+    "test_name": "submittable_methods",
+    "status": "FAIL",
+    "message": "Missing required methods: on_submit, on_cancel",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Fuel Price Update",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Fuel Price Update",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Fuel Price Update",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Fuel Price Update",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: price_updates",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Credit Sale",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.1e-05
+  },
+  {
+    "doctype": "Shift Credit Sale",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Credit Sale",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Shift Credit Sale",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Shift Credit Sale",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: amount",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Customer Payment Entry",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.000369
+  },
+  {
+    "doctype": "Customer Payment Entry",
+    "test_name": "submittable_methods",
+    "status": "PASS",
+    "message": "All required submittable methods present",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Customer Payment Entry",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Customer Payment Entry",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Customer Payment Entry",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 5e-06
+  },
+  {
+    "doctype": "Customer Payment Entry",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: paid_amount",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Driver Cash",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.2e-05
+  },
+  {
+    "doctype": "Shift Driver Cash",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Driver Cash",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Shift Driver Cash",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Driver Cash",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Shift Other Sales",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.3e-05
+  },
+  {
+    "doctype": "Shift Other Sales",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Other Sales",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 0.0
+  },
+  {
+    "doctype": "Shift Other Sales",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Other Sales",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Shift Online Payment",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.2e-05
+  },
+  {
+    "doctype": "Shift Online Payment",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Online Payment",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Shift Online Payment",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Online Payment",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tank Dip Reading",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.000609
+  },
+  {
+    "doctype": "Tank Dip Reading",
+    "test_name": "submittable_methods",
+    "status": "PASS",
+    "message": "All required submittable methods present",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tank Dip Reading",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tank Dip Reading",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tank Dip Reading",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Tank Dip Reading",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: tank_dip_details",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Sale Entry",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.001139
+  },
+  {
+    "doctype": "Shift Sale Entry",
+    "test_name": "submittable_methods",
+    "status": "FAIL",
+    "message": "Missing required methods: on_submit, on_cancel",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Shift Sale Entry",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 5e-06
+  },
+  {
+    "doctype": "Shift Sale Entry",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Sale Entry",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 1.1e-05
+  },
+  {
+    "doctype": "Shift Sale Entry",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: cash_received",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Shift Employee Advance",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 7.7e-05
+  },
+  {
+    "doctype": "Shift Employee Advance",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Employee Advance",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Shift Employee Advance",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Shift Employee Advance",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: amount",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tanker Receipt Item",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.8e-05
+  },
+  {
+    "doctype": "Tanker Receipt Item",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Tanker Receipt Item",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tanker Receipt Item",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Tanker Receipt Item",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: invoiced_quantity, rate_per_liter",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Internal Stock Transfer Item",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.2e-05
+  },
+  {
+    "doctype": "Internal Stock Transfer Item",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Internal Stock Transfer Item",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Internal Stock Transfer Item",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Internal Stock Transfer Item",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: quantity",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Fuel Type Sales Summary",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.2e-05
+  },
+  {
+    "doctype": "Fuel Type Sales Summary",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Fuel Type Sales Summary",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Fuel Type Sales Summary",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Fuel Type Sales Summary",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tank Consumption Summary",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.1e-05
+  },
+  {
+    "doctype": "Tank Consumption Summary",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tank Consumption Summary",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tank Consumption Summary",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tank Consumption Summary",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Customer Bill",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.000307
+  },
+  {
+    "doctype": "Customer Bill",
+    "test_name": "submittable_methods",
+    "status": "FAIL",
+    "message": "Missing required methods: on_submit, on_cancel",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Customer Bill",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 8e-06
+  },
+  {
+    "doctype": "Customer Bill",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Customer Bill",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 8e-06
+  },
+  {
+    "doctype": "Customer Bill",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: naming_series",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Nozzle Reading",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 7.6e-05
+  },
+  {
+    "doctype": "Shift Nozzle Reading",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 6e-06
+  },
+  {
+    "doctype": "Shift Nozzle Reading",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Shift Nozzle Reading",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 5e-06
+  },
+  {
+    "doctype": "Shift Nozzle Reading",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Master",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.4e-05
+  },
+  {
+    "doctype": "Shift Master",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Shift Master",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Master",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 6e-06
+  },
+  {
+    "doctype": "Shift Master",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: shift_name, shift_code",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Nozzle Reading Detail",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.6e-05
+  },
+  {
+    "doctype": "Nozzle Reading Detail",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Nozzle Reading Detail",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Nozzle Reading Detail",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Nozzle Reading Detail",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: opening_reading, closing_reading, rate_per_liter",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Product Purchase Item",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 7.6e-05
+  },
+  {
+    "doctype": "Product Purchase Item",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 6e-06
+  },
+  {
+    "doctype": "Product Purchase Item",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Product Purchase Item",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Product Purchase Item",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: quantity, rate",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Credit Sale Item",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.9e-05
+  },
+  {
+    "doctype": "Credit Sale Item",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Credit Sale Item",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Credit Sale Item",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Credit Sale Item",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: vehicle_number, amount",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tanker Receipt",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.000784
+  },
+  {
+    "doctype": "Tanker Receipt",
+    "test_name": "submittable_methods",
+    "status": "PASS",
+    "message": "All required submittable methods present",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tanker Receipt",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Tanker Receipt",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tanker Receipt",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 6e-06
+  },
+  {
+    "doctype": "Tanker Receipt",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: supplier_invoice_no, tanker_number, items",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Shift Expense Detail",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.7e-05
+  },
+  {
+    "doctype": "Shift Expense Detail",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Shift Expense Detail",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Shift Expense Detail",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Shift Expense Detail",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "All required fields have appropriate defaults",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Simple Purchase Entry",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 8.1e-05
+  },
+  {
+    "doctype": "Simple Purchase Entry",
+    "test_name": "submittable_methods",
+    "status": "FAIL",
+    "message": "Missing required methods: on_submit, on_cancel",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Simple Purchase Entry",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Simple Purchase Entry",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Simple Purchase Entry",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 7e-06
+  },
+  {
+    "doctype": "Simple Purchase Entry",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: naming_series, items",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Cashier Wise Shift Sale Entry",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.000965
+  },
+  {
+    "doctype": "Cashier Wise Shift Sale Entry",
+    "test_name": "submittable_methods",
+    "status": "FAIL",
+    "message": "Missing required methods: on_submit, on_cancel",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Cashier Wise Shift Sale Entry",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 5e-06
+  },
+  {
+    "doctype": "Cashier Wise Shift Sale Entry",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Cashier Wise Shift Sale Entry",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 1e-05
+  },
+  {
+    "doctype": "Cashier Wise Shift Sale Entry",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: cash_received",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Product Purchase Entry",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.000672
+  },
+  {
+    "doctype": "Product Purchase Entry",
+    "test_name": "submittable_methods",
+    "status": "PASS",
+    "message": "All required submittable methods present",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Product Purchase Entry",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 4e-06
+  },
+  {
+    "doctype": "Product Purchase Entry",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Product Purchase Entry",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 5e-06
+  },
+  {
+    "doctype": "Product Purchase Entry",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: naming_series, items",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tank Calibration Chart",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 6.9e-05
+  },
+  {
+    "doctype": "Tank Calibration Chart",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tank Calibration Chart",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tank Calibration Chart",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tank Calibration Chart",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: dip_height_mm, quantity_liters",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Simple Purchase Item",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 8e-05
+  },
+  {
+    "doctype": "Simple Purchase Item",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Simple Purchase Item",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Simple Purchase Item",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Simple Purchase Item",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: quantity, rate",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Fuel Price Update Item",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 5.9e-05
+  },
+  {
+    "doctype": "Fuel Price Update Item",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Fuel Price Update Item",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Fuel Price Update Item",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Fuel Price Update Item",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: new_price",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Credit Sale",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 0.000696
+  },
+  {
+    "doctype": "Credit Sale",
+    "test_name": "submittable_methods",
+    "status": "PASS",
+    "message": "All required submittable methods present",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Credit Sale",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 5e-06
+  },
+  {
+    "doctype": "Credit Sale",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Credit Sale",
+    "test_name": "duplicate_fields",
+    "status": "FAIL",
+    "message": "Duplicate fieldnames: amended_from",
+    "execution_time": 7e-06
+  },
+  {
+    "doctype": "Credit Sale",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: items",
+    "execution_time": 3e-06
+  },
+  {
+    "doctype": "Tank Dip Detail",
+    "test_name": "controller_syntax",
+    "status": "PASS",
+    "message": "Controller syntax is valid",
+    "execution_time": 7.3e-05
+  },
+  {
+    "doctype": "Tank Dip Detail",
+    "test_name": "field_dependencies",
+    "status": "PASS",
+    "message": "All field dependencies are valid",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tank Dip Detail",
+    "test_name": "fetch_from_fields",
+    "status": "PASS",
+    "message": "All fetch_from fields are valid",
+    "execution_time": 1e-06
+  },
+  {
+    "doctype": "Tank Dip Detail",
+    "test_name": "duplicate_fields",
+    "status": "PASS",
+    "message": "No duplicate fieldnames found",
+    "execution_time": 2e-06
+  },
+  {
+    "doctype": "Tank Dip Detail",
+    "test_name": "required_field_defaults",
+    "status": "PASS",
+    "message": "Fields without defaults: dip_height_mm",
+    "execution_time": 1e-06
+  }
+]

@@ -78,8 +78,9 @@ def get_data(filters):
     if not filters.get("from_date") or not filters.get("to_date"):
         frappe.throw(_("Please select From Date and To Date"))
     
-    conditions_sse = get_conditions_sse(filters)
-    conditions_cwsse = get_conditions_cwsse(filters)
+    params = {}
+    conditions_sse = get_conditions_sse(filters, params)
+    conditions_cwsse = get_conditions_cwsse(filters, params)
     
     # Query 1: Shift Sale Entry → Fuel Type Sales Summary
     sse_query = f"""
@@ -134,7 +135,7 @@ def get_data(filters):
         ORDER BY total_amount DESC
     """
     
-    data = frappe.db.sql(combined_query, filters, as_dict=1)
+    data = frappe.db.sql(combined_query, params, as_dict=1)
     
     if not data:
         return []
@@ -149,37 +150,41 @@ def get_data(filters):
     
     return data
 
-def get_conditions_sse(filters):
+def get_conditions_sse(filters, params):
     conditions = ""
     
     if filters.get("from_date"):
-        conditions += f" AND sse.posting_date >= '{filters.get('from_date')}'"
+        conditions += " AND sse.posting_date >= %(from_date)s"
+        params["from_date"] = filters.get("from_date")
     
     if filters.get("to_date"):
-        conditions += f" AND sse.posting_date <= '{filters.get('to_date')}'"
+        conditions += " AND sse.posting_date <= %(to_date)s"
+        params["to_date"] = filters.get("to_date")
     
     if filters.get("fuel_item"):
-        conditions += f" AND ftss.fuel_item = '{filters.get('fuel_item')}'"
+        conditions += " AND ftss.fuel_item = %(fuel_item)s"
+        params["fuel_item"] = filters.get("fuel_item")
     
     if filters.get("shift"):
-        conditions += f" AND sse.shift = '{filters.get('shift')}'"
+        conditions += " AND sse.shift = %(shift)s"
+        params["shift"] = filters.get("shift")
     
     return conditions
 
-def get_conditions_cwsse(filters):
+def get_conditions_cwsse(filters, params):
     conditions = ""
     
     if filters.get("from_date"):
-        conditions += f" AND cwsse.posting_date >= '{filters.get('from_date')}'"
+        conditions += " AND cwsse.posting_date >= %(from_date)s"
     
     if filters.get("to_date"):
-        conditions += f" AND cwsse.posting_date <= '{filters.get('to_date')}'"
+        conditions += " AND cwsse.posting_date <= %(to_date)s"
     
     if filters.get("fuel_item"):
-        conditions += f" AND nrd.fuel_item = '{filters.get('fuel_item')}'"
+        conditions += " AND nrd.fuel_item = %(fuel_item)s"
     
     if filters.get("shift"):
-        conditions += f" AND cwsse.shift = '{filters.get('shift')}'"
+        conditions += " AND cwsse.shift = %(shift)s"
     
     return conditions
 

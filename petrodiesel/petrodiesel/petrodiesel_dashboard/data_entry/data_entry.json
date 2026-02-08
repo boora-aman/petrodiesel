@@ -1,0 +1,21 @@
+{
+ "cards": [],
+ "charts": [
+  {
+   "chart": "Credit sale",
+   "width": "Half"
+  }
+ ],
+ "creation": "2026-01-26 14:43:27.143952",
+ "dashboard_name": "Data Entry",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2026-01-26 14:43:27.143952",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Data Entry",
+ "owner": "Administrator"
+}

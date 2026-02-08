@@ -23,8 +23,7 @@
    "fieldname": "vehicle_number",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Vehicle Number",
-   "reqd": 1
+   "label": "Vehicle Number"
   },
   {
    "columns": 2,
@@ -39,8 +38,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Fuel Item",
-   "options": "Item",
-   "reqd": 1
+   "options": "Item"
   },
   {
    "columns": 1,
@@ -56,8 +54,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Quantity (L)",
-   "precision": "2",
-   "read_only": 1
+   "precision": "2"
   },
   {
    "columns": 1,
@@ -65,9 +62,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Rate/L",
-   "precision": "2",
-   "read_only": 1,
-   "reqd": 1
+   "precision": "2"
   },
   {
    "columns": 2,

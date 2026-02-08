@@ -1,0 +1,12 @@
+{
+ "name": "Credit Customers Count",
+ "label": "Credit Customers Count",
+ "document_type": "Credit Sale",
+ "type": "Custom",
+ "module": "Petrodiesel",
+ "doctype": "Number Card",
+ "color": "#FF8989",
+ "show_percentage_stats": 0,
+ "stats_time_interval": "Daily",
+ "method": "petrodiesel.petrodiesel.number_card.get_credit_customers_count"
+}

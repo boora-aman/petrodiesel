@@ -1,0 +1,444 @@
+[
+  {
+    "name": "Customer Bill Payment",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 5,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Fuel Tank Master",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 20,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": []
+  },
+  {
+    "name": "Other Product Sales Detail",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 6,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Internal Stock Transfer",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 19,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": [
+      "get_warehouse_stock",
+      "get_item_stock_in_warehouse",
+      "get_warehouse_items",
+      "validate",
+      "on_submit",
+      "on_cancel",
+      "validate_warehouses",
+      "validate_stock_availability",
+      "calculate_totals",
+      "create_stock_entry",
+      "cancel_stock_entry"
+    ]
+  },
+  {
+    "name": "Salary Slip Shift Advance",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 6,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Fuel Nozzle Master",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 17,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": []
+  },
+  {
+    "name": "Driver Cash Advance",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 6,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Online Payment Detail",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 4,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Customer Bill Credit Item",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 10,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Fuel Price Update",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 16,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": []
+  },
+  {
+    "name": "Shift Credit Sale",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 10,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Customer Payment Entry",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 21,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": [
+      "get_customer_total_outstanding",
+      "get_customer_credit_summary",
+      "validate",
+      "on_submit",
+      "on_cancel",
+      "update_customer_balance"
+    ]
+  },
+  {
+    "name": "Shift Driver Cash",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 7,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Shift Other Sales",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 7,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Shift Online Payment",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 5,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Tank Dip Reading",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 19,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": [
+      "get_tank_system_stock",
+      "get_tank_current_dip",
+      "validate",
+      "on_submit",
+      "on_cancel",
+      "calculate_totals",
+      "calculate_variance",
+      "update_tank_stock_levels",
+      "create_variance_stock_entry",
+      "cancel_variance_stock_entry"
+    ]
+  },
+  {
+    "name": "Shift Sale Entry",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 54,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": [
+      "get_nozzle_details",
+      "get_latest_fuel_price",
+      "get_item_details",
+      "validate",
+      "fetch_previous_shift_cash",
+      "calculate_nozzle_readings",
+      "calculate_fuel_type_summary",
+      "calculate_tank_consumption",
+      "calculate_other_sales",
+      "calculate_credit_sales",
+      "calculate_driver_cash",
+      "calculate_online_payments",
+      "calculate_employee_advances",
+      "calculate_expenses",
+      "calculate_total_sales",
+      "calculate_cash_reconciliation",
+      "calculate_cash_handover"
+    ]
+  },
+  {
+    "name": "Shift Employee Advance",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 5,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Tanker Receipt Item",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 13,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Internal Stock Transfer Item",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 7,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Fuel Type Sales Summary",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 4,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Tank Consumption Summary",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 4,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Customer Bill",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 21,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": [
+      "fetch_customer_transactions",
+      "get_last_bill_date",
+      "validate",
+      "validate_dates",
+      "calculate_totals"
+    ]
+  },
+  {
+    "name": "Shift Nozzle Reading",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 11,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Shift Master",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 11,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": []
+  },
+  {
+    "name": "Nozzle Reading Detail",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 9,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Product Purchase Item",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 10,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Credit Sale Item",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 10,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Tanker Receipt",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 29,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": [
+      "get_tank_dip_reading",
+      "get_fuel_rate",
+      "validate",
+      "calculate_items",
+      "calculate_totals",
+      "on_submit",
+      "create_purchase_invoice",
+      "create_stock_entry",
+      "on_cancel"
+    ]
+  },
+  {
+    "name": "Shift Expense Detail",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 5,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Simple Purchase Entry",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 22,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Cashier Wise Shift Sale Entry",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 51,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": [
+      "get_latest_fuel_price",
+      "get_item_price",
+      "get_item_details",
+      "get_nozzle_opening_reading",
+      "validate",
+      "calculate_fuel_sales",
+      "calculate_other_sales",
+      "calculate_credit_fuel",
+      "calculate_driver_cash",
+      "calculate_online_payments",
+      "calculate_employee_advances",
+      "calculate_total_sales",
+      "calculate_cash_reconciliation"
+    ]
+  },
+  {
+    "name": "Product Purchase Entry",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 26,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": [
+      "get_item_details",
+      "validate",
+      "on_submit",
+      "on_cancel",
+      "calculate_totals",
+      "create_stock_entry",
+      "cancel_stock_entry",
+      "create_purchase_invoice_doc",
+      "cancel_purchase_invoice_doc"
+    ]
+  },
+  {
+    "name": "Tank Calibration Chart",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 2,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Simple Purchase Item",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 10,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Fuel Price Update Item",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 5,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  },
+  {
+    "name": "Credit Sale",
+    "module": "Petrodiesel",
+    "is_submittable": 1,
+    "field_count": 27,
+    "has_controller": true,
+    "has_tests": true,
+    "custom_methods": [
+      "get_customer_outstanding",
+      "get_customer_ledger",
+      "validate",
+      "on_submit",
+      "on_cancel",
+      "calculate_totals",
+      "update_outstanding",
+      "update_customer_balance",
+      "reverse_customer_balance",
+      "create_sales_invoice",
+      "cancel_sales_invoice"
+    ]
+  },
+  {
+    "name": "Tank Dip Detail",
+    "module": "Petrodiesel",
+    "is_submittable": false,
+    "field_count": 6,
+    "has_controller": true,
+    "has_tests": false,
+    "custom_methods": []
+  }
+]

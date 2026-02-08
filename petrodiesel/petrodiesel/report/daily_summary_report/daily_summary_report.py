@@ -20,10 +20,22 @@ def get_columns():
             "width": 120
         },
         {
+            "fieldname": "shift_count",
+            "label": _("Shifts"),
+            "fieldtype": "Int",
+            "width": 80
+        },
+        {
             "fieldname": "total_fuel_sales",
             "label": _("Fuel Sales (₹)"),
             "fieldtype": "Currency",
             "width": 150
+        },
+        {
+            "fieldname": "fuel_liters",
+            "label": _("Fuel (Liters)"),
+            "fieldtype": "Float",
+            "width": 120
         },
         {
             "fieldname": "other_product_sales",
@@ -68,10 +80,28 @@ def get_columns():
             "width": 130
         },
         {
+            "fieldname": "cash_variance",
+            "label": _("Cash Variance (₹)"),
+            "fieldtype": "Currency",
+            "width": 130
+        },
+        {
             "fieldname": "net_cash",
             "label": _("Net Cash (₹)"),
             "fieldtype": "Currency",
             "width": 150
+        },
+        {
+            "fieldname": "credit_outstanding",
+            "label": _("Credit Outstanding (₹)"),
+            "fieldtype": "Currency",
+            "width": 150
+        },
+        {
+            "fieldname": "tank_variance",
+            "label": _("Tank Variance (Liters)"),
+            "fieldtype": "Float",
+            "width": 140
         }
     ]
 
@@ -87,73 +117,149 @@ def get_data(filters):
         conditions += " AND posting_date <= %(to_date)s"
         params["to_date"] = filters.get("to_date")
     
-    # Get all dates with shifts
-    dates = frappe.db.sql("""
+    # Get all dates with shifts from both sources
+    shift_dates = frappe.db.sql("""
         SELECT DISTINCT posting_date
         FROM `tabShift Sale Entry`
         WHERE docstatus = 1
         {conditions}
-        ORDER BY posting_date
     """.format(conditions=conditions), params, as_dict=1)
+    
+    cashier_dates = frappe.db.sql("""
+        SELECT DISTINCT posting_date
+        FROM `tabCashier Wise Shift Sale Entry`
+        WHERE docstatus = 1
+        {conditions}
+    """.format(conditions=conditions), params, as_dict=1)
+    
+    # Combine and get unique dates
+    all_dates = set()
+    for d in shift_dates:
+        all_dates.add(d.posting_date)
+    for d in cashier_dates:
+        all_dates.add(d.posting_date)
+    
+    dates = [{"posting_date": d} for d in sorted(all_dates)]
     
     data = []
     
     for date_row in dates:
-        date = date_row.posting_date
+        date = date_row["posting_date"]
         
-        # Get all shifts for this date
-        shifts = frappe.db.sql("""
-            SELECT 
-                name,
-                total_fuel_sales,
-                total_other_sales,
-                total_sales,
-                cash_received,
-                total_credit_fuel,
-                total_online,
-                total_driver_cash,
-                total_expenses
-            FROM `tabShift Sale Entry`
-            WHERE posting_date = %(date)s
-            AND docstatus = 1
-        """, {"date": date}, as_dict=1)
+        # Get comprehensive daily data for this date
+        daily_data = get_comprehensive_daily_data(date)
         
-        # Aggregate all shifts for this date
-        total_fuel_sales = 0
-        other_product_sales = 0
-        total_sales = 0
-        cash_received = 0
-        credit_sales = 0
-        digital_payment = 0
-        driver_cash = 0
-        expenses = 0
-        
-        for shift in shifts:
-            total_fuel_sales += flt(shift.total_fuel_sales)
-            other_product_sales += flt(shift.total_other_sales)
-            total_sales += flt(shift.total_sales)
-            cash_received += flt(shift.cash_received)
-            credit_sales += flt(shift.total_credit_fuel)
-            digital_payment += flt(shift.total_online)
-            driver_cash += flt(shift.total_driver_cash)
-            expenses += flt(shift.total_expenses)
-        
-        net_cash = cash_received - expenses
-        
-        data.append({
-            "posting_date": date,
-            "total_fuel_sales": total_fuel_sales,
-            "other_product_sales": other_product_sales,
-            "total_sales": total_sales,
-            "cash_received": cash_received,
-            "credit_sales": credit_sales,
-            "digital_payment": digital_payment,
-            "driver_cash": driver_cash,
-            "expenses": expenses,
-            "net_cash": net_cash
-        })
+        if daily_data:
+            data.append(daily_data)
     
     return data
+
+def get_comprehensive_daily_data(date):
+    """Get comprehensive daily data using the same logic as comprehensive daily operations"""
+    
+    # Get shifts from Shift Sale Entry
+    shift_entries = frappe.db.sql("""
+        SELECT 
+            total_fuel_sales,
+            total_other_sales,
+            total_sales,
+            cash_received,
+            total_credit_fuel,
+            total_online,
+            total_driver_cash,
+            total_expenses,
+            cash_variance
+        FROM `tabShift Sale Entry`
+        WHERE posting_date = %(date)s
+        AND docstatus = 1
+    """, {"date": date}, as_dict=1)
+    
+    # Get shifts from Cashier Wise Shift Sale Entry
+    cashier_entries = frappe.db.sql("""
+        SELECT 
+            total_fuel_sales,
+            total_other_sales,
+            total_sales,
+            cash_received,
+            total_credit_fuel,
+            total_online,
+            total_driver_cash,
+            total_expenses,
+            cash_variance
+        FROM `tabCashier Wise Shift Sale Entry`
+        WHERE posting_date = %(date)s
+        AND docstatus = 1
+    """, {"date": date}, as_dict=1)
+    
+    # Combine both lists
+    shifts = shift_entries + cashier_entries
+    
+    # Get fuel quantity from Credit Sale Items (single source of truth)
+    fuel_data = frappe.db.sql("""
+        SELECT COALESCE(SUM(quantity_liters), 0) as total_fuel_liters
+        FROM `tabCredit Sale Item` csi
+        INNER JOIN `tabCredit Sale` cs ON csi.parent = cs.name
+        WHERE cs.posting_date = %(date)s AND cs.docstatus = 1
+    """, {"date": date}, as_dict=1)
+    
+    # Get credit outstanding for this date
+    credit_data = frappe.db.sql("""
+        SELECT COALESCE(SUM(outstanding_amount), 0) as credit_outstanding
+        FROM `tabCredit Sale`
+        WHERE posting_date = %(date)s AND docstatus = 1
+    """, {"date": date}, as_dict=1)
+    
+    # Get tank variance for this date
+    tank_data = frappe.db.sql("""
+        SELECT COALESCE(SUM(variance), 0) as tank_variance
+        FROM `tabTank Dip Reading`
+        WHERE posting_date = %(date)s AND docstatus = 1
+    """, {"date": date}, as_dict=1)
+    
+    # Aggregate all shifts for this date
+    total_fuel_sales = 0
+    other_product_sales = 0
+    total_sales = 0
+    cash_received = 0
+    credit_sales = 0
+    digital_payment = 0
+    driver_cash = 0
+    expenses = 0
+    cash_variance = 0
+    
+    for shift in shifts:
+        total_fuel_sales += flt(shift.total_fuel_sales)
+        other_product_sales += flt(shift.total_other_sales)
+        total_sales += flt(shift.total_sales)
+        cash_received += flt(shift.cash_received)
+        credit_sales += flt(shift.total_credit_fuel)
+        digital_payment += flt(shift.total_online)
+        driver_cash += flt(shift.total_driver_cash)
+        expenses += flt(shift.total_expenses)
+        cash_variance += flt(shift.cash_variance)
+    
+    net_cash = cash_received - expenses
+    fuel_liters = fuel_data[0].total_fuel_liters if fuel_data else 0
+    credit_outstanding = credit_data[0].credit_outstanding if credit_data else 0
+    tank_variance = tank_data[0].tank_variance if tank_data else 0
+    
+    return {
+        "posting_date": date,
+        "shift_count": len(shifts),
+        "total_fuel_sales": total_fuel_sales,
+        "fuel_liters": fuel_liters,
+        "other_product_sales": other_product_sales,
+        "total_sales": total_sales,
+        "cash_received": cash_received,
+        "credit_sales": credit_sales,
+        "digital_payment": digital_payment,
+        "driver_cash": driver_cash,
+        "expenses": expenses,
+        "cash_variance": cash_variance,
+        "net_cash": net_cash,
+        "credit_outstanding": credit_outstanding,
+        "tank_variance": tank_variance
+    }
 
 def get_chart_data(data):
     """Generate chart showing sales trend"""
@@ -167,18 +273,22 @@ def get_chart_data(data):
             "datasets": [
                 {
                     "name": "Total Sales",
-                    "values": [d["total_sales"] for d in data]
+                    "values": [flt(d["total_sales"]) for d in data]
+                },
+                {
+                    "name": "Fuel Sales",
+                    "values": [flt(d["total_fuel_sales"]) for d in data]
                 },
                 {
                     "name": "Cash Received",
-                    "values": [d["cash_received"] for d in data]
+                    "values": [flt(d["cash_received"]) for d in data]
                 },
                 {
                     "name": "Credit Sales",
-                    "values": [d["credit_sales"] for d in data]
+                    "values": [flt(d["credit_sales"]) for d in data]
                 }
             ]
         },
         "type": "line",
-        "colors": ["#7cd6fd", "#5e64ff", "#fc4f51"]
+        "colors": ["#29CD42", "#FF5858", "#FFA00A", "#8B5CF6"]
     }

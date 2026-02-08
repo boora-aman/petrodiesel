@@ -64,22 +64,26 @@ def get_data(filters):
     if not filters.get("from_date") or not filters.get("to_date"):
         frappe.throw(_("Please select From Date and To Date"))
     
+    params = {}
     # Date conditions only (no payment_method filter in subqueries)
     date_conditions_sse = ""
     if filters.get("from_date"):
-        date_conditions_sse += f" AND sse.posting_date >= '{filters.get('from_date')}'"
+        date_conditions_sse += " AND sse.posting_date >= %(from_date)s"
+        params["from_date"] = filters.get("from_date")
     if filters.get("to_date"):
-        date_conditions_sse += f" AND sse.posting_date <= '{filters.get('to_date')}'"
+        date_conditions_sse += " AND sse.posting_date <= %(to_date)s"
+        params["to_date"] = filters.get("to_date")
     if filters.get("shift"):
-        date_conditions_sse += f" AND sse.shift = '{filters.get('shift')}'"
+        date_conditions_sse += " AND sse.shift = %(shift)s"
+        params["shift"] = filters.get("shift")
     
     date_conditions_cwsse = ""
     if filters.get("from_date"):
-        date_conditions_cwsse += f" AND cwsse.posting_date >= '{filters.get('from_date')}'"
+        date_conditions_cwsse += " AND cwsse.posting_date >= %(from_date)s"
     if filters.get("to_date"):
-        date_conditions_cwsse += f" AND cwsse.posting_date <= '{filters.get('to_date')}'"
+        date_conditions_cwsse += " AND cwsse.posting_date <= %(to_date)s"
     if filters.get("shift"):
-        date_conditions_cwsse += f" AND cwsse.shift = '{filters.get('shift')}'"
+        date_conditions_cwsse += " AND cwsse.shift = %(shift)s"
     
     # Query 1: Shift Sale Entry → Shift Online Payment
     sse_query = f"""
@@ -116,9 +120,9 @@ def get_data(filters):
     # Query 3: Customer Payment Entry
     cpe_conditions = ""
     if filters.get("from_date"):
-        cpe_conditions += f" AND cpe.posting_date >= '{filters.get('from_date')}'"
+        cpe_conditions += " AND cpe.posting_date >= %(from_date)s"
     if filters.get("to_date"):
-        cpe_conditions += f" AND cpe.posting_date <= '{filters.get('to_date')}'"
+        cpe_conditions += " AND cpe.posting_date <= %(to_date)s"
     
     cpe_query = f"""
         SELECT 
@@ -188,7 +192,7 @@ def get_data(filters):
         ORDER BY total_amount DESC
     """
     
-    data = frappe.db.sql(combined_query, as_dict=1)
+    data = frappe.db.sql(combined_query, params, as_dict=1)
     
     if not data:
         return []

@@ -1,4 +1,4 @@
-# Copyright (c) 2025, AlfaStack and contributors
+# Copyright (c) 2025, Aman Boora and contributors
 # For license information, please see license.txt
 
 import frappe
@@ -107,21 +107,25 @@ def get_columns():
 def get_data(filters):
     customer = filters.get("customer")
     
+    params = {"customer": customer}
     date_conditions_sse = ""
     if filters.get("from_date"):
-        date_conditions_sse += f" AND sse.posting_date >= '{filters.get('from_date')}'"
+        date_conditions_sse += " AND sse.posting_date >= %(from_date)s"
+        params["from_date"] = filters.get("from_date")
     if filters.get("to_date"):
-        date_conditions_sse += f" AND sse.posting_date <= '{filters.get('to_date')}'"
+        date_conditions_sse += " AND sse.posting_date <= %(to_date)s"
+        params["to_date"] = filters.get("to_date")
     if filters.get("vehicle_number"):
-        date_conditions_sse += f" AND scs.vehicle_number = '{filters.get('vehicle_number')}'"
+        date_conditions_sse += " AND scs.vehicle_number = %(vehicle_number)s"
+        params["vehicle_number"] = filters.get("vehicle_number")
     
     date_conditions_cwsse = ""
     if filters.get("from_date"):
-        date_conditions_cwsse += f" AND cwsse.posting_date >= '{filters.get('from_date')}'"
+        date_conditions_cwsse += " AND cwsse.posting_date >= %(from_date)s"
     if filters.get("to_date"):
-        date_conditions_cwsse += f" AND cwsse.posting_date <= '{filters.get('to_date')}'"
+        date_conditions_cwsse += " AND cwsse.posting_date <= %(to_date)s"
     if filters.get("vehicle_number"):
-        date_conditions_cwsse += f" AND csi.vehicle_number = '{filters.get('vehicle_number')}'"
+        date_conditions_cwsse += " AND csi.vehicle_number = %(vehicle_number)s"
     
     # Query 1: Shift Sale Entry → Shift Credit Sale (Fuel)
     fuel_sse_query = f"""
@@ -142,7 +146,7 @@ def get_data(filters):
         FROM `tabShift Credit Sale` scs
         INNER JOIN `tabShift Sale Entry` sse ON scs.parent = sse.name
         WHERE sse.docstatus = 1
-        AND scs.customer = '{customer}'
+        AND scs.customer = %(customer)s
         {date_conditions_sse}
     """
     
@@ -165,7 +169,7 @@ def get_data(filters):
         FROM `tabShift Driver Cash` sdc
         INNER JOIN `tabShift Sale Entry` sse ON sdc.parent = sse.name
         WHERE sse.docstatus = 1
-        AND sdc.customer = '{customer}'
+        AND sdc.customer = %(customer)s
         {date_conditions_sse}
     """
     
@@ -188,7 +192,7 @@ def get_data(filters):
         FROM `tabCredit Sale Item` csi
         INNER JOIN `tabCashier Wise Shift Sale Entry` cwsse ON csi.parent = cwsse.name
         WHERE cwsse.docstatus = 1
-        AND csi.customer_name = '{customer}'
+        AND csi.customer_name = %(customer)s
         {date_conditions_cwsse}
     """
     
@@ -211,16 +215,16 @@ def get_data(filters):
         FROM `tabDriver Cash Advance` dca
         INNER JOIN `tabCashier Wise Shift Sale Entry` cwsse ON dca.parent = cwsse.name
         WHERE cwsse.docstatus = 1
-        AND dca.customer = '{customer}'
+        AND dca.customer = %(customer)s
         {date_conditions_cwsse}
     """
     
     # Query 5: Credit Sale (standalone)
     cs_conditions = ""
     if filters.get("from_date"):
-        cs_conditions += f" AND cs.posting_date >= '{filters.get('from_date')}'"
+        cs_conditions += " AND cs.posting_date >= %(from_date)s"
     if filters.get("to_date"):
-        cs_conditions += f" AND cs.posting_date <= '{filters.get('to_date')}'"
+        cs_conditions += " AND cs.posting_date <= %(to_date)s"
     
     fuel_cs_query = f"""
         SELECT 
@@ -240,7 +244,7 @@ def get_data(filters):
         FROM `tabCredit Sale Item` csi
         INNER JOIN `tabCredit Sale` cs ON csi.parent = cs.name
         WHERE cs.docstatus = 1
-        AND cs.customer = '{customer}'
+        AND cs.customer = %(customer)s
         {cs_conditions}
     """
     
@@ -260,7 +264,7 @@ def get_data(filters):
         ORDER BY posting_date DESC, vehicle_number, transaction_type
     """
     
-    data = frappe.db.sql(combined_query, as_dict=1)
+    data = frappe.db.sql(combined_query, params, as_dict=1)
     
     return data
 
