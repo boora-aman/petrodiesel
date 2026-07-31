@@ -2,9 +2,15 @@
  "name": "Weekly Revenue",
  "chart_name": "Weekly Revenue",
  "chart_type": "Custom",
- "method": "petrodiesel.petrodiesel.number_card.get_weekly_revenue_trend",
+ "source": "Combined Weekly Revenue",
+ "filters_json": "[]",
+ "time_interval": "Weekly",
+ "timespan": "Last Month",
+ "timeseries": 1,
  "module": "Petrodiesel",
  "doctype": "Dashboard Chart",
+ "type": "Bar",
+ "number_of_groups": 0,
  "is_public": 1,
  "color": "#FFA00A"
 }

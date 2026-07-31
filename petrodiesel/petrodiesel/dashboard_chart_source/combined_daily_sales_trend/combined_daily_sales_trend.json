@@ -1,0 +1,8 @@
+{
+ "name": "Combined Daily Sales Trend",
+ "source_name": "Combined Daily Sales Trend",
+ "timeseries": 1,
+ "module": "Petrodiesel",
+ "doctype": "Dashboard Chart Source",
+ "is_standard": 1
+}

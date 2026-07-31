@@ -1,0 +1,26 @@
+[
+  {
+    "doctype": "Dashboard Chart Source",
+    "name": "Combined Daily Sales Trend",
+    "source_name": "Combined Daily Sales Trend",
+    "module": "Petrodiesel",
+    "timeseries": 1,
+    "is_standard": 1
+  },
+  {
+    "doctype": "Dashboard Chart Source",
+    "name": "Combined Daily Fuel Sales",
+    "source_name": "Combined Daily Fuel Sales",
+    "module": "Petrodiesel",
+    "timeseries": 1,
+    "is_standard": 1
+  },
+  {
+    "doctype": "Dashboard Chart Source",
+    "name": "Combined Weekly Revenue",
+    "source_name": "Combined Weekly Revenue",
+    "module": "Petrodiesel",
+    "timeseries": 1,
+    "is_standard": 1
+  }
+]

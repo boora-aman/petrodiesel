@@ -2,9 +2,15 @@
  "name": "Daily Sales Trend",
  "chart_name": "Daily Sales Trend",
  "chart_type": "Custom",
- "method": "petrodiesel.petrodiesel.number_card.get_daily_sales_trend",
+ "source": "Combined Daily Sales Trend",
+ "filters_json": "[]",
+ "time_interval": "Daily",
+ "timespan": "Last Week",
+ "timeseries": 1,
  "module": "Petrodiesel",
  "doctype": "Dashboard Chart",
+ "type": "Line",
+ "number_of_groups": 0,
  "is_public": 1,
  "color": "#29CD42"
 }

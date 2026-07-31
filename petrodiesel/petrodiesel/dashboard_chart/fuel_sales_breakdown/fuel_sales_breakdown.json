@@ -2,9 +2,15 @@
  "name": "Fuel Sales Breakdown",
  "chart_name": "Fuel Sales Breakdown",
  "chart_type": "Custom",
- "method": "petrodiesel.petrodiesel.number_card.get_daily_fuel_sales_trend",
+ "source": "Combined Daily Fuel Sales",
+ "filters_json": "[]",
+ "time_interval": "Daily",
+ "timespan": "Last Month",
+ "timeseries": 1,
  "module": "Petrodiesel",
  "doctype": "Dashboard Chart",
+ "type": "Line",
+ "number_of_groups": 0,
  "is_public": 1,
  "color": "#7575FF"
 }

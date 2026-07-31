@@ -68,6 +68,12 @@ def get_columns():
             "width": 130
         },
         {
+            "fieldname": "payments_received",
+            "label": _("Payments Received (₹)"),
+            "fieldtype": "Currency",
+            "width": 150
+        },
+        {
             "fieldname": "driver_cash",
             "label": _("Driver Cash (₹)"),
             "fieldtype": "Currency",
@@ -194,12 +200,31 @@ def get_comprehensive_daily_data(date):
     # Combine both lists
     shifts = shift_entries + cashier_entries
     
-    # Get fuel quantity from Credit Sale Items (single source of truth)
-    fuel_data = frappe.db.sql("""
-        SELECT COALESCE(SUM(quantity_liters), 0) as total_fuel_liters
-        FROM `tabCredit Sale Item` csi
-        INNER JOIN `tabCredit Sale` cs ON csi.parent = cs.name
-        WHERE cs.posting_date = %(date)s AND cs.docstatus = 1
+    # Get fuel liters from nozzle readings (both shift doctypes)
+    shift_fuel_liters = frappe.db.sql("""
+        SELECT COALESCE(SUM(nr.actual_sale_qty), 0) as liters
+        FROM `tabShift Nozzle Reading` nr
+        INNER JOIN `tabShift Sale Entry` sse ON nr.parent = sse.name
+        WHERE sse.posting_date = %(date)s
+        AND sse.docstatus = 1
+    """, {"date": date}, as_dict=1)
+
+    cashier_fuel_liters = frappe.db.sql("""
+        SELECT COALESCE(SUM(nrd.actual_sale_qty), 0) as liters
+        FROM `tabNozzle Reading Detail` nrd
+        INNER JOIN `tabCashier Wise Shift Sale Entry` cwsse ON nrd.parent = cwsse.name
+        WHERE cwsse.posting_date = %(date)s
+        AND cwsse.docstatus = 1
+    """, {"date": date}, as_dict=1)
+
+    fuel_liters = (shift_fuel_liters[0].liters if shift_fuel_liters else 0) + (cashier_fuel_liters[0].liters if cashier_fuel_liters else 0)
+
+    # Payments received on this date
+    payments_data = frappe.db.sql("""
+        SELECT COALESCE(SUM(paid_amount), 0) as payments_received
+        FROM `tabCustomer Payment Entry`
+        WHERE posting_date = %(date)s
+        AND docstatus = 1
     """, {"date": date}, as_dict=1)
     
     # Get credit outstanding for this date
@@ -239,7 +264,7 @@ def get_comprehensive_daily_data(date):
         cash_variance += flt(shift.cash_variance)
     
     net_cash = cash_received - expenses
-    fuel_liters = fuel_data[0].total_fuel_liters if fuel_data else 0
+    payments_received = payments_data[0].payments_received if payments_data else 0
     credit_outstanding = credit_data[0].credit_outstanding if credit_data else 0
     tank_variance = tank_data[0].tank_variance if tank_data else 0
     
@@ -253,6 +278,7 @@ def get_comprehensive_daily_data(date):
         "cash_received": cash_received,
         "credit_sales": credit_sales,
         "digital_payment": digital_payment,
+        "payments_received": payments_received,
         "driver_cash": driver_cash,
         "expenses": expenses,
         "cash_variance": cash_variance,

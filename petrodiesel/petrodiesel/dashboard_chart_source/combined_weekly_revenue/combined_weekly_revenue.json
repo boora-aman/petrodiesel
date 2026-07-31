@@ -1,0 +1,8 @@
+{
+ "name": "Combined Weekly Revenue",
+ "source_name": "Combined Weekly Revenue",
+ "timeseries": 1,
+ "module": "Petrodiesel",
+ "doctype": "Dashboard Chart Source",
+ "is_standard": 1
+}

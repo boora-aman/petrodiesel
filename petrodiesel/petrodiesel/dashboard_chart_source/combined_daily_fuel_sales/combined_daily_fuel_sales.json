@@ -1,0 +1,8 @@
+{
+ "name": "Combined Daily Fuel Sales",
+ "source_name": "Combined Daily Fuel Sales",
+ "timeseries": 1,
+ "module": "Petrodiesel",
+ "doctype": "Dashboard Chart Source",
+ "is_standard": 1
+}

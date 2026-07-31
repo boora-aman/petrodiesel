@@ -208,6 +208,10 @@ doc_events = {
 # before_job = ["petrodiesel.utils.before_job"]
 # after_job = ["petrodiesel.utils.after_job"]
 
+# Data sync
+# ------------------
+after_migrate = ["petrodiesel.workspace_sync.sync_workspaces"]
+
 # User Data Protection
 # --------------------
 
@@ -249,7 +253,7 @@ doc_events = {
 # Fixtures
 # ------------------
 fixtures = [
-	{"doctype": "Workspace", "filters": [["module", "=", "Petrodiesel"]]},
 	{"doctype": "Number Card", "filters": [["module", "=", "Petrodiesel"]]},
 	{"doctype": "Dashboard Chart", "filters": [["module", "=", "Petrodiesel"]]},
+	{"doctype": "Dashboard Chart Source", "filters": [["module", "=", "Petrodiesel"]]},
 ]

@@ -51,6 +51,24 @@
   };
 
   const runOnce = () => {
+    // Redirect old workspace routes containing '&' (%26) to clean slugs
+    try {
+      const route = window.location.pathname || "";
+      if (route.startsWith("/app/")) {
+        const slug = route.slice("/app/".length);
+        const redirects = {
+          "petrosoft---hr-%26-advances": "petrosoft---hr-advances",
+          "petrosoft---tank-%26-stock": "petrosoft---tank-stock",
+          "petrosoft---sales-%26-payments": "petrosoft---sales-payments",
+        };
+        if (redirects[slug] && frappe?.set_route) {
+          frappe.set_route(redirects[slug]);
+          return;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
     renderUserMenu();
     removeSupportLinks();
   };
