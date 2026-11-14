@@ -1,38 +1,50 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "allow_rename": 0,
  "autoname": "naming_series:",
- "creation": "2025-11-22 03:52:12.225235",
+ "creation": "2026-11-14 12:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "station",
   "posting_date",
   "posting_time",
-  "column_break_1",
-  "shift",
+  "cb1",
+  "reading_type",
   "recorded_by",
-  "section_break_details",
-  "tank_dip_details",
-  "section_break_summary",
-  "total_stock_as_per_dip",
-  "total_stock_as_per_system",
-  "column_break_summary",
-  "variance",
-  "variance_percentage",
-  "reason_for_variance",
-  "section_break_remarks",
+  "get_tanks",
+  "sb_rows",
+  "readings",
+  "sb_tot",
+  "total_dip_stock",
+  "cb2",
+  "total_book_stock",
+  "cb3",
+  "total_variance",
   "remarks",
   "amended_from"
  ],
  "fields": [
   {
-   "default": "DIP-.YYYY.-.MM.-.####",
+   "default": "DIP-.YYYY.-.#####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 0,
    "label": "Series",
-   "options": "DIP-.YYYY.-.MM.-.####",
+   "no_copy": 1,
+   "options": "DIP-.YYYY.-.#####",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "station",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fuel Station",
+   "options": "Fuel Station",
    "reqd": 1
   },
   {
@@ -40,91 +52,87 @@
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Posting Date",
+   "in_standard_filter": 1,
+   "label": "Date",
    "reqd": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
-   "label": "Posting Time",
+   "label": "Time",
    "reqd": 1
   },
   {
-   "fieldname": "column_break_1",
+   "fieldname": "cb1",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "shift",
-   "fieldtype": "Link",
-   "label": "Shift",
-   "options": "Shift Master"
+   "default": "Morning (Opening)",
+   "fieldname": "reading_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Reading Type",
+   "options": "Morning (Opening)\nNight (Closing)\nShift Change\nBefore Decantation\nAfter Decantation\nSurprise Check"
   },
   {
    "fieldname": "recorded_by",
    "fieldtype": "Link",
    "label": "Recorded By",
-   "options": "Employee",
-   "reqd": 1
+   "options": "Employee"
   },
   {
-   "fieldname": "section_break_details",
+   "fieldname": "get_tanks",
+   "fieldtype": "Button",
+   "label": "Get Active Tanks"
+  },
+  {
+   "fieldname": "sb_rows",
    "fieldtype": "Section Break",
-   "label": "Tank Dip Details"
+   "label": ""
   },
   {
-   "fieldname": "tank_dip_details",
+   "fieldname": "readings",
    "fieldtype": "Table",
-   "label": "Tank Dip Details",
+   "label": "Dip Readings",
    "options": "Tank Dip Detail",
    "reqd": 1
   },
   {
-   "fieldname": "section_break_summary",
+   "fieldname": "sb_tot",
    "fieldtype": "Section Break",
-   "label": "Stock Variance Summary"
+   "label": ""
   },
   {
-   "fieldname": "total_stock_as_per_dip",
+   "fieldname": "total_dip_stock",
    "fieldtype": "Float",
-   "label": "Total Stock as per Dip (L)",
+   "label": "Total Dip Stock (L)",
    "precision": "2",
    "read_only": 1
   },
   {
-   "fieldname": "total_stock_as_per_system",
-   "fieldtype": "Float",
-   "label": "Total Stock as per System (L)",
-   "precision": "2",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_summary",
+   "fieldname": "cb2",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "variance",
+   "fieldname": "total_book_stock",
    "fieldtype": "Float",
-   "label": "Variance (L)",
+   "label": "Total Book Stock (L)",
    "precision": "2",
    "read_only": 1
   },
   {
-   "fieldname": "variance_percentage",
-   "fieldtype": "Percent",
-   "label": "Variance %",
+   "fieldname": "cb3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_variance",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Variance (L)",
    "precision": "2",
    "read_only": 1
-  },
-  {
-   "fieldname": "reason_for_variance",
-   "fieldtype": "Select",
-   "label": "Reason for Variance",
-   "options": "\nTemperature\nEvaporation\nLeakage\nTheft\nMeasurement Error"
-  },
-  {
-   "fieldname": "section_break_remarks",
-   "fieldtype": "Section Break",
-   "label": "Remarks"
   },
   {
    "fieldname": "remarks",
@@ -137,25 +145,19 @@
    "label": "Amended From",
    "no_copy": 1,
    "options": "Tank Dip Reading",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Tank Dip Reading",
-   "read_only": 1
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-22 04:40:09.675492",
+ "modified": "2026-11-14 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Tank Dip Reading",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -183,6 +185,21 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Pump Owner",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "Pump Manager",
    "share": 1,
    "submit": 1,
@@ -196,15 +213,29 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Stock Manager",
+   "role": "Pump Stock Keeper",
    "share": 1,
-   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Cashier",
+   "share": 1,
    "write": 1
   }
  ],
+ "quick_entry": 0,
  "row_format": "Dynamic",
- "sort_field": "modified",
+ "show_title_field_in_link": 0,
+ "sort_field": "posting_date",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "reading_type",
  "track_changes": 1
 }

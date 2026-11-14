@@ -1,0 +1,231 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:station_name",
+ "creation": "2026-11-14 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "station_name",
+  "company",
+  "omc",
+  "ro_code",
+  "cb1",
+  "dealer_name",
+  "gstin",
+  "phone",
+  "is_active",
+  "address",
+  "sb_acc",
+  "cost_center",
+  "walk_in_customer",
+  "lube_warehouse",
+  "cb_acc",
+  "cash_account",
+  "cash_short_excess_account",
+  "employee_advance_account",
+  "sb_lic",
+  "licences"
+ ],
+ "fields": [
+  {
+   "fieldname": "station_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Station Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "omc",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Oil Marketing Company",
+   "options": "IOCL\nBPCL\nHPCL\nNayara\nJio-bp\nShell\nMRPL\nOther"
+  },
+  {
+   "fieldname": "ro_code",
+   "fieldtype": "Data",
+   "label": "RO / Dealer Code"
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dealer_name",
+   "fieldtype": "Data",
+   "label": "Dealer Name"
+  },
+  {
+   "fieldname": "gstin",
+   "fieldtype": "Data",
+   "label": "GSTIN"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Data",
+   "label": "Phone",
+   "options": "Phone"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Active"
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Small Text",
+   "label": "Address"
+  },
+  {
+   "fieldname": "sb_acc",
+   "fieldtype": "Section Break",
+   "label": "Accounting Defaults"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "description": "Retail cash/UPI/card sales are invoiced to this customer and settled in the shift journal.",
+   "fieldname": "walk_in_customer",
+   "fieldtype": "Link",
+   "label": "Walk-in (Retail) Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lube_warehouse",
+   "fieldtype": "Link",
+   "label": "Lubricant / Shop Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "cb_acc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cash_account",
+   "fieldtype": "Link",
+   "label": "Cash Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "cash_short_excess_account",
+   "fieldtype": "Link",
+   "label": "Cash Short / Excess Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_advance_account",
+   "fieldtype": "Link",
+   "label": "Employee Advance Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "sb_lic",
+   "fieldtype": "Section Break",
+   "label": "Licences & Statutory Approvals"
+  },
+  {
+   "fieldname": "licences",
+   "fieldtype": "Table",
+   "label": "Licences",
+   "options": "Station Licence"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Fuel Station",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Owner",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Cashier",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Stock Keeper",
+   "share": 1,
+   "write": 0
+  }
+ ],
+ "quick_entry": 0,
+ "row_format": "Dynamic",
+ "search_fields": "company,omc,ro_code",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,301 +1,181 @@
-# Copyright (c) 2025, Aman Boora and contributors
+# Copyright (c) 2026, Aman Boora and contributors
 # For license information, please see license.txt
+"""Tanker Receipt: decantation of a tank lorry into underground tanks.
+
+Follows the OMC Marketing Discipline Guidelines: seal check, density check
+against the challan (±3 kg/m³ at 15°C), dips before and after decantation.
+On submit a Purchase Invoice (update_stock) books the invoiced quantity into
+the tank warehouse, and a Stock Entry books any transit short/excess.
+"""
+
+from __future__ import annotations
 
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import flt
+
+from petrodiesel.petrodiesel.utils import dip_to_volume, get_settings
 
 
 class TankerReceipt(Document):
-    def validate(self):
-        """Validate and calculate totals"""
-        self.validate_required_fields()
-        self.validate_dip_readings()
-        self.calculate_items()
-        self.calculate_totals()
-        self.check_variance_threshold()
-    
-    def validate_required_fields(self):
-        """Validate all required fields"""
-        if not self.supplier:
-            frappe.throw(_("Supplier is mandatory"), title=_("Missing Supplier"))
-        if not self.posting_date:
-            frappe.throw(_("Posting Date is mandatory"), title=_("Missing Date"))
-        if not self.items:
-            frappe.throw(_("Please add at least one item to the receipt"), title=_("No Items"))
-    
-    def validate_dip_readings(self):
-        """Validate dip readings are logical"""
-        for row in self.items:
-            if row.dip_after_unloading and row.dip_before_unloading:
-                if flt(row.dip_after_unloading) <= flt(row.dip_before_unloading):
-                    frappe.throw(_(f"Row {row.idx}: Dip after unloading ({row.dip_after_unloading} KL) must be greater than "
-                                  f"dip before unloading ({row.dip_before_unloading} KL)"), 
-                                title=_("Invalid Dip Reading"))
-    
-    def check_variance_threshold(self):
-        """Check if variance exceeds acceptable threshold"""
-        for row in self.items:
-            if row.shortage_excess:
-                variance_liters = abs(flt(row.shortage_excess) * 1000)
-                if variance_liters > 50:  # More than 50 liters
-                    msg = _(f"Row {row.idx} ({row.fuel_item}): Variance of {variance_liters:.2f} liters detected.\n"
-                           f"Invoiced: {row.invoiced_quantity * 1000:.2f}L, Received: {row.calculated_received_qty * 1000:.2f}L")
-                    frappe.msgprint(msg, alert=True, indicator='orange', title=_("High Variance"))
-    
-    def calculate_items(self):
-        """Calculate received qty and shortage/excess for each item"""
-        for row in self.items:
-            # Calculate received quantity from dip readings (in KL)
-            if row.dip_after_unloading and row.dip_before_unloading:
-                row.calculated_received_qty = flt(row.dip_after_unloading) - flt(row.dip_before_unloading)
-            
-            # Calculate shortage or excess (KL)
-            if row.invoiced_quantity and row.calculated_received_qty:
-                row.shortage_excess = flt(row.calculated_received_qty) - flt(row.invoiced_quantity)
-            
-            # Calculate amount (based on invoiced quantity)
-            if row.invoiced_quantity and row.rate_per_liter:
-                # Convert KL to Liters for rate calculation (rate is per liter)
-                qty_in_liters = flt(row.invoiced_quantity) * 1000
-                row.amount = qty_in_liters * flt(row.rate_per_liter)
-    
-    def calculate_totals(self):
-        """Calculate total quantities and amounts"""
-        total_invoiced = 0
-        total_received = 0
-        total_amount = 0
-        
-        for row in self.items:
-            total_invoiced += flt(row.invoiced_quantity)
-            total_received += flt(row.calculated_received_qty)
-            total_amount += flt(row.amount)
-        
-        self.total_invoiced_qty = total_invoiced
-        self.total_received_qty = total_received
-        self.total_amount = total_amount
-        self.grand_total = total_amount + flt(self.freight_charges)
-    
-    def on_submit(self):
-        """Create Purchase Invoice, Stock Entry, and Update Tank Levels"""
-        self.update_tank_stock_levels()
-        self.create_purchase_invoice()
-        self.create_stock_entry()
-        
-        msg = _(f"✓ Tanker Receipt {self.name} processed successfully\n\n"
-               f"Supplier: {self.supplier}\n"
-               f"Total Invoiced: {self.total_invoiced_qty * 1000:.2f} Liters\n"
-               f"Total Received: {self.total_received_qty * 1000:.2f} Liters\n"
-               f"Amount: ₹{self.grand_total:,.2f}\n\n"
-               f"Tank stock levels have been updated.")
-        frappe.msgprint(msg, alert=True, indicator='green', title=_("Receipt Processed"))
-    
-    def on_cancel(self):
-        """Cancel linked documents and reverse tank updates"""
-        self.cancel_stock_entry()
-        self.cancel_purchase_invoice()
-        self.reverse_tank_stock_levels()
-    
-    def update_tank_stock_levels(self):
-        """Increase tank stock levels after fuel receipt"""
-        for row in self.items:
-            if row.tank and row.calculated_received_qty:
-                tank_doc = frappe.get_doc("Fuel Tank Master", row.tank)
-                
-                # Store dip reading before receipt for variance checking
-                dip_before_kl = flt(row.dip_before_unloading)
-                
-                # Add received quantity (in KL) to current stock
-                current_stock_kl = flt(tank_doc.current_stock_level or 0)
-                new_stock_kl = current_stock_kl + flt(row.calculated_received_qty)
-                
-                tank_doc.current_stock_level = new_stock_kl
-                tank_doc.last_updated_on = self.posting_date
-                tank_doc.last_receipt_date = self.posting_date
-                
-                # Store receipt reference for dip reading sync
-                tank_doc.last_receipt_ref = self.name
-                tank_doc.last_receipt_dip_before = dip_before_kl
-                tank_doc.last_receipt_dip_after = flt(row.dip_after_unloading)
-                
-                tank_doc.flags.ignore_permissions = True
-                tank_doc.save()
-                
-                # Check variance with system stock
-                variance_kl = flt(row.calculated_received_qty) - flt(row.invoiced_quantity)
-                if abs(variance_kl) > 0.05:  # More than 50 liters variance
-                    frappe.msgprint(
-                        _(f"Tank {row.tank}: Variance of {variance_kl * 1000:.2f} liters detected. "
-                          f"Invoiced: {row.invoiced_quantity * 1000:.2f}L, Received: {row.calculated_received_qty * 1000:.2f}L"),
-                        alert=True,
-                        indicator='orange'
-                    )
-        
-        frappe.msgprint(_("Tank stock levels updated"), alert=True)
-    
-    def reverse_tank_stock_levels(self):
-        """Decrease tank stock levels on cancel"""
-        for row in self.items:
-            if row.tank and row.calculated_received_qty:
-                tank_doc = frappe.get_doc("Fuel Tank Master", row.tank)
-                
-                current_stock_kl = flt(tank_doc.current_stock_level or 0)
-                new_stock_kl = current_stock_kl - flt(row.calculated_received_qty)
-                
-                tank_doc.current_stock_level = new_stock_kl
-                tank_doc.flags.ignore_permissions = True
-                tank_doc.save()
-    
-    def create_purchase_invoice(self):
-        """Create Purchase Invoice for tanker receipt"""
-        if self.purchase_invoice:
-            frappe.msgprint(_("Purchase Invoice {0} already exists").format(self.purchase_invoice))
-            return
-        
-        # Create Purchase Invoice
-        pi = frappe.get_doc({
-            "doctype": "Purchase Invoice",
-            "supplier": self.supplier,
-            "posting_date": self.posting_date,
-            "posting_time": self.posting_time,
-            "bill_no": self.supplier_invoice_no,
-            "bill_date": self.supplier_invoice_date,
-            "items": []
-        })
-        
-        # Add items (use INVOICED quantity for billing)
-        for row in self.items:
-            qty_in_liters = flt(row.invoiced_quantity) * 1000
-            
-            pi.append("items", {
-                "item_code": row.fuel_item,
-                "qty": qty_in_liters,
-                "uom": row.uom or "Litre",
-                "rate": row.rate_per_liter,
-                "warehouse": row.warehouse
-            })
-        
-        # Add freight as expense
-        if self.freight_charges:
-            pi.append("taxes", {
-                "charge_type": "Actual",
-                "account_head": frappe.db.get_value("Company", pi.company, "default_expense_account") or "Freight and Forwarding Charges - Company",
-                "description": "Freight Charges",
-                "tax_amount": self.freight_charges
-            })
-        
-        try:
-            pi.flags.ignore_permissions = True
-            pi.insert()
-            pi.submit()
-            
-            self.db_set("purchase_invoice", pi.name)
-            frappe.msgprint(_("Purchase Invoice {0} created").format(pi.name))
-        except Exception as e:
-            frappe.log_error(f"Failed to create Purchase Invoice: {str(e)}")
-            frappe.throw(_("Failed to create Purchase Invoice. Check error log."))
-    
-    def create_stock_entry(self):
-        """Create Stock Entry for fuel receipt"""
-        if self.stock_entry:
-            frappe.msgprint(_("Stock Entry {0} already exists").format(self.stock_entry))
-            return
-        
-        # Create Stock Entry - Material Receipt
-        se = frappe.get_doc({
-            "doctype": "Stock Entry",
-            "stock_entry_type": "Material Receipt",
-            "posting_date": self.posting_date,
-            "posting_time": self.posting_time,
-            "items": []
-        })
-        
-        # Add items (use RECEIVED quantity for stock)
-        for row in self.items:
-            qty_in_liters = flt(row.calculated_received_qty) * 1000
-            
-            se.append("items", {
-                "item_code": row.fuel_item,
-                "t_warehouse": row.warehouse,
-                "qty": qty_in_liters,
-                "uom": row.uom or "Litre",
-                "basic_rate": row.rate_per_liter,
-                "cost_center": frappe.db.get_value("Company", se.company, "cost_center")
-            })
-        
-        try:
-            se.flags.ignore_permissions = True
-            se.insert()
-            se.submit()
-            
-            self.db_set("stock_entry", se.name)
-            frappe.msgprint(_("Stock Entry {0} created").format(se.name))
-        except Exception as e:
-            frappe.log_error(f"Failed to create Stock Entry: {str(e)}")
-            frappe.throw(_("Failed to create Stock Entry. Check error log."))
-    
-    def cancel_stock_entry(self):
-        """Cancel Stock Entry"""
-        if self.stock_entry:
-            try:
-                se = frappe.get_doc("Stock Entry", self.stock_entry)
-                if se.docstatus == 1:
-                    se.flags.ignore_permissions = True
-                    se.cancel()
-                    frappe.msgprint(_("Stock Entry {0} cancelled").format(self.stock_entry))
-            except Exception as e:
-                frappe.log_error(f"Failed to cancel Stock Entry: {str(e)}")
-    
-    def cancel_purchase_invoice(self):
-        """Cancel Purchase Invoice"""
-        if self.purchase_invoice:
-            try:
-                pi = frappe.get_doc("Purchase Invoice", self.purchase_invoice)
-                if pi.docstatus == 1:
-                    pi.flags.ignore_permissions = True
-                    pi.cancel()
-                    frappe.msgprint(_("Purchase Invoice {0} cancelled").format(self.purchase_invoice))
-            except Exception as e:
-                frappe.log_error(f"Failed to cancel Purchase Invoice: {str(e)}")
+	ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry",
+		"Purchase Invoice", "Stock Entry", "Repost Item Valuation", "Serial and Batch Bundle")
 
+	def validate(self):
+		station = frappe.get_cached_doc("Fuel Station", self.station)
+		self.company = station.company
+		tolerance = flt(get_settings().density_tolerance) or 3.0
+		density_fail = []
+		for row in self.items:
+			tank = frappe.get_cached_doc("Fuel Tank Master", row.tank)
+			if tank.station != self.station:
+				frappe.throw(_("Row {0}: tank {1} is not at station {2}.").format(row.idx, row.tank, self.station))
+			row.fuel_item = tank.fuel_item
+			row.amount = flt(flt(row.invoice_qty) * flt(row.rate), 2)
 
-# Whitelisted Methods
+			if flt(row.challan_density) and flt(row.density_at_15):
+				row.density_variance = flt(flt(row.density_at_15) - flt(row.challan_density), 1)
+				row.density_ok = 1 if abs(row.density_variance) <= tolerance else 0
+				if not row.density_ok:
+					density_fail.append(row)
+			else:
+				row.density_variance = 0
+				row.density_ok = 0
 
-@frappe.whitelist()
-def get_tank_dip_reading(tank):
-    """Get current dip reading from tank"""
-    if not tank:
-        return 0
-    
-    # Get tank current stock level (in KL)
-    tank_doc = frappe.get_doc("Fuel Tank Master", tank)
-    return flt(tank_doc.current_stock_level or 0)
+			if flt(row.dip_before_mm) or flt(row.dip_after_mm):
+				row.stock_before = dip_to_volume(row.tank, row.dip_before_mm)
+				row.stock_after = dip_to_volume(row.tank, row.dip_after_mm)
+				row.received_qty = flt(row.stock_after - row.stock_before + flt(row.sales_during_decantation), 2)
+			elif not flt(row.received_qty):
+				row.received_qty = flt(row.invoice_qty)
+			row.shortage_qty = flt(flt(row.invoice_qty) - flt(row.received_qty), 2)
 
+			capacity = flt(tank.capacity_liters) * (flt(tank.safe_fill_percent) or 100) / 100
+			if row.stock_after and capacity and row.stock_after > capacity + 1:
+				frappe.msgprint(_("Row {0}: tank {1} filled above safe-fill level ({2} L).").format(
+					row.idx, row.tank, flt(capacity, 0)), indicator="orange", alert=True)
 
-@frappe.whitelist()
-def get_fuel_rate(fuel_item, posting_date=None):
-    """Get fuel purchase rate"""
-    if not fuel_item:
-        return 0
-    
-    if not posting_date:
-        posting_date = frappe.utils.today()
-    
-    # Get from Fuel Price Update
-    price_update = frappe.get_all('Fuel Price Update',
-        filters={'docstatus': 1, 'effective_date': ['<=', posting_date]},
-        order_by='effective_date desc',
-        limit=1
-    )
-    
-    if price_update:
-        price = frappe.db.get_value('Fuel Price Update Item',
-            filters={'parent': price_update[0].name, 'fuel_item': fuel_item},
-            fieldname='new_price'
-        )
-        if price:
-            return price
-    
-    # Fallback to Item standard rate
-    return frappe.db.get_value('Item', fuel_item, 'standard_rate') or 0
+		if density_fail and not self.override_density_check:
+			frappe.throw(
+				_("Density variance beyond ±{0} kg/m³ for: {1}. Do not decant. "
+				"Raise a complaint with the OMC, or tick 'Accept Despite Density Variance' with remarks.").format(
+					tolerance, ", ".join(f"{r.tank} ({r.density_variance:+})" for r in density_fail)),
+				title=_("Density Check Failed"))
+		if self.override_density_check and density_fail and not self.remarks:
+			frappe.throw(_("Enter remarks explaining why the density variance was accepted."))
+		if not self.seals_intact and not self.remarks:
+			frappe.throw(_("Seals were not intact. Record the details in remarks."))
+
+		self.total_invoice_qty = flt(sum(flt(r.invoice_qty) for r in self.items), 2)
+		self.total_received_qty = flt(sum(flt(r.received_qty) for r in self.items), 2)
+		self.total_shortage_qty = flt(sum(flt(r.shortage_qty) for r in self.items), 2)
+		self.total_amount = flt(sum(flt(r.amount) for r in self.items), 2)
+
+	def before_submit(self):
+		if self.override_density_check and not frappe.db.get_value(
+			"Has Role", {"parent": frappe.session.user, "role": ["in", ["Pump Owner", "Pump Manager", "System Manager"]]}
+		):
+			frappe.throw(_("Only a Pump Manager or Owner can accept a density variance."))
+
+	def on_submit(self):
+		self.make_purchase_invoice()
+		self.make_transit_adjustment()
+		for row in self.items:
+			if flt(row.dip_after_mm):
+				frappe.db.set_value("Fuel Tank Master", row.tank, {
+					"last_dip_mm": row.dip_after_mm,
+					"last_dip_stock": row.stock_after,
+					"last_dip_on": f"{self.posting_date} {self.posting_time}",
+				})
+
+	def on_cancel(self):
+		docs = [("Stock Entry", n) for n in frappe.get_all(
+			"Stock Entry", {"tanker_receipt": self.name, "docstatus": 1}, pluck="name")]
+		docs.append(("Purchase Invoice", self.purchase_invoice))
+		for doctype, name in docs:
+			if name and frappe.db.get_value(doctype, name, "docstatus") == 1:
+				doc = frappe.get_doc(doctype, name)
+				doc.flags.ignore_permissions = True
+				doc.flags.ignore_links = True
+				doc.cancel()
+
+	def make_purchase_invoice(self):
+		cost_center = frappe.get_cached_value("Fuel Station", self.station, "cost_center")
+		pi = frappe.new_doc("Purchase Invoice")
+		pi.update({
+			"company": self.company,
+			"supplier": self.supplier,
+			"posting_date": self.posting_date,
+			"set_posting_time": 1,
+			"posting_time": self.posting_time,
+			"bill_no": self.supplier_invoice_no,
+			"bill_date": self.supplier_invoice_date or self.posting_date,
+			"due_date": self.posting_date,
+			"update_stock": 1,
+			"disable_rounded_total": 1,
+			"cost_center": cost_center,
+			"tanker_receipt": self.name,
+			"remarks": _("Tanker {0} decanted via {1}").format(self.truck_no, self.name),
+		})
+		for row in self.items:
+			pi.append("items", {
+				"item_code": row.fuel_item,
+				"qty": row.invoice_qty,
+				"rate": row.rate,
+				"price_list_rate": row.rate,
+				"warehouse": frappe.get_cached_value("Fuel Tank Master", row.tank, "warehouse"),
+				"cost_center": cost_center,
+			})
+		pi.set_missing_values()
+		for row, src in zip(pi.items, self.items):
+			row.rate = src.rate
+		pi.calculate_taxes_and_totals()
+		pi.flags.ignore_permissions = True
+		pi.insert()
+		pi.submit()
+		self.db_set("purchase_invoice", pi.name)
+
+	def make_transit_adjustment(self):
+		rows = [r for r in self.items if abs(flt(r.shortage_qty)) >= 0.01]
+		if not rows:
+			return
+		shortages = [r for r in rows if r.shortage_qty > 0]
+		excesses = [r for r in rows if r.shortage_qty < 0]
+		account = frappe.get_cached_value("Company", self.company, "stock_adjustment_account")
+		cost_center = frappe.get_cached_value("Fuel Station", self.station, "cost_center")
+		names = []
+		for purpose, group in (("Material Issue", shortages), ("Material Receipt", excesses)):
+			if not group:
+				continue
+			se = frappe.new_doc("Stock Entry")
+			se.update({
+				"stock_entry_type": purpose,
+				"purpose": purpose,
+				"company": self.company,
+				"posting_date": self.posting_date,
+				"set_posting_time": 1,
+				"posting_time": self.posting_time,
+				"tanker_receipt": self.name,
+				"remarks": _("Decantation {0} for tanker {1} ({2})").format(
+					_("shortage") if purpose == "Material Issue" else _("excess"), self.truck_no, self.name),
+			})
+			for r in group:
+				wh = frappe.get_cached_value("Fuel Tank Master", r.tank, "warehouse")
+				se.append("items", {
+					"item_code": r.fuel_item,
+					"qty": abs(r.shortage_qty),
+					"s_warehouse": wh if purpose == "Material Issue" else None,
+					"t_warehouse": wh if purpose == "Material Receipt" else None,
+					"basic_rate": r.rate,
+					"expense_account": account,
+					"cost_center": cost_center,
+				})
+			se.flags.ignore_permissions = True
+			se.insert()
+			se.submit()
+			names.append(se.name)
+		# the link field holds one entry; a receipt with both short and excess rows keeps the first
+		self.db_set("adjustment_entry", names[0])
+		if len(names) > 1:
+			self.add_comment("Info", _("Transit adjustment entries: {0}").format(", ".join(names)))

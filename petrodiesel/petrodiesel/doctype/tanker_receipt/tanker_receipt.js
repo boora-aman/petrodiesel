@@ -1,176 +1,87 @@
-// Copyright (c) 2025, Aman Boora and contributors
+// Copyright (c) 2026, Aman Boora and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Tanker Receipt', {
-    refresh: function(frm) {
-        update_indicators(frm);
-        
-        // Add custom buttons after submit
-        if (frm.doc.docstatus === 1) {
-            if (frm.doc.purchase_invoice) {
-                frm.add_custom_button(__('View Purchase Invoice'), function() {
-                    frappe.set_route('Form', 'Purchase Invoice', frm.doc.purchase_invoice);
-                }, __('View'));
-            }
-            
-            if (frm.doc.stock_entry) {
-                frm.add_custom_button(__('View Stock Entry'), function() {
-                    frappe.set_route('Form', 'Stock Entry', frm.doc.stock_entry);
-                }, __('View'));
-            }
-        }
-    },
-    
-    freight_charges: function(frm) {
-        calculate_grand_total(frm);
-    }
+frappe.ui.form.on("Tanker Receipt", {
+	setup(frm) {
+		frm.set_query("tank", "items", () => ({ filters: { station: frm.doc.station, status: "Active" } }));
+	},
+	async onload(frm) {
+		if (frm.is_new() && !frm.doc.station) {
+			const station = await frappe.db.get_single_value("Petrodiesel Settings", "default_station");
+			if (station) frm.set_value("station", station);
+		}
+	},
+	refresh(frm) {
+		if (frm.doc.docstatus === 1) {
+			if (frm.doc.purchase_invoice) {
+				frm.add_custom_button(__("Purchase Invoice"), () =>
+					frappe.set_route("Form", "Purchase Invoice", frm.doc.purchase_invoice), __("View"));
+			}
+			frm.add_custom_button(__("Stock Entries"), () =>
+				frappe.set_route("List", "Stock Entry", { tanker_receipt: frm.doc.name }), __("View"));
+		}
+		const short = flt(frm.doc.total_shortage_qty);
+		if (frm.doc.items && frm.doc.items.length) {
+			frm.dashboard.clear_headline();
+			frm.dashboard.set_headline(
+				`${__("Invoiced")}: <b>${format_number(frm.doc.total_invoice_qty || 0, null, 2)} L</b> &nbsp;
+				 ${__("Received")}: <b>${format_number(frm.doc.total_received_qty || 0, null, 2)} L</b> &nbsp;
+				 <span class="indicator ${short > 0 ? "red" : "green"}">${short > 0 ? __("Short") : __("Excess")}
+				 ${format_number(Math.abs(short), null, 2)} L</span>`
+			);
+		}
+	},
 });
 
-
-// TANKER RECEIPT ITEM
-frappe.ui.form.on('Tanker Receipt Item', {
-    tank: function(frm, cdt, cdn) {
-        let row = locals[cdt][cdn];
-        if (row.tank) {
-            // Auto-fetch current dip reading (before unloading)
-            frappe.call({
-                method: 'petrodiesel.petrodiesel.doctype.tanker_receipt.tanker_receipt.get_tank_dip_reading',
-                args: { tank: row.tank },
-                callback: function(r) {
-                    if (r.message) {
-                        frappe.model.set_value(cdt, cdn, 'dip_before_unloading', r.message);
-                        frappe.msgprint(__('Current tank dip: {0} KL', [r.message]));
-                    }
-                }
-            });
-        }
-    },
-    
-    fuel_item: function(frm, cdt, cdn) {
-        let row = locals[cdt][cdn];
-        if (row.fuel_item) {
-            // Auto-fetch fuel rate
-            frappe.call({
-                method: 'petrodiesel.petrodiesel.doctype.tanker_receipt.tanker_receipt.get_fuel_rate',
-                args: { 
-                    fuel_item: row.fuel_item,
-                    posting_date: frm.doc.posting_date
-                },
-                callback: function(r) {
-                    if (r.message) {
-                        frappe.model.set_value(cdt, cdn, 'rate_per_liter', r.message);
-                    }
-                }
-            });
-        }
-    },
-    
-    dip_before_unloading: function(frm, cdt, cdn) { calculate_item_row(frm, cdt, cdn); },
-    dip_after_unloading: function(frm, cdt, cdn) { calculate_item_row(frm, cdt, cdn); },
-    invoiced_quantity: function(frm, cdt, cdn) { calculate_item_row(frm, cdt, cdn); },
-    rate_per_liter: function(frm, cdt, cdn) { calculate_item_row(frm, cdt, cdn); },
-    
-    items_remove: function(frm) { calculate_all_totals(frm); }
+frappe.ui.form.on("Tanker Receipt Item", {
+	async tank(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		if (!row.tank) return;
+		const t = await frappe.db.get_value("Fuel Tank Master", row.tank, "fuel_item");
+		const item = t.message.fuel_item;
+		if (row.fuel_item !== item) await frappe.model.set_value(cdt, cdn, "fuel_item", item);
+		const r = await frappe.db.get_value("Item", item, "last_purchase_rate");
+		if (!row.rate && r.message.last_purchase_rate) {
+			frappe.model.set_value(cdt, cdn, "rate", r.message.last_purchase_rate);
+		}
+	},
+	invoice_qty: (frm, cdt, cdn) => petro_tr.calc(frm, cdt, cdn),
+	rate: (frm, cdt, cdn) => petro_tr.calc(frm, cdt, cdn),
+	dip_before_mm: (frm, cdt, cdn) => petro_tr.calc(frm, cdt, cdn),
+	dip_after_mm: (frm, cdt, cdn) => petro_tr.calc(frm, cdt, cdn),
+	sales_during_decantation: (frm, cdt, cdn) => petro_tr.calc(frm, cdt, cdn),
+	challan_density: (frm, cdt, cdn) => petro_tr.calc(frm, cdt, cdn),
+	density_at_15: (frm, cdt, cdn) => petro_tr.calc(frm, cdt, cdn),
 });
 
-
-// ========== CALCULATION FUNCTIONS ==========
-
-function calculate_item_row(frm, cdt, cdn) {
-    let row = locals[cdt][cdn];
-    
-    // Calculate received quantity (KL)
-    if (row.dip_after_unloading && row.dip_before_unloading) {
-        row.calculated_received_qty = row.dip_after_unloading - row.dip_before_unloading;
-    } else {
-        row.calculated_received_qty = 0;
-    }
-    
-    // Calculate shortage/excess (KL)
-    if (row.invoiced_quantity && row.calculated_received_qty) {
-        row.shortage_excess = row.calculated_received_qty - row.invoiced_quantity;
-        
-        // Alert if shortage > 1%
-        let shortage_percent = Math.abs(row.shortage_excess / row.invoiced_quantity) * 100;
-        if (shortage_percent > 1) {
-            let msg = row.shortage_excess > 0 ? 'Excess' : 'Shortage';
-            frappe.msgprint({
-                title: __(msg + ' Detected'),
-                message: __('{0}: {1} KL ({2}%)', [msg, Math.abs(row.shortage_excess).toFixed(3), shortage_percent.toFixed(2)]),
-                indicator: row.shortage_excess > 0 ? 'blue' : 'red'
-            });
-        }
-    }
-    
-    // Calculate amount (KL to Liters × rate)
-    if (row.invoiced_quantity && row.rate_per_liter) {
-        // Convert KL to Liters for rate calculation
-        let qty_in_liters = row.invoiced_quantity * 1000;
-        row.amount = qty_in_liters * row.rate_per_liter;
-    } else {
-        row.amount = 0;
-    }
-    
-    frm.refresh_field('items');
-    calculate_all_totals(frm);
-}
-
-function calculate_all_totals(frm) {
-    let total_invoiced = 0;
-    let total_received = 0;
-    let total_amount = 0;
-    
-    $.each(frm.doc.items || [], function(i, row) {
-        total_invoiced += row.invoiced_quantity || 0;
-        total_received += row.calculated_received_qty || 0;
-        total_amount += row.amount || 0;
-    });
-    
-    frm.set_value('total_invoiced_qty', total_invoiced);
-    frm.set_value('total_received_qty', total_received);
-    frm.set_value('total_amount', total_amount);
-    
-    calculate_grand_total(frm);
-    update_indicators(frm);
-}
-
-function calculate_grand_total(frm) {
-    let grand_total = (frm.doc.total_amount || 0) + (frm.doc.freight_charges || 0);
-    frm.set_value('grand_total', grand_total);
-    
-    update_indicators(frm);
-}
-
-function update_indicators(frm) {
-    frm.page.clear_indicator();
-    
-    // Grand Total
-    if (frm.doc.grand_total) {
-        frm.page.add_indicator(__('Total: ₹{0}', [format_currency(frm.doc.grand_total)]), 'green');
-    }
-    
-    // Received Quantity
-    if (frm.doc.total_received_qty) {
-        frm.page.add_indicator(__('Received: {0} KL', [frm.doc.total_received_qty.toFixed(3)]), 'blue');
-    }
-    
-    // Shortage/Excess
-    if (frm.doc.total_invoiced_qty && frm.doc.total_received_qty) {
-        let variance = frm.doc.total_received_qty - frm.doc.total_invoiced_qty;
-        if (Math.abs(variance) > 0.01) {
-            let color = variance > 0 ? 'orange' : 'red';
-            let label = variance > 0 ? 'Excess' : 'Shortage';
-            frm.page.add_indicator(__('{0}: {1} KL', [label, Math.abs(variance).toFixed(3)]), color);
-        }
-    }
-    
-    // Purchase Invoice status
-    if (frm.doc.docstatus === 1) {
-        if (frm.doc.purchase_invoice) {
-            frm.page.add_indicator(__('PI: {0}', [frm.doc.purchase_invoice]), 'green');
-        }
-        if (frm.doc.stock_entry) {
-            frm.page.add_indicator(__('Stock: {0}', [frm.doc.stock_entry]), 'green');
-        }
-    }
-}
+const petro_tr = {
+	async vol(tank, mm) {
+		if (!tank || !flt(mm)) return 0;
+		const r = await frappe.call("petrodiesel.petrodiesel.utils.get_dip_volume", { tank, dip_mm: mm });
+		return r.message.net;
+	},
+	async calc(frm, cdt, cdn) {
+		const row = locals[cdt][cdn];
+		row.amount = flt(flt(row.invoice_qty) * flt(row.rate), 2);
+		if (flt(row.dip_before_mm) || flt(row.dip_after_mm)) {
+			row.stock_before = await petro_tr.vol(row.tank, row.dip_before_mm);
+			row.stock_after = await petro_tr.vol(row.tank, row.dip_after_mm);
+			row.received_qty = flt(row.stock_after - row.stock_before + flt(row.sales_during_decantation), 2);
+		}
+		row.shortage_qty = flt(flt(row.invoice_qty) - flt(row.received_qty), 2);
+		if (flt(row.challan_density) && flt(row.density_at_15)) {
+			const tol = flt(await frappe.db.get_single_value("Petrodiesel Settings", "density_tolerance")) || 3;
+			row.density_variance = flt(row.density_at_15 - row.challan_density, 1);
+			row.density_ok = Math.abs(row.density_variance) <= tol ? 1 : 0;
+			if (!row.density_ok) {
+				frappe.show_alert({ message: __("Density variance {0} kg/m³ exceeds ±{1}", [row.density_variance, tol]), indicator: "red" });
+			}
+		}
+		const sum = (f) => (frm.doc.items || []).reduce((a, r) => a + flt(r[f]), 0);
+		frm.doc.total_invoice_qty = flt(sum("invoice_qty"), 2);
+		frm.doc.total_received_qty = flt(sum("received_qty"), 2);
+		frm.doc.total_shortage_qty = flt(sum("shortage_qty"), 2);
+		frm.doc.total_amount = flt(sum("amount"), 2);
+		frm.refresh_fields();
+	},
+};

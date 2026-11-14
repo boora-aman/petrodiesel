@@ -1,8 +1,8 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "allow_rename": 0,
  "autoname": "naming_series:",
- "creation": "2025-11-22 04:11:43.594159",
+ "creation": "2026-11-14 12:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -10,26 +10,25 @@
   "naming_series",
   "effective_date",
   "effective_time",
-  "column_break_1",
-  "notification_source",
-  "approved_by",
-  "section_break_prices",
-  "price_updates",
-  "section_break_apply",
+  "cb1",
   "price_list",
-  "column_break_2",
-  "applied_to_price_list",
-  "section_break_remarks",
+  "source",
+  "get_items",
+  "sb_items",
+  "items",
   "remarks",
   "amended_from"
  ],
  "fields": [
   {
-   "default": "FP-UPD-.YYYY.-.MM.-.####",
+   "default": "FPU-.YYYY.-.####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 0,
    "label": "Series",
-   "options": "FP-UPD-.YYYY.-.MM.-.####",
+   "no_copy": 1,
+   "options": "FPU-.YYYY.-.####",
+   "print_hide": 1,
    "reqd": 1
   },
   {
@@ -37,75 +36,55 @@
    "fieldname": "effective_date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Effective Date",
    "reqd": 1
   },
   {
    "default": "06:00:00",
+   "description": "OMC retail prices change daily at 06:00. Shifts spanning 06:00 should record two reading rows per nozzle.",
    "fieldname": "effective_time",
    "fieldtype": "Time",
-   "label": "Effective Time"
+   "label": "Effective From"
   },
   {
-   "fieldname": "column_break_1",
+   "fieldname": "cb1",
    "fieldtype": "Column Break"
   },
   {
-   "default": "Oil Company",
-   "fieldname": "notification_source",
-   "fieldtype": "Select",
-   "label": "Notification Source",
-   "options": "Oil Company\nGovernment\nManual"
-  },
-  {
-   "fieldname": "approved_by",
+   "fieldname": "price_list",
    "fieldtype": "Link",
-   "label": "Approved By",
-   "options": "Employee"
+   "label": "Price List",
+   "options": "Price List",
+   "reqd": 1
   },
   {
-   "fieldname": "section_break_prices",
+   "default": "OMC SMS",
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Price Source",
+   "options": "OMC SMS\nOMC Portal / App\nEmail\nManual"
+  },
+  {
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Fuel Items"
+  },
+  {
+   "fieldname": "sb_items",
    "fieldtype": "Section Break",
-   "label": "Price Update Details"
+   "label": ""
   },
   {
-   "fieldname": "price_updates",
+   "fieldname": "items",
    "fieldtype": "Table",
-   "label": "Price Updates",
+   "label": "Prices",
    "options": "Fuel Price Update Item",
    "reqd": 1
   },
   {
-   "fieldname": "section_break_apply",
-   "fieldtype": "Section Break",
-   "label": "Application Status"
-  },
-  {
-   "default": "Retail Fuel Prices",
-   "fieldname": "price_list",
-   "fieldtype": "Link",
-   "label": "Price List",
-   "options": "Price List"
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "applied_to_price_list",
-   "fieldtype": "Check",
-   "label": "Applied to Price List",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_remarks",
-   "fieldtype": "Section Break",
-   "label": "Remarks"
-  },
-  {
    "fieldname": "remarks",
-   "fieldtype": "Text",
+   "fieldtype": "Small Text",
    "label": "Remarks"
   },
   {
@@ -114,25 +93,19 @@
    "label": "Amended From",
    "no_copy": 1,
    "options": "Fuel Price Update",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Fuel Price Update",
-   "read_only": 1
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-11-22 04:40:11.007052",
+ "modified": "2026-11-14 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Fuel Price Update",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -151,8 +124,25 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Owner",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 0,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -162,10 +152,35 @@
    "share": 1,
    "submit": 1,
    "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Cashier",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Stock Keeper",
+   "share": 1,
+   "write": 0
   }
  ],
+ "quick_entry": 0,
  "row_format": "Dynamic",
- "sort_field": "modified",
+ "sort_field": "effective_date",
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1

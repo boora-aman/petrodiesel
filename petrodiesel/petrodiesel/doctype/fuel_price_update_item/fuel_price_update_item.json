@@ -1,7 +1,7 @@
 {
  "actions": [],
- "allow_rename": 1,
- "creation": "2025-11-22 04:11:43.211459",
+ "allow_rename": 0,
+ "creation": "2026-11-14 12:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -10,7 +10,9 @@
   "old_price",
   "new_price",
   "change_amount",
-  "change_percentage"
+  "change_percent",
+  "item_price",
+  "previous_item_price"
  ],
  "fields": [
   {
@@ -18,7 +20,7 @@
    "fieldname": "fuel_item",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Fuel Item",
+   "label": "Fuel",
    "options": "Item",
    "reqd": 1
   },
@@ -26,8 +28,8 @@
    "columns": 2,
    "fieldname": "old_price",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Old Price",
-   "precision": "2",
    "read_only": 1
   },
   {
@@ -36,31 +38,45 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "New Price",
-   "precision": "2",
    "reqd": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "change_amount",
    "fieldtype": "Currency",
-   "label": "Change (\u20b9)",
-   "precision": "2",
+   "in_list_view": 1,
+   "label": "Change",
    "read_only": 1
   },
   {
-   "columns": 2,
-   "fieldname": "change_percentage",
+   "columns": 1,
+   "fieldname": "change_percent",
    "fieldtype": "Percent",
+   "in_list_view": 1,
    "label": "Change %",
-   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_price",
+   "fieldtype": "Link",
+   "label": "Item Price Created",
+   "no_copy": 1,
+   "options": "Item Price",
+   "read_only": 1
+  },
+  {
+   "fieldname": "previous_item_price",
+   "fieldtype": "Link",
+   "label": "Previous Item Price",
+   "no_copy": 1,
+   "options": "Item Price",
    "read_only": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "istable": 1,
  "links": [],
- "modified": "2025-11-22 04:11:43.211459",
+ "modified": "2026-11-14 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Fuel Price Update Item",

@@ -1,28 +1,38 @@
 {
  "actions": [],
- "allow_rename": 1,
- "creation": "2025-11-22 04:11:14.771287",
+ "allow_rename": 0,
+ "creation": "2026-11-14 12:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "tank",
   "fuel_item",
-  "invoiced_quantity",
-  "dip_before_unloading",
-  "dip_after_unloading",
-  "calculated_received_qty",
-  "shortage_excess",
-  "rate_per_liter",
+  "compartment",
+  "invoice_qty",
+  "rate",
   "amount",
-  "temperature",
-  "density",
-  "uom",
-  "warehouse"
+  "sb_density",
+  "challan_density",
+  "observed_density",
+  "observed_temperature",
+  "cb_d",
+  "density_at_15",
+  "density_variance",
+  "density_ok",
+  "sb_dip",
+  "dip_before_mm",
+  "stock_before",
+  "sales_during_decantation",
+  "cb_dip",
+  "dip_after_mm",
+  "stock_after",
+  "received_qty",
+  "shortage_qty"
  ],
  "fields": [
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "tank",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -31,107 +41,156 @@
    "reqd": 1
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fetch_from": "tank.fuel_item",
    "fieldname": "fuel_item",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Fuel Item",
+   "label": "Fuel",
    "options": "Item",
    "read_only": 1
   },
   {
+   "fieldname": "compartment",
+   "fieldtype": "Data",
+   "label": "TT Compartment"
+  },
+  {
    "columns": 1,
-   "fieldname": "invoiced_quantity",
+   "fieldname": "invoice_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Invoiced Qty (KL)",
+   "label": "Invoice Qty (L)",
    "precision": "2",
    "reqd": 1
   },
   {
    "columns": 1,
-   "fieldname": "dip_before_unloading",
-   "fieldtype": "Float",
-   "label": "Dip Before (mm)",
-   "precision": "2"
-  },
-  {
-   "columns": 1,
-   "fieldname": "dip_after_unloading",
-   "fieldtype": "Float",
-   "label": "Dip After (mm)",
-   "precision": "2"
-  },
-  {
-   "columns": 1,
-   "fieldname": "calculated_received_qty",
-   "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Received Qty (KL)",
-   "precision": "2",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "shortage_excess",
-   "fieldtype": "Float",
-   "label": "Shortage/Excess (L)",
-   "precision": "2",
-   "read_only": 1
-  },
-  {
-   "columns": 1,
-   "fieldname": "rate_per_liter",
+   "fieldname": "rate",
    "fieldtype": "Currency",
-   "label": "Rate/L",
-   "precision": "2",
+   "in_list_view": 1,
+   "label": "Rate / L",
    "reqd": 1
   },
   {
-   "columns": 1,
    "fieldname": "amount",
    "fieldtype": "Currency",
-   "in_list_view": 1,
    "label": "Amount",
-   "precision": "2",
    "read_only": 1
   },
   {
-   "fieldname": "temperature",
+   "fieldname": "sb_density",
+   "fieldtype": "Section Break",
+   "label": "Density Check"
+  },
+  {
+   "fieldname": "challan_density",
    "fieldtype": "Float",
-   "label": "Temperature (\u00b0C)",
+   "label": "Challan Density @15\u00b0C (kg/m\u00b3)",
    "precision": "1"
   },
   {
-   "fieldname": "density",
+   "fieldname": "observed_density",
    "fieldtype": "Float",
-   "label": "Density",
-   "precision": "4"
+   "label": "Observed Density (kg/m\u00b3)",
+   "precision": "1"
+  },
+  {
+   "fieldname": "observed_temperature",
+   "fieldtype": "Float",
+   "label": "Observed Temp (\u00b0C)",
+   "precision": "1"
+  },
+  {
+   "fieldname": "cb_d",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "From ASTM Table 53B conversion chart for the observed density and temperature.",
+   "fieldname": "density_at_15",
+   "fieldtype": "Float",
+   "label": "Density @15\u00b0C (kg/m\u00b3)",
+   "precision": "1"
   },
   {
    "columns": 1,
-   "default": "KL",
-   "fieldname": "uom",
-   "fieldtype": "Link",
+   "fieldname": "density_variance",
+   "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "UOM",
-   "options": "UOM"
+   "label": "Density Variance",
+   "precision": "1",
+   "read_only": 1
   },
   {
-   "fetch_from": "tank.warehouse",
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "label": "Warehouse",
-   "options": "Warehouse",
+   "fieldname": "density_ok",
+   "fieldtype": "Check",
+   "label": "Density Within Limit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_dip",
+   "fieldtype": "Section Break",
+   "label": "Decantation Dips"
+  },
+  {
+   "fieldname": "dip_before_mm",
+   "fieldtype": "Float",
+   "label": "Dip Before (mm)",
+   "precision": "1"
+  },
+  {
+   "fieldname": "stock_before",
+   "fieldtype": "Float",
+   "label": "Stock Before (L)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_during_decantation",
+   "fieldtype": "Float",
+   "label": "Sales During Decantation (L)",
+   "precision": "2"
+  },
+  {
+   "fieldname": "cb_dip",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dip_after_mm",
+   "fieldtype": "Float",
+   "label": "Dip After (mm)",
+   "precision": "1"
+  },
+  {
+   "fieldname": "stock_after",
+   "fieldtype": "Float",
+   "label": "Stock After (L)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "received_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Received Qty (L)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "shortage_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Short (+) / Excess (\u2212) (L)",
+   "precision": "2",
    "read_only": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "istable": 1,
  "links": [],
- "modified": "2025-12-21 12:14:29.719778",
+ "modified": "2026-11-14 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Tanker Receipt Item",

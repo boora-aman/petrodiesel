@@ -1,64 +1,63 @@
 {
  "actions": [],
- "allow_rename": 1,
- "creation": "2025-12-21 02:58:57.166359",
+ "allow_rename": 0,
+ "creation": "2026-11-14 12:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "cashier",
-  "product_type",
   "item_code",
   "item_name",
-  "quantity",
+  "warehouse",
+  "attendant",
+  "qty",
   "rate",
   "amount"
  ],
  "fields": [
   {
    "columns": 2,
-   "fieldname": "cashier",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Cashier",
-   "options": "Employee"
-  },
-  {
-   "columns": 1,
-   "fieldname": "product_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Type",
-   "options": "Lubricant\nAccessory"
-  },
-  {
-   "columns": 2,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Item",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "label": "Item Name",
    "read_only": 1
   },
   {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "attendant",
+   "fieldtype": "Link",
+   "label": "Sold By",
+   "options": "Employee"
+  },
+  {
    "columns": 1,
-   "fieldname": "quantity",
+   "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty",
-   "precision": "2"
+   "reqd": 1
   },
   {
    "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Rate"
+   "label": "Rate",
+   "reqd": 1
   },
   {
    "columns": 2,
@@ -69,11 +68,10 @@
    "read_only": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "istable": 1,
  "links": [],
- "modified": "2025-12-21 02:58:57.166359",
+ "modified": "2026-11-14 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Shift Other Sales",

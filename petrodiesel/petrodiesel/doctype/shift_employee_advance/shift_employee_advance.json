@@ -1,16 +1,15 @@
 {
  "actions": [],
- "allow_rename": 1,
- "creation": "2025-12-01 23:27:37.965705",
+ "allow_rename": 0,
+ "creation": "2026-11-14 12:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "employee",
   "employee_name",
-  "advance_type",
   "amount",
-  "reason"
+  "remarks"
  ],
  "fields": [
   {
@@ -23,22 +22,13 @@
    "reqd": 1
   },
   {
-   "columns": 2,
+   "columns": 3,
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Name",
+   "label": "Employee Name",
    "read_only": 1
-  },
-  {
-   "columns": 2,
-   "default": "Advance",
-   "fieldname": "advance_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Type",
-   "options": "\nAdvance\nExpense\nLoan"
   },
   {
    "columns": 2,
@@ -49,17 +39,17 @@
    "reqd": 1
   },
   {
-   "columns": 3,
-   "fieldname": "reason",
-   "fieldtype": "Small Text",
-   "label": "Reason"
+   "columns": 2,
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Remarks"
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "istable": 1,
  "links": [],
- "modified": "2025-12-01 23:27:37.965705",
+ "modified": "2026-11-14 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Shift Employee Advance",

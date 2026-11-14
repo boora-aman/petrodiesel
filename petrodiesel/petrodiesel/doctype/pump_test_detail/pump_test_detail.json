@@ -1,0 +1,83 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-11-14 12:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "nozzle",
+  "fuel_item",
+  "measure_liters",
+  "error_ml",
+  "result",
+  "returned_to_tank"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "nozzle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Nozzle",
+   "options": "Fuel Nozzle Master",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fetch_from": "nozzle.fuel_item",
+   "fieldname": "fuel_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fuel",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "default": "5",
+   "fieldname": "measure_liters",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Measure (L)"
+  },
+  {
+   "columns": 2,
+   "description": "Reading on the measure's neck scale. + means customer gets more.",
+   "fieldname": "error_ml",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Error (ml, +/\u2212)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "result",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Result",
+   "options": "\nPass\nFail",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "default": "1",
+   "fieldname": "returned_to_tank",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Returned to Tank"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-14 12:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Pump Test Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
