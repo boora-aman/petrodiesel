@@ -1,64 +1,153 @@
 {
  "actions": [],
- "creation": "2026-02-01 16:11:00.000000",
+ "allow_rename": 1,
+ "creation": "2026-11-15 14:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "cash_variance_threshold",
-  "credit_limit_warning_percentage",
-  "auto_create_sales_invoice",
-  "default_fuel_price_list",
-  "enable_tank_stock_validation",
-  "enable_credit_limit_validation"
+  "sb_defaults",
+  "default_station",
+  "fuel_price_list",
+  "cb_d1",
+  "fuel_item_group",
+  "lube_item_group",
+  "sb_tax",
+  "fuel_tax_template",
+  "cb_t1",
+  "lube_tax_template",
+  "sb_controls",
+  "require_shift_approval",
+  "cash_variance_tolerance",
+  "cb_c1",
+  "density_tolerance",
+  "pump_test_tolerance_ml",
+  "default_permissible_loss",
+  "cb_c2",
+  "post_dsr_stock_adjustment",
+  "expiry_alert_days"
  ],
  "fields": [
   {
-   "default": "500",
-   "description": "Alert when cash variance exceeds this amount",
-   "fieldname": "cash_variance_threshold",
-   "fieldtype": "Currency",
-   "label": "Cash Variance Threshold"
+   "fieldname": "sb_defaults",
+   "fieldtype": "Section Break",
+   "label": "Defaults"
   },
   {
-   "default": "80",
-   "description": "Warn when credit utilization exceeds this percentage",
-   "fieldname": "credit_limit_warning_percentage",
-   "fieldtype": "Percent",
-   "label": "Credit Limit Warning %"
-  },
-  {
-   "default": "0",
-   "description": "Automatically create Sales Invoice for Credit Sales",
-   "fieldname": "auto_create_sales_invoice",
-   "fieldtype": "Check",
-   "label": "Auto Create Sales Invoice"
-  },
-  {
-   "fieldname": "default_fuel_price_list",
+   "fieldname": "default_station",
    "fieldtype": "Link",
-   "label": "Default Fuel Price List",
+   "label": "Default Fuel Station",
+   "options": "Fuel Station"
+  },
+  {
+   "description": "Daily fuel retail prices are maintained as dated Item Prices in this price list.",
+   "fieldname": "fuel_price_list",
+   "fieldtype": "Link",
+   "label": "Fuel Price List",
    "options": "Price List"
   },
   {
-   "default": "1",
-   "description": "Validate tank stock before allowing sales",
-   "fieldname": "enable_tank_stock_validation",
-   "fieldtype": "Check",
-   "label": "Enable Tank Stock Validation"
+   "fieldname": "cb_d1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fuel_item_group",
+   "fieldtype": "Link",
+   "label": "Fuel Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "lube_item_group",
+   "fieldtype": "Link",
+   "label": "Lubricant Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "sb_tax",
+   "fieldtype": "Section Break",
+   "label": "Taxes"
+  },
+  {
+   "description": "Petrol/diesel are outside GST. Use a VAT template with 'Included in Print Rate'.",
+   "fieldname": "fuel_tax_template",
+   "fieldtype": "Link",
+   "label": "Fuel Sales Tax Template (VAT)",
+   "options": "Sales Taxes and Charges Template"
+  },
+  {
+   "fieldname": "cb_t1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Lubricants carry 18% GST (HSN 2710 19). Use an inclusive GST template.",
+   "fieldname": "lube_tax_template",
+   "fieldtype": "Link",
+   "label": "Lubricant Sales Tax Template (GST)",
+   "options": "Sales Taxes and Charges Template"
+  },
+  {
+   "fieldname": "sb_controls",
+   "fieldtype": "Section Break",
+   "label": "Controls & Tolerances"
   },
   {
    "default": "1",
-   "description": "Validate customer credit limit before credit sales",
-   "fieldname": "enable_credit_limit_validation",
+   "fieldname": "require_shift_approval",
    "fieldtype": "Check",
-   "label": "Enable Credit Limit Validation"
+   "label": "Shift Entries Need Manager Approval"
+  },
+  {
+   "default": "100",
+   "fieldname": "cash_variance_tolerance",
+   "fieldtype": "Currency",
+   "label": "Cash Short/Excess Tolerance (\u20b9)"
+  },
+  {
+   "fieldname": "cb_c1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "3",
+   "description": "MDG: observed density at 15\u00b0C must be within \u00b13.0 kg/m\u00b3 of challan density.",
+   "fieldname": "density_tolerance",
+   "fieldtype": "Float",
+   "label": "Density Tolerance (kg/m\u00b3)"
+  },
+  {
+   "default": "15",
+   "description": "Legal Metrology permissible error: \u00b115 ml per 5 litre measure.",
+   "fieldname": "pump_test_tolerance_ml",
+   "fieldtype": "Float",
+   "label": "Pump Test Tolerance (ml per 5 L)"
+  },
+  {
+   "default": "0.6",
+   "description": "Used when the fuel Item has no permissible loss % set.",
+   "fieldname": "default_permissible_loss",
+   "fieldtype": "Percent",
+   "label": "Default Permissible Stock Loss %"
+  },
+  {
+   "fieldname": "cb_c2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "post_dsr_stock_adjustment",
+   "fieldtype": "Check",
+   "label": "Reconcile ERPNext Stock to Dip on DSR Submit"
+  },
+  {
+   "default": "30",
+   "fieldname": "expiry_alert_days",
+   "fieldtype": "Int",
+   "label": "Licence / Stamping Expiry Alert (days)"
   }
  ],
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "issingle": 1,
  "links": [],
- "modified": "2026-02-01 16:11:00.000000",
+ "modified": "2026-11-15 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Petrodiesel Settings",
@@ -66,15 +155,67 @@
  "permissions": [
   {
    "create": 1,
-   "delete": 1,
+   "delete": 0,
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
+   "report": 1,
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Owner",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Manager",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Cashier",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Stock Keeper",
+   "share": 1,
+   "write": 0
   }
  ],
+ "quick_entry": 0,
+ "row_format": "Dynamic",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

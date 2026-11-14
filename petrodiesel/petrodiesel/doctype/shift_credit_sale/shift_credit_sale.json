@@ -1,32 +1,25 @@
 {
  "actions": [],
- "allow_rename": 1,
- "creation": "2025-12-21 02:58:57.301234",
+ "allow_rename": 0,
+ "creation": "2026-11-15 14:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "cashier",
   "customer",
-  "vehicle_number",
-  "driver_name",
+  "vehicle",
+  "slip_no",
   "fuel_item",
-  "nozzle",
-  "rate_per_liter",
+  "qty",
+  "rate",
   "amount",
-  "quantity_liters",
-  "slip_number",
-  "credit_sale_ref"
+  "cb1",
+  "driver_name",
+  "odometer",
+  "attendant",
+  "sales_invoice"
  ],
  "fields": [
-  {
-   "columns": 2,
-   "fieldname": "cashier",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Cashier",
-   "options": "Employee"
-  },
   {
    "columns": 2,
    "fieldname": "customer",
@@ -37,18 +30,19 @@
    "reqd": 1
   },
   {
-   "columns": 2,
-   "fieldname": "vehicle_number",
-   "fieldtype": "Data",
+   "columns": 1,
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Vehicle No"
+   "label": "Vehicle",
+   "options": "Customer Vehicle"
   },
   {
-   "columns": 2,
-   "fieldname": "driver_name",
+   "columns": 1,
+   "fieldname": "slip_no",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Driver"
+   "label": "Indent / Slip No"
   },
   {
    "columns": 1,
@@ -56,61 +50,69 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Fuel",
-   "options": "Item"
-  },
-  {
-   "columns": 1,
-   "fieldname": "nozzle",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Nozzle",
-   "options": "Fuel Nozzle Master"
-  },
-  {
-   "columns": 1,
-   "fieldname": "rate_per_liter",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Rate/L",
-   "read_only": 1
-  },
-  {
-   "columns": 2,
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Amount",
+   "options": "Item",
    "reqd": 1
   },
   {
    "columns": 1,
-   "fieldname": "quantity_liters",
+   "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty (L)",
    "precision": "2",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
    "read_only": 1
   },
   {
-   "fieldname": "slip_number",
-   "fieldtype": "Data",
-   "label": "Slip No"
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
   },
   {
-   "description": "Auto-created Credit Sale document",
-   "fieldname": "credit_sale_ref",
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "label": "Driver Name"
+  },
+  {
+   "fieldname": "odometer",
+   "fieldtype": "Int",
+   "label": "Odometer (km)"
+  },
+  {
+   "columns": 1,
+   "fieldname": "attendant",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Credit Sale",
-   "options": "Credit Sale",
+   "label": "Attendant (who filled)",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "no_copy": 1,
+   "options": "Sales Invoice",
    "read_only": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "istable": 1,
  "links": [],
- "modified": "2026-02-01 15:37:14.613935",
+ "modified": "2026-11-15 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Shift Credit Sale",

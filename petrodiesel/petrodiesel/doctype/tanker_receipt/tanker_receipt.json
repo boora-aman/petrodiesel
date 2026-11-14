@@ -1,38 +1,44 @@
 {
  "actions": [],
- "allow_rename": 1,
+ "allow_rename": 0,
  "autoname": "naming_series:",
- "creation": "2025-11-22 04:11:27.011551",
+ "creation": "2026-11-15 14:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "station",
+  "company",
   "posting_date",
   "posting_time",
-  "column_break_1",
+  "cb1",
   "supplier",
-  "section_break_invoice",
   "supplier_invoice_no",
   "supplier_invoice_date",
-  "column_break_2",
-  "tanker_number",
+  "cb2",
+  "truck_no",
   "driver_name",
-  "seal_number",
-  "section_break_items",
+  "received_by",
+  "sb_seal",
+  "seals_intact",
+  "seal_numbers",
+  "cb3",
+  "sales_stopped",
+  "water_checked",
+  "sb_items",
   "items",
-  "section_break_totals",
-  "total_invoiced_qty",
+  "override_density_check",
+  "sb_tot",
+  "total_invoice_qty",
   "total_received_qty",
-  "column_break_totals",
+  "cb4",
+  "total_shortage_qty",
   "total_amount",
-  "freight_charges",
-  "grand_total",
-  "section_break_linked",
+  "sb_acc",
   "purchase_invoice",
-  "column_break_linked",
-  "stock_entry",
-  "section_break_remarks",
+  "cb5",
+  "adjustment_entry",
   "remarks",
   "amended_from"
  ],
@@ -41,62 +47,78 @@
    "default": "TR-.YYYY.-.####",
    "fieldname": "naming_series",
    "fieldtype": "Select",
+   "hidden": 0,
    "label": "Series",
+   "no_copy": 1,
    "options": "TR-.YYYY.-.####",
+   "print_hide": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "station",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fuel Station",
+   "options": "Fuel Station",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "station.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
   },
   {
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Posting Date",
    "reqd": 1
   },
   {
+   "default": "Now",
    "fieldname": "posting_time",
    "fieldtype": "Time",
-   "label": "Posting Time",
-   "reqd": 1
+   "label": "Posting Time"
   },
   {
-   "fieldname": "column_break_1",
+   "fieldname": "cb1",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Supplier",
+   "in_standard_filter": 1,
+   "label": "Supplier (OMC)",
    "options": "Supplier",
    "reqd": 1
   },
   {
-   "fieldname": "section_break_invoice",
-   "fieldtype": "Section Break",
-   "label": "Supplier Invoice Details"
-  },
-  {
    "fieldname": "supplier_invoice_no",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Supplier Invoice No",
+   "label": "OMC Invoice No",
    "reqd": 1
   },
   {
    "fieldname": "supplier_invoice_date",
    "fieldtype": "Date",
-   "label": "Supplier Invoice Date",
-   "reqd": 1
+   "label": "OMC Invoice Date"
   },
   {
-   "fieldname": "column_break_2",
+   "fieldname": "cb2",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "tanker_number",
+   "fieldname": "truck_no",
    "fieldtype": "Data",
-   "label": "Tanker Number",
+   "in_list_view": 1,
+   "label": "Tank Lorry No",
    "reqd": 1
   },
   {
@@ -105,14 +127,47 @@
    "label": "Driver Name"
   },
   {
-   "fieldname": "seal_number",
-   "fieldtype": "Data",
-   "label": "Seal Number"
+   "fieldname": "received_by",
+   "fieldtype": "Link",
+   "label": "Received By",
+   "options": "Employee"
   },
   {
-   "fieldname": "section_break_items",
+   "fieldname": "sb_seal",
    "fieldtype": "Section Break",
-   "label": "Tanker Receipt Items"
+   "label": "Seal & Safety Check"
+  },
+  {
+   "default": "1",
+   "fieldname": "seals_intact",
+   "fieldtype": "Check",
+   "label": "Seals Intact"
+  },
+  {
+   "fieldname": "seal_numbers",
+   "fieldtype": "Data",
+   "label": "Seal Numbers"
+  },
+  {
+   "fieldname": "cb3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "sales_stopped",
+   "fieldtype": "Check",
+   "label": "Sales Stopped from Tank During Decantation"
+  },
+  {
+   "default": "1",
+   "fieldname": "water_checked",
+   "fieldtype": "Check",
+   "label": "Water Paste Test Done"
+  },
+  {
+   "fieldname": "sb_items",
+   "fieldtype": "Section Break",
+   "label": "Products"
   },
   {
    "fieldname": "items",
@@ -122,80 +177,77 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_totals",
+   "description": "Manager override. Record the reason in remarks and raise a complaint with the OMC.",
+   "fieldname": "override_density_check",
+   "fieldtype": "Check",
+   "label": "Accept Despite Density Variance"
+  },
+  {
+   "fieldname": "sb_tot",
    "fieldtype": "Section Break",
    "label": "Totals"
   },
   {
-   "fieldname": "total_invoiced_qty",
+   "fieldname": "total_invoice_qty",
    "fieldtype": "Float",
-   "label": "Total Invoiced Qty (L)",
+   "label": "Total Invoice Qty (L)",
    "precision": "2",
    "read_only": 1
   },
   {
    "fieldname": "total_received_qty",
    "fieldtype": "Float",
+   "in_list_view": 1,
    "label": "Total Received Qty (L)",
    "precision": "2",
    "read_only": 1
   },
   {
-   "fieldname": "column_break_totals",
+   "fieldname": "cb4",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_shortage_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Short (+) / Excess (\u2212) (L)",
+   "precision": "2",
+   "read_only": 1
   },
   {
    "fieldname": "total_amount",
    "fieldtype": "Currency",
-   "label": "Total Amount",
-   "precision": "2",
+   "label": "Invoice Amount",
    "read_only": 1
   },
   {
-   "fieldname": "freight_charges",
-   "fieldtype": "Currency",
-   "label": "Freight Charges",
-   "precision": "2"
-  },
-  {
-   "bold": 1,
-   "fieldname": "grand_total",
-   "fieldtype": "Currency",
-   "label": "Grand Total",
-   "precision": "2",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_linked",
+   "fieldname": "sb_acc",
    "fieldtype": "Section Break",
-   "label": "Linked Documents"
+   "label": "Accounting"
   },
   {
    "fieldname": "purchase_invoice",
    "fieldtype": "Link",
    "label": "Purchase Invoice",
+   "no_copy": 1,
    "options": "Purchase Invoice",
    "read_only": 1
   },
   {
-   "fieldname": "column_break_linked",
+   "fieldname": "cb5",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "stock_entry",
+   "fieldname": "adjustment_entry",
    "fieldtype": "Link",
-   "label": "Stock Entry",
+   "label": "Transit Loss / Gain Entry",
+   "no_copy": 1,
    "options": "Stock Entry",
    "read_only": 1
   },
   {
-   "fieldname": "section_break_remarks",
-   "fieldtype": "Section Break",
-   "label": "Remarks"
-  },
-  {
    "fieldname": "remarks",
-   "fieldtype": "Text",
+   "fieldtype": "Small Text",
    "label": "Remarks"
   },
   {
@@ -204,25 +256,19 @@
    "label": "Amended From",
    "no_copy": 1,
    "options": "Tanker Receipt",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Tanker Receipt",
-   "read_only": 1
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-21 12:14:29.561543",
+ "modified": "2026-11-15 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Tanker Receipt",
+ "naming_rule": "By \"Naming Series\" field",
  "owner": "Administrator",
  "permissions": [
   {
@@ -241,9 +287,25 @@
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Owner",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 0,
    "email": 1,
    "export": 1,
    "print": 1,
@@ -262,15 +324,30 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Stock Manager",
+   "role": "Pump Stock Keeper",
    "share": 1,
-   "submit": 1,
    "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Cashier",
+   "share": 1,
+   "write": 0
   }
  ],
+ "quick_entry": 0,
  "row_format": "Dynamic",
- "sort_field": "modified",
+ "search_fields": "supplier,truck_no,supplier_invoice_no",
+ "show_title_field_in_link": 0,
+ "sort_field": "posting_date",
  "sort_order": "DESC",
  "states": [],
+ "title_field": "truck_no",
  "track_changes": 1
 }

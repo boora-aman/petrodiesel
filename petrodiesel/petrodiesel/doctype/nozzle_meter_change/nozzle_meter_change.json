@@ -1,0 +1,190 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "naming_series:",
+ "creation": "2026-11-15 14:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "nozzle",
+  "station",
+  "posting_date",
+  "reason",
+  "cb1",
+  "old_meter_final_reading",
+  "new_meter_start_reading",
+  "previous_last_reading",
+  "sb2",
+  "technician",
+  "wm_reverification_done",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "default": "NMC-.YYYY.-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 0,
+   "label": "Series",
+   "no_copy": 1,
+   "options": "NMC-.YYYY.-.####",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "nozzle",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Nozzle",
+   "options": "Fuel Nozzle Master",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "nozzle.station",
+   "fieldname": "station",
+   "fieldtype": "Link",
+   "label": "Fuel Station",
+   "options": "Fuel Station",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "default": "Meter Replaced",
+   "fieldname": "reason",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Reason",
+   "options": "Meter Replaced\nMeter Repaired / Reset\nPulser / CPU Card Replaced\nCorrection"
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Must equal the nozzle's last closing reading (change meters at shift change).",
+   "fieldname": "old_meter_final_reading",
+   "fieldtype": "Float",
+   "label": "Old Meter Final Reading",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "new_meter_start_reading",
+   "fieldtype": "Float",
+   "label": "New Meter Start Reading",
+   "precision": "2",
+   "reqd": 1
+  },
+  {
+   "fieldname": "previous_last_reading",
+   "fieldtype": "Float",
+   "label": "Previous Last Reading",
+   "no_copy": 1,
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb2",
+   "fieldtype": "Section Break",
+   "label": ""
+  },
+  {
+   "fieldname": "technician",
+   "fieldtype": "Data",
+   "label": "Technician / Company"
+  },
+  {
+   "fieldname": "wm_reverification_done",
+   "fieldtype": "Check",
+   "label": "W&M Re-verification Done"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Nozzle Meter Change",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2026-11-15 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Nozzle Meter Change",
+ "naming_rule": "By \"Naming Series\" field",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Owner",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 0,
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

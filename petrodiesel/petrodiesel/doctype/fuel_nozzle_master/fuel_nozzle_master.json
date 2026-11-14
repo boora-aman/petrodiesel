@@ -2,31 +2,26 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:nozzle_id",
- "creation": "2025-11-22 03:46:51.340458",
+ "creation": "2026-11-15 14:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "nozzle_id",
-  "nozzle_number",
-  "nozzle_name",
-  "column_break_1",
+  "dispensing_unit",
+  "station",
+  "side",
+  "cb1",
+  "tank",
   "fuel_item",
-  "source_tank",
-  "section_break_loc",
-  "nozzle_location",
-  "meter_serial_number",
-  "column_break_2",
-  "meter_make",
-  "installation_date",
-  "section_break_status",
-  "last_calibration_date",
-  "current_reading",
-  "column_break_3",
   "status",
-  "last_shift",
-  "last_cashier",
-  "last_updated_on"
+  "sb_meter",
+  "meter_type",
+  "opening_totalizer",
+  "cb2",
+  "last_reading",
+  "last_shift_entry",
+  "last_reading_on"
  ],
  "fields": [
   {
@@ -38,125 +33,111 @@
    "unique": 1
   },
   {
-   "fieldname": "nozzle_number",
-   "fieldtype": "Int",
+   "fieldname": "dispensing_unit",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Nozzle Number",
+   "in_standard_filter": 1,
+   "label": "Dispensing Unit",
+   "options": "Dispensing Unit",
    "reqd": 1
   },
   {
-   "fieldname": "nozzle_name",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Nozzle Name",
-   "reqd": 1
+   "fetch_from": "dispensing_unit.station",
+   "fieldname": "station",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Fuel Station",
+   "options": "Fuel Station",
+   "read_only": 1
   },
   {
-   "fieldname": "column_break_1",
+   "fieldname": "side",
+   "fieldtype": "Select",
+   "label": "Side",
+   "options": "\nA\nB"
+  },
+  {
+   "fieldname": "cb1",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "fuel_item",
+   "fieldname": "tank",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Fuel Item",
-   "options": "Item",
-   "reqd": 1
-  },
-  {
-   "fieldname": "source_tank",
-   "fieldtype": "Link",
    "label": "Source Tank",
    "options": "Fuel Tank Master",
    "reqd": 1
   },
   {
-   "fieldname": "section_break_loc",
-   "fieldtype": "Section Break",
-   "label": "Location & Meter"
-  },
-  {
-   "fieldname": "nozzle_location",
-   "fieldtype": "Select",
-   "label": "Nozzle Location",
-   "options": "Island 1\nIsland 2\nIsland 3\nIsland 4"
-  },
-  {
-   "fieldname": "meter_serial_number",
-   "fieldtype": "Data",
-   "label": "Meter Serial Number"
-  },
-  {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "meter_make",
-   "fieldtype": "Data",
-   "label": "Meter Make"
-  },
-  {
-   "fieldname": "installation_date",
-   "fieldtype": "Date",
-   "label": "Installation Date"
-  },
-  {
-   "fieldname": "section_break_status",
-   "fieldtype": "Section Break",
-   "label": "Status"
-  },
-  {
-   "fieldname": "last_calibration_date",
-   "fieldtype": "Date",
-   "label": "Last Calibration"
-  },
-  {
-   "fieldname": "current_reading",
-   "fieldtype": "Float",
-   "label": "Current Reading",
-   "precision": "2",
+   "fetch_from": "tank.fuel_item",
+   "fieldname": "fuel_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fuel Item",
+   "options": "Item",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
   },
   {
    "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Status",
-   "options": "Active\nFaulty\nUnder Repair\nInactive",
-   "reqd": 1
+   "options": "Active\nUnder Maintenance\nInactive"
   },
   {
-   "fieldname": "last_shift",
-   "fieldtype": "Link",
-   "label": "Last Shift",
-   "options": "Shift Master",
+   "fieldname": "sb_meter",
+   "fieldtype": "Section Break",
+   "label": "Totalizer"
+  },
+  {
+   "default": "Electronic",
+   "fieldname": "meter_type",
+   "fieldtype": "Select",
+   "label": "Meter Type",
+   "options": "Electronic\nMechanical"
+  },
+  {
+   "description": "Cumulative litres shown on the totalizer when this nozzle was set up. Never reset.",
+   "fieldname": "opening_totalizer",
+   "fieldtype": "Float",
+   "label": "Opening Totalizer (at go-live)",
+   "precision": "2",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_reading",
+   "fieldtype": "Float",
+   "label": "Last Closing Reading",
+   "precision": "2",
    "read_only": 1
   },
   {
-   "fieldname": "last_cashier",
+   "fieldname": "last_shift_entry",
    "fieldtype": "Link",
-   "label": "Last Cashier",
-   "options": "Employee",
+   "label": "Last Shift Entry",
+   "options": "Shift Sale Entry",
    "read_only": 1
   },
   {
-   "fieldname": "last_updated_on",
+   "fieldname": "last_reading_on",
    "fieldtype": "Date",
-   "label": "Last Updated On",
+   "label": "Last Reading Date",
    "read_only": 1
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-02-01 15:37:14.172014",
+ "modified": "2026-11-15 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Fuel Nozzle Master",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -179,24 +160,50 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Pump Manager",
+   "role": "Pump Owner",
    "share": 1,
    "write": 1
   },
   {
    "create": 1,
-   "delete": 1,
+   "delete": 0,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Cashier",
+   "role": "Pump Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Cashier",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Stock Keeper",
+   "share": 1,
+   "write": 0
   }
  ],
+ "quick_entry": 0,
  "row_format": "Dynamic",
+ "search_fields": "fuel_item,dispensing_unit,tank",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],

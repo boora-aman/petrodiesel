@@ -1,0 +1,56 @@
+@import 'frappe-ui/style.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body { @apply bg-canvas text-ink antialiased; font-family: Inter, ui-sans-serif, system-ui, sans-serif; }
+  .num { font-variant-numeric: tabular-nums; }
+  input[type='number']::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type='number'] { -moz-appearance: textfield; }
+}
+
+@layer utilities {
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+}
+
+@layer components {
+  .card { @apply bg-white border border-line rounded-lg; }
+  .card-pad { @apply p-4; }
+  .h-title { @apply text-[20px] leading-7 font-semibold tracking-tight text-ink; }
+  .h-section { @apply text-[15px] font-semibold text-ink; }
+  .lbl { @apply text-[12px] font-medium text-ink-2; }
+  .muted { @apply text-[12px] text-ink-3; }
+  .inp { @apply w-full h-9 rounded-lg border border-gray-300 bg-white px-3 text-[14px] text-ink outline-none transition
+    focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 disabled:bg-slate-50 disabled:text-ink-2; }
+  .inp-lg { @apply h-12 text-[18px] font-semibold num; }
+  .auto { @apply relative flex items-center w-full h-9 rounded-lg border border-dashed border-slate-300 bg-slate-50 px-3
+    text-[14px] font-semibold num text-ink; }
+  .btn { @apply inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-[14px] font-medium border transition
+    disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap; }
+  .btn-primary { @apply btn bg-brand-600 border-transparent text-white hover:bg-brand-700 active:bg-brand-800; }
+  .btn-secondary { @apply btn bg-white border-line text-ink hover:bg-gray-50 hover:border-gray-300; }
+  .btn-danger { @apply btn bg-red-600 border-transparent text-white hover:bg-red-700; }
+  .btn-ghost { @apply btn border-transparent text-ink-2 hover:bg-gray-100; }
+  .btn-sm { @apply h-7 px-2.5 text-[12px]; }
+  .tbl { @apply w-full text-[13px]; }
+  .tbl th { @apply bg-slate-50 text-ink-2 text-[11px] font-semibold uppercase tracking-wider px-3 py-2.5 text-left
+    border-b border-line whitespace-nowrap; }
+  .tbl td { @apply px-3 py-2 border-b border-slate-100 align-middle whitespace-nowrap; }
+  .tbl td.wrap { @apply whitespace-normal; }
+  .tbl tr:hover td { @apply bg-slate-50/70; }
+  .tbl .r { @apply text-right num; }
+  .pill { @apply inline-flex items-center gap-1.5 rounded-full px-2.5 h-[22px] text-[11px] font-semibold border whitespace-nowrap; }
+  .tab-btn { @apply px-3 h-9 text-[13px] font-medium text-ink-2 border-b-2 border-transparent hover:text-ink whitespace-nowrap; }
+  .tab-btn.active { @apply text-brand-600 border-brand-600; }
+}
+
+@media print {
+  aside, header, nav.fixed, .print\:hidden, button.fixed { display: none !important; }
+  main { padding: 0 !important; max-width: none !important; }
+  .lg\:pl-60, .lg\:pl-16 { padding-left: 0 !important; }
+  body { background: #fff !important; }
+  .card { border-color: #ddd !important; }
+  .tbl th, .tbl td { padding: 4px 6px !important; font-size: 10px !important; }
+}

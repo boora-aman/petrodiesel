@@ -1,0 +1,838 @@
+{
+ "app": "petrodiesel",
+ "charts": [
+  {
+   "chart_name": "Daily Fuel Sales",
+   "label": "Daily Fuel Sales"
+  },
+  {
+   "chart_name": "Collection Mix",
+   "label": "Collection Mix"
+  },
+  {
+   "chart_name": "Tank Levels",
+   "label": "Tank Levels"
+  },
+  {
+   "chart_name": "Daily Stock Variance",
+   "label": "Daily Stock Variance"
+  }
+ ],
+ "content": "[{\"id\": \"346b81a32e\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today at the outlet</b></span>\", \"col\": 12}}, {\"id\": \"c5d06058d6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Sale Today (L)\", \"col\": 4}}, {\"id\": \"d740b875a8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Gross Sales Today\", \"col\": 4}}, {\"id\": \"bdd103bca4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Credit Sales Today\", \"col\": 4}}, {\"id\": \"1d03d29a2d\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Digital Collection Today\", \"col\": 4}}, {\"id\": \"cc85c7c548\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cash Short (-) Excess (+) Today\", \"col\": 4}}, {\"id\": \"afee53d8f0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Gross Sales This Month\", \"col\": 4}}, {\"id\": \"e005368b5e\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Sale This Month (L)\", \"col\": 4}}, {\"id\": \"5b2b7d1fe2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Stock in Tanks (L)\", \"col\": 4}}, {\"id\": \"0489bcc491\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Credit Outstanding\", \"col\": 4}}, {\"id\": \"64cfa7397b\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Stock Gain (+) Loss (-) This Month (L)\", \"col\": 4}}, {\"id\": \"7f3fa7aa05\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"490b2834e6\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Entry</b></span>\", \"col\": 12}}, {\"id\": \"9a673e0505\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shift Closing\", \"col\": 3}}, {\"id\": \"0e43b077dd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tanker Receipt\", \"col\": 3}}, {\"id\": \"67eb47b1f3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dip Reading\", \"col\": 3}}, {\"id\": \"97aa3bf997\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Daily Stock Register\", \"col\": 3}}, {\"id\": \"aea5c23dcf\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Price Update\", \"col\": 3}}, {\"id\": \"a46a8b3b27\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Pump Test\", \"col\": 3}}, {\"id\": \"84c7cf423a\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Receive Payment\", \"col\": 3}}, {\"id\": \"7cd717b8fa\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tank Stock\", \"col\": 3}}, {\"id\": \"33cfd1ff8d\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"858bcc8403\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Daily Fuel Sales\", \"col\": 6}}, {\"id\": \"5d154bad97\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Collection Mix\", \"col\": 6}}, {\"id\": \"9e91e3ad06\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Tank Levels\", \"col\": 6}}, {\"id\": \"1659f821f7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Daily Stock Variance\", \"col\": 6}}, {\"id\": \"0df6f113d2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"6f207f8b5d\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Masters & Reports</b></span>\", \"col\": 12}}, {\"id\": \"83ebf381a1\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}, {\"id\": \"d67f2c2285\", \"type\": \"card\", \"data\": {\"card_name\": \"Purchases & Stock\", \"col\": 4}}, {\"id\": \"fdf1f864d6\", \"type\": \"card\", \"data\": {\"card_name\": \"Credit Customers\", \"col\": 4}}, {\"id\": \"2139f1870b\", \"type\": \"card\", \"data\": {\"card_name\": \"Sales Reports\", \"col\": 4}}, {\"id\": \"ffea8619f5\", \"type\": \"card\", \"data\": {\"card_name\": \"Staff Advances\", \"col\": 4}}, {\"id\": \"481005efaa\", \"type\": \"card\", \"data\": {\"card_name\": \"Stock Reports\", \"col\": 4}}, {\"id\": \"b12e6d8494\", \"type\": \"card\", \"data\": {\"card_name\": \"Outlet Setup\", \"col\": 4}}, {\"id\": \"5f13e6dbce\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"9a22bfd2c6\", \"type\": \"card\", \"data\": {\"card_name\": \"Accounts\", \"col\": 4}}]",
+ "creation": "2026-11-15 14:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "getting-started",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Petrol Pump",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Daily Operations",
+   "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Shift Sale Entry",
+   "link_count": 0,
+   "link_to": "Shift Sale Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tank Dip Reading",
+   "link_count": 0,
+   "link_to": "Tank Dip Reading",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pump Test Log",
+   "link_count": 0,
+   "link_to": "Pump Test Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Daily Stock Register",
+   "link_count": 0,
+   "link_to": "Daily Stock Register",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fuel Price Update",
+   "link_count": 0,
+   "link_to": "Fuel Price Update",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchases & Stock",
+   "link_count": 7,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tanker Receipt",
+   "link_count": 0,
+   "link_to": "Tanker Receipt",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Shop Purchase",
+   "link_count": 0,
+   "link_to": "Shop Purchase",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Internal Stock Transfer",
+   "link_count": 0,
+   "link_to": "Internal Stock Transfer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Purchase Invoice",
+   "link_count": 0,
+   "link_to": "Purchase Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Entry",
+   "link_count": 0,
+   "link_to": "Stock Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Balance",
+   "link_count": 0,
+   "link_to": "Stock Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Ledger",
+   "link_count": 0,
+   "link_to": "Stock Ledger",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Credit Customers",
+   "link_count": 7,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer",
+   "link_count": 0,
+   "link_to": "Customer",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Customer Vehicle",
+   "link_count": 0,
+   "link_to": "Customer Vehicle",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Credit Bill",
+   "link_count": 0,
+   "link_to": "Credit Bill",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Invoice",
+   "link_count": 0,
+   "link_to": "Sales Invoice",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Payment Entry",
+   "link_count": 0,
+   "link_to": "Payment Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Credit Customer Statement",
+   "link_count": 0,
+   "link_to": "Credit Customer Statement",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Accounts Receivable",
+   "link_count": 0,
+   "link_to": "Accounts Receivable",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sales Reports",
+   "link_count": 12,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Daily Sales Summary",
+   "link_count": 0,
+   "link_to": "Daily Sales Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Nozzle Sales Register",
+   "link_count": 0,
+   "link_to": "Nozzle Sales Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Shift Cash Reconciliation",
+   "link_count": 0,
+   "link_to": "Shift Cash Reconciliation",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Payment Mode Collection",
+   "link_count": 0,
+   "link_to": "Payment Mode Collection",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Attendant Sales",
+   "link_count": 0,
+   "link_to": "Attendant Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Fuel Price History",
+   "link_count": 0,
+   "link_to": "Fuel Price History",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Attendant Collection",
+   "link_count": 0,
+   "link_to": "Attendant Collection",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Machine-wise Sales",
+   "link_count": 0,
+   "link_to": "Machine-wise Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Cashier Performance",
+   "link_count": 0,
+   "link_to": "Cashier Performance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Monthly Sales Analysis",
+   "link_count": 0,
+   "link_to": "Monthly Sales Analysis",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Expense Category Analysis",
+   "link_count": 0,
+   "link_to": "Expense Category Analysis",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Comprehensive Daily Operations",
+   "link_count": 0,
+   "link_to": "Comprehensive Daily Operations",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Staff Advances",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Staff Advance",
+   "link_count": 0,
+   "link_to": "Staff Advance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Staff Advance Recovery",
+   "link_count": 0,
+   "link_to": "Staff Advance Recovery",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Staff Advance Balance",
+   "link_count": 0,
+   "link_to": "Staff Advance Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Stock Reports",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Tank Stock Status",
+   "link_count": 0,
+   "link_to": "Tank Stock Status",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Stock Variance Register",
+   "link_count": 0,
+   "link_to": "Stock Variance Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Tanker Receipt Register",
+   "link_count": 0,
+   "link_to": "Tanker Receipt Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Tank Stock Movement",
+   "link_count": 0,
+   "link_to": "Tank Stock Movement",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Outlet Setup",
+   "link_count": 9,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fuel Station",
+   "link_count": 0,
+   "link_to": "Fuel Station",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fuel Tank Master",
+   "link_count": 0,
+   "link_to": "Fuel Tank Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Dispensing Unit",
+   "link_count": 0,
+   "link_to": "Dispensing Unit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fuel Nozzle Master",
+   "link_count": 0,
+   "link_to": "Fuel Nozzle Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Nozzle Meter Change",
+   "link_count": 0,
+   "link_to": "Nozzle Meter Change",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Shift Master",
+   "link_count": 0,
+   "link_to": "Shift Master",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Mode of Payment",
+   "link_count": 0,
+   "link_to": "Mode of Payment",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee",
+   "link_count": 0,
+   "link_to": "Employee",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Petrodiesel Settings",
+   "link_count": 0,
+   "link_to": "Petrodiesel Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Compliance",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Compliance Expiry",
+   "link_count": 0,
+   "link_to": "Compliance Expiry",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Pump Test Log",
+   "link_count": 0,
+   "link_to": "Pump Test Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Dispensing Unit",
+   "link_count": 0,
+   "link_to": "Dispensing Unit",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Accounts",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "General Ledger",
+   "link_count": 0,
+   "link_to": "General Ledger",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Accounts Receivable",
+   "link_count": 0,
+   "link_to": "Accounts Receivable",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Profit and Loss Statement",
+   "link_count": 0,
+   "link_to": "Profit and Loss Statement",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Journal Entry",
+   "link_count": 0,
+   "link_to": "Journal Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-11-15 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Petrol Pump",
+ "number_cards": [
+  {
+   "label": "Fuel Sale Today (L)",
+   "number_card_name": "Fuel Sale Today (L)"
+  },
+  {
+   "label": "Gross Sales Today",
+   "number_card_name": "Gross Sales Today"
+  },
+  {
+   "label": "Credit Sales Today",
+   "number_card_name": "Credit Sales Today"
+  },
+  {
+   "label": "Digital Collection Today",
+   "number_card_name": "Digital Collection Today"
+  },
+  {
+   "label": "Cash Short (-) Excess (+) Today",
+   "number_card_name": "Cash Short (-) Excess (+) Today"
+  },
+  {
+   "label": "Gross Sales This Month",
+   "number_card_name": "Gross Sales This Month"
+  },
+  {
+   "label": "Fuel Sale This Month (L)",
+   "number_card_name": "Fuel Sale This Month (L)"
+  },
+  {
+   "label": "Fuel Stock in Tanks (L)",
+   "number_card_name": "Fuel Stock in Tanks (L)"
+  },
+  {
+   "label": "Credit Outstanding",
+   "number_card_name": "Credit Outstanding"
+  },
+  {
+   "label": "Stock Gain (+) Loss (-) This Month (L)",
+   "number_card_name": "Stock Gain (+) Loss (-) This Month (L)"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "role": "Pump Owner"
+  },
+  {
+   "role": "Pump Manager"
+  },
+  {
+   "role": "Pump Cashier"
+  },
+  {
+   "role": "Pump Stock Keeper"
+  },
+  {
+   "role": "System Manager"
+  }
+ ],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "label": "Shift Closing",
+   "link_to": "Shift Sale Entry",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Orange",
+   "doc_view": "List",
+   "label": "Tanker Receipt",
+   "link_to": "Tanker Receipt",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "List",
+   "label": "Dip Reading",
+   "link_to": "Tank Dip Reading",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Daily Stock Register",
+   "link_to": "Daily Stock Register",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Purple",
+   "doc_view": "List",
+   "label": "Price Update",
+   "link_to": "Fuel Price Update",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "label": "Pump Test",
+   "link_to": "Pump Test Log",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Pink",
+   "doc_view": "List",
+   "label": "Receive Payment",
+   "link_to": "Payment Entry",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Yellow",
+   "doc_view": "",
+   "label": "Tank Stock",
+   "link_to": "Tank Stock Status",
+   "stats_filter": "[]",
+   "type": "Report"
+  }
+ ],
+ "standard": 1,
+ "title": "Petrol Pump",
+ "type": "Workspace"
+}

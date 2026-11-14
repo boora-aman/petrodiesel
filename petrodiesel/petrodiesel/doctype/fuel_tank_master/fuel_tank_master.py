@@ -1,87 +1,40 @@
-# Copyright (c) 2025, Aman Boora and contributors
+# Copyright (c) 2026, Aman Boora and contributors
 # For license information, please see license.txt
 
 import frappe
-from frappe.model.document import Document
 from frappe import _
+from frappe.model.document import Document
 from frappe.utils import flt
+
+from petrodiesel.petrodiesel.utils import get_tank_book_stock
 
 
 class FuelTankMaster(Document):
-    def validate(self):
-        self.validate_duplicate_tank()
-        self.validate_capacity()
-        self.check_stock_level()
-    
-    def validate_duplicate_tank(self):
-        """Ensure no duplicate tank ID"""
-        duplicate = frappe.db.exists("Fuel Tank Master", {
-            "tank_id": self.tank_id,
-            "name": ["!=", self.name]
-        })
-        
-        if duplicate:
-            frappe.throw(_(f"Tank ID {self.tank_id} already exists"))
-    
-    def validate_capacity(self):
-        """Validate current stock doesn't exceed capacity"""
-        if self.current_stock_level and self.capacity_in_liters:
-            capacity_kl = flt(self.capacity_in_liters) / 1000
-            
-            if flt(self.current_stock_level) > capacity_kl:
-                frappe.throw(_(f"Current stock level {self.current_stock_level} KL exceeds tank capacity {capacity_kl} KL"))
-    
-    def check_stock_level(self):
-        """Check if stock is low and warn"""
-        if self.current_stock_level and self.capacity_in_liters:
-            capacity_kl = flt(self.capacity_in_liters) / 1000
-            current_percentage = (flt(self.current_stock_level) / capacity_kl) * 100
-            
-            if current_percentage < 20:
-                frappe.msgprint(_(f"Warning: Tank {self.tank_name} stock is low ({current_percentage:.1f}%)"), 
-                              indicator='orange', alert=True)
+	@property
+	def current_stock(self):
+		return flt(get_tank_book_stock(self.name), 2) if not self.is_new() else 0
 
+	@property
+	def ullage(self):
+		safe = flt(self.capacity_liters) * (flt(self.safe_fill_percent) or 100) / 100
+		return flt(safe - self.current_stock, 2)
 
-@frappe.whitelist()
-def get_tank_status(tank):
-    """Get current status of tank"""
-    if not tank:
-        return {}
-    
-    tank_doc = frappe.get_doc("Fuel Tank Master", tank)
-    
-    capacity_kl = flt(tank_doc.capacity_in_liters) / 1000 if tank_doc.capacity_in_liters else 0
-    current_percentage = (flt(tank_doc.current_stock_level) / capacity_kl * 100) if capacity_kl else 0
-    
-    return {
-        "current_stock_level": tank_doc.current_stock_level,
-        "capacity_kl": capacity_kl,
-        "fill_percentage": current_percentage,
-        "status": tank_doc.status,
-        "fuel_item": tank_doc.fuel_item,
-        "last_updated_on": tank_doc.last_updated_on,
-        "last_receipt_date": tank_doc.last_receipt_date
-    }
-
-
-@frappe.whitelist()
-def get_tank_stock_ledger(tank, limit=50):
-    """Get stock movement history for tank"""
-    if not tank:
-        return []
-    
-    tank_doc = frappe.get_doc("Fuel Tank Master", tank)
-    
-    ledger = frappe.db.sql("""
-        SELECT 
-            posting_date, posting_time, voucher_type, voucher_no,
-            actual_qty, qty_after_transaction, stock_uom
-        FROM `tabStock Ledger Entry`
-        WHERE warehouse = %s
-        AND item_code = %s
-        AND docstatus < 2
-        ORDER BY posting_date DESC, posting_time DESC
-        LIMIT %s
-    """, (tank_doc.warehouse, tank_doc.fuel_item, limit), as_dict=1)
-    
-    return ledger
+	def validate(self):
+		company = frappe.get_cached_value("Fuel Station", self.station, "company")
+		wh_company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
+		if wh_company != company:
+			frappe.throw(_("Warehouse {0} belongs to {1}, not {2}.").format(self.warehouse, wh_company, company))
+		if frappe.get_cached_value("Item", self.fuel_item, "petro_product_type") != "Fuel":
+			frappe.throw(_("Item {0} is not marked as Fuel (Item > Petrol Pump > Product Type).").format(self.fuel_item))
+		other = frappe.db.get_value("Fuel Tank Master", {"warehouse": self.warehouse, "name": ["!=", self.name]})
+		if other:
+			frappe.throw(_("Warehouse {0} is already used by tank {1}. Use one warehouse per tank.").format(self.warehouse, other))
+		self.calibration_data.sort(key=lambda r: flt(r.dip_mm))
+		prev = None
+		for i, row in enumerate(self.calibration_data, 1):
+			row.idx = i
+			if prev and (flt(row.dip_mm) == flt(prev.dip_mm) or flt(row.volume_liters) < flt(prev.volume_liters)):
+				frappe.throw(_("Calibration chart row {0}: dips must be unique and volumes must increase with dip.").format(i))
+			prev = row
+		if self.calibration_data and flt(self.calibration_data[-1].volume_liters) > flt(self.capacity_liters) * 1.05:
+			frappe.msgprint(_("Calibration chart volume exceeds tank capacity. Check the chart."), indicator="orange")

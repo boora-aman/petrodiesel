@@ -2,22 +2,17 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:shift_name",
- "creation": "2025-11-22 03:46:14.357035",
+ "creation": "2026-11-15 14:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "shift_name",
-  "shift_code",
-  "column_break_1",
-  "shift_type",
-  "section_break_timing",
+  "sequence",
+  "cb1",
   "start_time",
   "end_time",
-  "column_break_2",
-  "duration_hours",
-  "section_break_status",
-  "status"
+  "is_active"
  ],
  "fields": [
   {
@@ -29,27 +24,17 @@
    "unique": 1
   },
   {
-   "fieldname": "shift_code",
-   "fieldtype": "Data",
+   "default": "1",
+   "description": "Order of this shift within a business day (1 = first shift after 06:00).",
+   "fieldname": "sequence",
+   "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Shift Code",
+   "label": "Sequence in Day",
    "reqd": 1
   },
   {
-   "fieldname": "column_break_1",
+   "fieldname": "cb1",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "Regular",
-   "fieldname": "shift_type",
-   "fieldtype": "Select",
-   "label": "Shift Type",
-   "options": "Regular\nNight\nWeekend"
-  },
-  {
-   "fieldname": "section_break_timing",
-   "fieldtype": "Section Break",
-   "label": "Timing Details"
   },
   {
    "fieldname": "start_time",
@@ -66,36 +51,19 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "duration_hours",
-   "fieldtype": "Float",
-   "label": "Duration (Hours)",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_break_status",
-   "fieldtype": "Section Break",
-   "label": "Status"
-  },
-  {
-   "default": "Active",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Active\nInactive",
-   "reqd": 1
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "label": "Active"
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2025-11-22 03:46:14.357035",
+ "modified": "2026-11-15 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Shift Master",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -118,13 +86,51 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Pump Owner",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "Pump Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Cashier",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Stock Keeper",
+   "share": 1,
+   "write": 0
   }
  ],
+ "quick_entry": 0,
  "row_format": "Dynamic",
- "sort_field": "modified",
+ "sort_field": "sequence",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "track_changes": 1
 }

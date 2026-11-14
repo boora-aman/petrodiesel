@@ -5,3 +5,7 @@
 tags
 node_modules
 __pycache__
+.claude/
+
+petrodiesel/public/frontend/
+petrodiesel/www/petrodiesel.html

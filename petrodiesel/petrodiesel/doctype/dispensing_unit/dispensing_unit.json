@@ -1,0 +1,185 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "field:du_code",
+ "creation": "2026-11-15 14:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "du_code",
+  "station",
+  "make",
+  "model",
+  "cb1",
+  "serial_no",
+  "installed_on",
+  "status",
+  "sb_wm",
+  "wm_certificate_no",
+  "wm_stamped_on",
+  "cb2",
+  "wm_valid_till",
+  "wm_verified_by"
+ ],
+ "fields": [
+  {
+   "fieldname": "du_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "DU / MPD Code",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "station",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Fuel Station",
+   "options": "Fuel Station",
+   "reqd": 1
+  },
+  {
+   "fieldname": "make",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Make"
+  },
+  {
+   "fieldname": "model",
+   "fieldtype": "Data",
+   "label": "Model"
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Data",
+   "label": "Serial No"
+  },
+  {
+   "fieldname": "installed_on",
+   "fieldtype": "Date",
+   "label": "Installed On"
+  },
+  {
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nUnder Maintenance\nInactive"
+  },
+  {
+   "fieldname": "sb_wm",
+   "fieldtype": "Section Break",
+   "label": "Legal Metrology (Weights & Measures) Stamping"
+  },
+  {
+   "fieldname": "wm_certificate_no",
+   "fieldtype": "Data",
+   "label": "Verification Certificate No"
+  },
+  {
+   "fieldname": "wm_stamped_on",
+   "fieldtype": "Date",
+   "label": "Stamped On"
+  },
+  {
+   "fieldname": "cb2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "wm_valid_till",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Stamping Valid Till"
+  },
+  {
+   "fieldname": "wm_verified_by",
+   "fieldtype": "Data",
+   "label": "Verified By (Inspector / GATC)"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-11-15 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Dispensing Unit",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Owner",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Cashier",
+   "share": 1,
+   "write": 0
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Stock Keeper",
+   "share": 1,
+   "write": 0
+  }
+ ],
+ "quick_entry": 0,
+ "row_format": "Dynamic",
+ "search_fields": "station,make",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

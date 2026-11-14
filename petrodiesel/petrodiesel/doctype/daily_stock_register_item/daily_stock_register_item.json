@@ -1,0 +1,168 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-11-15 14:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tank",
+  "fuel_item",
+  "opening_stock",
+  "receipts",
+  "meter_sales",
+  "test_qty",
+  "net_sales",
+  "book_closing",
+  "closing_dip_mm",
+  "closing_stock",
+  "cb1",
+  "variance",
+  "variance_percent",
+  "permissible_percent",
+  "within_limit",
+  "density_at_15",
+  "cumulative_variance"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "tank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tank",
+   "options": "Fuel Tank Master",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "tank.fuel_item",
+   "fieldname": "fuel_item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fuel",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "opening_stock",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Opening Dip Stock",
+   "precision": "2"
+  },
+  {
+   "columns": 1,
+   "fieldname": "receipts",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Receipts",
+   "precision": "2"
+  },
+  {
+   "columns": 1,
+   "fieldname": "meter_sales",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Meter Sales",
+   "precision": "2"
+  },
+  {
+   "fieldname": "test_qty",
+   "fieldtype": "Float",
+   "label": "Testing (returned)",
+   "precision": "2"
+  },
+  {
+   "fieldname": "net_sales",
+   "fieldtype": "Float",
+   "label": "Net Sales",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "book_closing",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Book Closing",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "closing_dip_mm",
+   "fieldtype": "Float",
+   "label": "Closing Dip (mm)",
+   "precision": "1"
+  },
+  {
+   "columns": 1,
+   "fieldname": "closing_stock",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Closing Dip Stock",
+   "precision": "2"
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "variance",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Gain (+) / Loss (\u2212)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "variance_percent",
+   "fieldtype": "Percent",
+   "in_list_view": 1,
+   "label": "Variance % of Sales",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "fieldname": "permissible_percent",
+   "fieldtype": "Percent",
+   "label": "Permissible Loss %",
+   "precision": "3"
+  },
+  {
+   "fieldname": "within_limit",
+   "fieldtype": "Check",
+   "label": "Within Limit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "density_at_15",
+   "fieldtype": "Float",
+   "label": "Morning Density @15\u00b0C",
+   "precision": "1"
+  },
+  {
+   "fieldname": "cumulative_variance",
+   "fieldtype": "Float",
+   "label": "Month-to-date Variance (L)",
+   "precision": "2",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-15 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Daily Stock Register Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

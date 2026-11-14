@@ -1,138 +1,78 @@
-# Copyright (c) 2025, Aman Boora and contributors
+# Copyright (c) 2026, Aman Boora and contributors
 # For license information, please see license.txt
+"""Fuel Price Update: daily dynamic OMC prices kept as dated Item Prices."""
+
+from __future__ import annotations
 
 import frappe
-from frappe.model.document import Document
 from frappe import _
-from frappe.utils import flt, getdate, nowtime
+from frappe.model.document import Document
+from frappe.utils import add_days, flt, getdate
+
+from petrodiesel.petrodiesel.utils import get_fuel_rate, get_settings
 
 
 class FuelPriceUpdate(Document):
-    def validate(self):
-        self.validate_effective_date()
-        self.calculate_price_changes()
-    
-    def on_submit(self):
-        self.update_item_prices()
-        items_updated = len(self.price_updates)
-        msg = _(f"✓ Fuel Price Update {self.name} applied successfully\n\n"
-               f"Effective Date: {self.effective_date}\n"
-               f"Items Updated: {items_updated}\n\n"
-               f"All fuel prices have been updated in the system.")
-        frappe.msgprint(msg, alert=True, indicator='green', title=_("Prices Updated"))
-    
-    def on_cancel(self):
-        self.revert_item_prices()
-        frappe.msgprint(_(f"Fuel Price Update {self.name} cancelled. Prices reverted to previous values."), 
-                       alert=True, indicator='orange', title=_("Prices Reverted"))
-    
-    def validate_effective_date(self):
-        """Validate effective date is not in past"""
-        if not self.effective_date:
-            frappe.throw(_("Effective Date is mandatory"), title=_("Missing Date"))
-        
-        if getdate(self.effective_date) < getdate(frappe.utils.today()):
-            frappe.msgprint(_(f"Warning: Effective date ({self.effective_date}) is in the past. "
-                            "This will apply historical pricing."), 
-                          alert=True, indicator='orange')
-    
-    def calculate_price_changes(self):
-        """Calculate price change percentage"""
-        for row in self.price_updates:
-            if row.old_price and row.new_price:
-                price_diff = flt(row.new_price) - flt(row.old_price)
-                row.change_amount = price_diff
-                row.change_percentage = (price_diff / flt(row.old_price)) * 100 if row.old_price else 0
-    
-    def update_item_prices(self):
-        """Update Item Price master for all fuel items"""
-        price_list = self.price_list or "Retail Fuel Prices"
-        
-        for row in self.price_updates:
-            # Check if Item Price exists
-            existing_price = frappe.db.exists("Item Price", {
-                "item_code": row.fuel_item,
-                "price_list": price_list
-            })
-            
-            if existing_price:
-                # Update existing
-                frappe.db.set_value("Item Price", existing_price, {
-                    "price_list_rate": row.new_price,
-                    "valid_from": self.effective_date
-                })
-            else:
-                # Create new Item Price
-                item_price = frappe.get_doc({
-                    "doctype": "Item Price",
-                    "item_code": row.fuel_item,
-                    "price_list": price_list,
-                    "price_list_rate": row.new_price,
-                    "valid_from": self.effective_date
-                })
-                item_price.flags.ignore_permissions = True
-                item_price.insert()
-            
-            # Also update Item standard_rate
-            frappe.db.set_value("Item", row.fuel_item, "standard_rate", row.new_price)
-        
-        frappe.db.commit()
-    
-    def revert_item_prices(self):
-        """Revert to old prices on cancel"""
-        price_list = self.price_list or "Retail Fuel Prices"
-        
-        for row in self.price_updates:
-            if row.old_price:
-                existing_price = frappe.db.exists("Item Price", {
-                    "item_code": row.fuel_item,
-                    "price_list": price_list
-                })
-                
-                if existing_price:
-                    frappe.db.set_value("Item Price", existing_price, "price_list_rate", row.old_price)
-                
-                frappe.db.set_value("Item", row.fuel_item, "standard_rate", row.old_price)
-        
-        frappe.db.commit()
+	def validate(self):
+		if not self.price_list:
+			self.price_list = get_settings().fuel_price_list
+		seen = set()
+		for row in self.items:
+			if row.fuel_item in seen:
+				frappe.throw(_("{0} is listed twice.").format(row.fuel_item))
+			seen.add(row.fuel_item)
+			if flt(row.new_price) <= 0:
+				frappe.throw(_("Row {0}: new price must be positive.").format(row.idx))
+			row.old_price = get_fuel_rate(row.fuel_item, add_days(self.effective_date, -1), self.price_list)
+			row.change_amount = flt(flt(row.new_price) - flt(row.old_price), 2)
+			row.change_percent = flt(row.change_amount * 100 / row.old_price, 2) if flt(row.old_price) else 0
+
+	def on_submit(self):
+		date = getdate(self.effective_date)
+		for row in self.items:
+			uom = frappe.db.get_value("Item", row.fuel_item, "stock_uom")
+			# close the price that is valid on the effective date
+			prev = frappe.db.sql("""
+				select name, valid_from from `tabItem Price`
+				where item_code=%s and price_list=%s and (valid_from is null or valid_from <= %s)
+				and (valid_upto is null or valid_upto >= %s)
+				order by valid_from desc limit 1""", (row.fuel_item, self.price_list, date, date), as_dict=True)
+			if prev:
+				p = prev[0]
+				if p.valid_from and getdate(p.valid_from) == date:
+					frappe.throw(_("{0} already has a price from {1} ({2}). Cancel that update first.").format(
+						row.fuel_item, date, p.name))
+				frappe.db.set_value("Item Price", p.name, "valid_upto", add_days(date, -1))
+				row.db_set("previous_item_price", p.name)
+			later = frappe.db.get_value("Item Price", {"item_code": row.fuel_item, "price_list": self.price_list,
+				"valid_from": [">", date]}, "valid_from", order_by="valid_from asc")
+			ip = frappe.get_doc({
+				"doctype": "Item Price",
+				"item_code": row.fuel_item,
+				"price_list": self.price_list,
+				"uom": uom,
+				"price_list_rate": row.new_price,
+				"valid_from": date,
+				"valid_upto": add_days(later, -1) if later else None,
+				"note": _("Fuel Price Update {0}").format(self.name),
+			})
+			ip.flags.ignore_permissions = True
+			ip.insert()
+			row.db_set("item_price", ip.name)
+			frappe.db.set_value("Item", row.fuel_item, "standard_rate", row.new_price, update_modified=False)
+
+	def on_cancel(self):
+		for row in self.items:
+			if row.item_price and frappe.db.exists("Item Price", row.item_price):
+				upto = frappe.db.get_value("Item Price", row.item_price, "valid_upto")
+				frappe.delete_doc("Item Price", row.item_price, ignore_permissions=True, force=True)
+				if row.previous_item_price and frappe.db.exists("Item Price", row.previous_item_price):
+					frappe.db.set_value("Item Price", row.previous_item_price, "valid_upto", upto)
+				row.db_set("item_price", None)
 
 
 @frappe.whitelist()
-def get_current_fuel_price(fuel_item, price_list="Retail Fuel Prices"):
-    """Get current price for fuel item"""
-    if not fuel_item:
-        return 0
-    
-    # Try to get from Item Price
-    price = frappe.db.get_value("Item Price", 
-        filters={"item_code": fuel_item, "price_list": price_list},
-        fieldname="price_list_rate"
-    )
-    
-    if price:
-        return price
-    
-    # Fallback to Item standard_rate
-    return frappe.db.get_value("Item", fuel_item, "standard_rate") or 0
-
-
-@frappe.whitelist()
-def get_price_history(fuel_item, limit=10):
-    """Get price change history for fuel item"""
-    history = frappe.db.sql("""
-        SELECT 
-            fpu.name,
-            fpu.effective_date,
-            fpu.effective_time,
-            fpui.old_price,
-            fpui.new_price,
-            fpui.change_percentage
-        FROM `tabFuel Price Update Item` fpui
-        INNER JOIN `tabFuel Price Update` fpu ON fpu.name = fpui.parent
-        WHERE fpui.fuel_item = %s
-        AND fpu.docstatus = 1
-        ORDER BY fpu.effective_date DESC, fpu.effective_time DESC
-        LIMIT %s
-    """, (fuel_item, limit), as_dict=1)
-    
-    return history
+def get_fuel_items(effective_date: str | None = None, price_list: str | None = None) -> list[dict]:
+	items = frappe.get_all("Item", {"petro_product_type": "Fuel", "disabled": 0}, pluck="name", order_by="name")
+	return [{"fuel_item": i, "old_price": get_fuel_rate(i, add_days(effective_date or frappe.utils.today(), -1), price_list)}
+		for i in items]

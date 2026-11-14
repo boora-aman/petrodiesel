@@ -2,37 +2,39 @@
  "actions": [],
  "allow_rename": 1,
  "autoname": "field:tank_id",
- "creation": "2025-11-22 03:46:39.268119",
+ "creation": "2026-11-15 14:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "tank_id",
-  "tank_name",
-  "column_break_1",
+  "station",
+  "company",
   "fuel_item",
+  "fuel_item_name",
+  "cb1",
   "warehouse",
-  "section_break_specs",
-  "capacity_in_liters",
+  "status",
   "tank_type",
-  "column_break_2",
+  "sb_cap",
+  "capacity_liters",
+  "dead_stock_liters",
+  "safe_fill_percent",
+  "cb2",
   "diameter_mm",
   "length_mm",
-  "section_break_calib",
-  "calibration_chart",
-  "calibration_data",
-  "section_break_dates",
-  "installation_date",
-  "last_calibration_date",
-  "column_break_3",
+  "last_calibrated_on",
   "next_calibration_due",
-  "status",
-  "current_stock_level",
-  "last_receipt_date",
-  "last_dip_height_mm",
-  "last_dip_reading_date",
-  "last_dip_reading_time",
-  "last_updated_on"
+  "sb_live",
+  "current_stock",
+  "ullage",
+  "cb3",
+  "last_dip_mm",
+  "last_dip_stock",
+  "last_dip_on",
+  "sb_chart",
+  "calibration_chart_file",
+  "calibration_data"
  ],
  "fields": [
   {
@@ -44,25 +46,44 @@
    "unique": 1
   },
   {
-   "fieldname": "tank_name",
-   "fieldtype": "Data",
+   "fieldname": "station",
+   "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Tank Name",
+   "in_standard_filter": 1,
+   "label": "Fuel Station",
+   "options": "Fuel Station",
    "reqd": 1
   },
   {
-   "fieldname": "column_break_1",
-   "fieldtype": "Column Break"
+   "fetch_from": "station.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
   },
   {
    "fieldname": "fuel_item",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Fuel Item",
    "options": "Item",
    "reqd": 1
   },
   {
+   "fetch_from": "fuel_item.item_name",
+   "fieldname": "fuel_item_name",
+   "fieldtype": "Data",
+   "label": "Fuel Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "One ERPNext warehouse per tank so stock, valuation and variance stay tank-wise.",
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
@@ -70,26 +91,45 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_specs",
-   "fieldtype": "Section Break",
-   "label": "Tank Specifications"
-  },
-  {
-   "fieldname": "capacity_in_liters",
-   "fieldtype": "Float",
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Capacity (Liters)",
-   "reqd": 1
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "Active\nUnder Maintenance\nInactive"
   },
   {
-   "default": "Underground",
+   "default": "Underground Horizontal",
    "fieldname": "tank_type",
    "fieldtype": "Select",
    "label": "Tank Type",
-   "options": "Underground\nOverhead\nHorizontal\nVertical"
+   "options": "Underground Horizontal\nAboveground Horizontal\nVertical"
   },
   {
-   "fieldname": "column_break_2",
+   "fieldname": "sb_cap",
+   "fieldtype": "Section Break",
+   "label": "Capacity"
+  },
+  {
+   "fieldname": "capacity_liters",
+   "fieldtype": "Float",
+   "label": "Capacity (Litres)",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dead_stock_liters",
+   "fieldtype": "Float",
+   "label": "Dead Stock (Litres)"
+  },
+  {
+   "default": "95",
+   "fieldname": "safe_fill_percent",
+   "fieldtype": "Percent",
+   "label": "Safe Fill %"
+  },
+  {
+   "fieldname": "cb2",
    "fieldtype": "Column Break"
   },
   {
@@ -103,39 +143,9 @@
    "label": "Length (mm)"
   },
   {
-   "fieldname": "section_break_calib",
-   "fieldtype": "Section Break",
-   "label": "Calibration Details"
-  },
-  {
-   "fieldname": "calibration_chart",
-   "fieldtype": "Attach",
-   "label": "Calibration Chart (PDF)"
-  },
-  {
-   "fieldname": "calibration_data",
-   "fieldtype": "Table",
-   "label": "Calibration Data",
-   "options": "Tank Calibration Chart"
-  },
-  {
-   "fieldname": "section_break_dates",
-   "fieldtype": "Section Break",
-   "label": "Dates"
-  },
-  {
-   "fieldname": "installation_date",
+   "fieldname": "last_calibrated_on",
    "fieldtype": "Date",
-   "label": "Installation Date"
-  },
-  {
-   "fieldname": "last_calibration_date",
-   "fieldtype": "Date",
-   "label": "Last Calibration Date"
-  },
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
+   "label": "Last Calibrated On"
   },
   {
    "fieldname": "next_calibration_due",
@@ -143,60 +153,72 @@
    "label": "Next Calibration Due"
   },
   {
-   "default": "Active",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Active\nInactive\nUnder Maintenance",
-   "reqd": 1
+   "fieldname": "sb_live",
+   "fieldtype": "Section Break",
+   "label": "Live Status"
   },
   {
-   "description": "Current stock in Kiloliters",
-   "fieldname": "current_stock_level",
+   "fieldname": "current_stock",
    "fieldtype": "Float",
-   "in_list_view": 1,
-   "label": "Current Stock Level (KL)",
-   "precision": "3"
-  },
-  {
-   "fieldname": "last_receipt_date",
-   "fieldtype": "Date",
-   "label": "Last Receipt Date",
+   "is_virtual": 1,
+   "label": "Book Stock (Litres)",
    "read_only": 1
   },
   {
-   "fieldname": "last_dip_height_mm",
+   "description": "Space available for the next decantation (safe fill capacity \u2212 book stock).",
+   "fieldname": "ullage",
    "fieldtype": "Float",
-   "label": "Last Dip Height (mm)",
-   "precision": "2",
+   "is_virtual": 1,
+   "label": "Ullage (Litres)",
    "read_only": 1
   },
   {
-   "fieldname": "last_dip_reading_date",
-   "fieldtype": "Date",
-   "label": "Last Dip Reading Date",
+   "fieldname": "cb3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "last_dip_mm",
+   "fieldtype": "Float",
+   "label": "Last Dip (mm)",
    "read_only": 1
   },
   {
-   "fieldname": "last_dip_reading_time",
-   "fieldtype": "Time",
-   "label": "Last Dip Reading Time",
+   "fieldname": "last_dip_stock",
+   "fieldtype": "Float",
+   "label": "Last Dip Stock (Litres)",
    "read_only": 1
   },
   {
-   "fieldname": "last_updated_on",
-   "fieldtype": "Date",
-   "label": "Last Updated On",
+   "fieldname": "last_dip_on",
+   "fieldtype": "Datetime",
+   "label": "Last Dip On",
    "read_only": 1
+  },
+  {
+   "description": "Dip (mm) to volume (litres) table from the tank calibration certificate. Intermediate dips are linearly interpolated.",
+   "fieldname": "sb_chart",
+   "fieldtype": "Section Break",
+   "label": "Calibration Chart"
+  },
+  {
+   "fieldname": "calibration_chart_file",
+   "fieldtype": "Attach",
+   "label": "Calibration Certificate"
+  },
+  {
+   "fieldname": "calibration_data",
+   "fieldtype": "Table",
+   "label": "Calibration Data",
+   "options": "Tank Calibration Chart"
   }
  ],
- "grid_page_length": 50,
- "index_web_pages_for_search": 1,
+ "index_web_pages_for_search": 0,
  "links": [],
- "modified": "2026-02-01 15:37:13.868071",
+ "modified": "2026-11-15 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Fuel Tank Master",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {
@@ -219,24 +241,50 @@
    "print": 1,
    "read": 1,
    "report": 1,
+   "role": "Pump Owner",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
    "role": "Pump Manager",
    "share": 1,
    "write": 1
   },
   {
    "create": 1,
-   "delete": 1,
+   "delete": 0,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Stock Manager",
+   "role": "Pump Stock Keeper",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Pump Cashier",
+   "share": 1,
+   "write": 0
   }
  ],
+ "quick_entry": 0,
  "row_format": "Dynamic",
+ "search_fields": "fuel_item,station",
  "sort_field": "modified",
  "sort_order": "DESC",
  "states": [],
