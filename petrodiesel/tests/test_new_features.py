@@ -182,10 +182,26 @@ class TestNewFeatures(IntegrationTestCase):
 		ist.submit()
 		self.assertAlmostEqual(get_tank_book_stock(src), a - 100, places=1)
 		self.assertAlmostEqual(get_tank_book_stock(dst), b + 100, places=1)
-		wrong = frappe.get_doc({"doctype": "Internal Stock Transfer", "station": STATION, "transfer_type": "Fuel Tank to Tank",
-			"from_warehouse": frappe.db.get_value("Fuel Tank Master", "T1-MS", "warehouse"),
-			"to_warehouse": frappe.db.get_value("Fuel Tank Master", dst, "warehouse"), "items": [{"item_code": "HSD", "qty": 1}]})
-		self.assertRaises(frappe.ValidationError, wrong.insert)
+		wh = lambda t: frappe.db.get_value("Fuel Tank Master", t, "warehouse")
+		lube = frappe.db.get_value("Fuel Station", STATION, "lube_warehouse")
+		bad_cases = [
+			# MS tank into an HSD tank, whatever item is named
+			{"transfer_type": "Fuel Tank to Tank", "from_warehouse": wh("T1-MS"), "to_warehouse": wh(dst), "items": [{"item_code": "MS", "qty": 1}]},
+			{"transfer_type": "Fuel Tank to Tank", "from_warehouse": wh("T1-MS"), "to_warehouse": wh(dst), "items": [{"item_code": "HSD", "qty": 1}]},
+			# naming a different fuel than the tanks hold
+			{"transfer_type": "Fuel Tank to Tank", "from_warehouse": wh(src), "to_warehouse": wh(dst), "items": [{"item_code": "MS", "qty": 1}]},
+			# shop-stock type used to pull fuel out of a tank
+			{"transfer_type": "Lube / Shop Stock", "from_warehouse": wh(src), "to_warehouse": lube, "items": [{"item_code": "HSD", "qty": 1}]},
+			{"transfer_type": "Lube / Shop Stock", "from_warehouse": wh(src), "to_warehouse": wh(dst), "items": [{"item_code": "HSD", "qty": 1}]},
+		]
+		for case in bad_cases:
+			doc = frappe.get_doc({"doctype": "Internal Stock Transfer", "station": STATION, **case})
+			self.assertRaises(frappe.ValidationError, doc.insert)
+		# item left blank on a tank transfer is filled with the tank's fuel
+		auto = frappe.get_doc({"doctype": "Internal Stock Transfer", "station": STATION, "transfer_type": "Fuel Tank to Tank",
+			"from_warehouse": wh(src), "to_warehouse": wh(dst), "items": [{"qty": 5}]})
+		auto.run_method("validate")
+		self.assertEqual(auto.items[0].item_code, "HSD")
 
 	# ---------------------------------------------------------------- reports
 	def test_new_reports_run(self):

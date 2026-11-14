@@ -2,8 +2,8 @@
   <div>
     <PageHeader title="Staff advances" subtitle="Money given to staff and how much is still to recover">
       <template #actions>
-        <button v-if="can('Staff Advance Recovery', 'create')" class="btn-secondary" @click="openRecover()"><i class="lucide-undo-2 size-4" />Record recovery</button>
-        <button v-if="can('Staff Advance', 'create')" class="btn-primary" @click="openGive()"><i class="lucide-plus size-4" />Give advance</button>
+        <button v-if="can('Staff Advance Recovery', 'submit')" class="btn-secondary" @click="openRecover()"><i class="lucide-undo-2 size-4" />Record recovery</button>
+        <button v-if="can('Staff Advance', 'submit')" class="btn-primary" @click="openGive()"><i class="lucide-plus size-4" />Give advance</button>
       </template>
     </PageHeader>
     <div class="mb-4 grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -23,7 +23,7 @@
                 <td class="font-medium">{{ b.employee_name }}</td><td class="r">{{ inr(b.given) }}</td><td class="r">{{ inr(b.recovered) }}</td>
                 <td class="r font-semibold" :class="b.balance > 0.5 ? 'text-amber-700' : 'text-green-700'">{{ inr(b.balance) }}</td>
                 <td>{{ dateFmt(b.last_date) }}</td>
-                <td class="text-right"><button v-if="b.balance > 0.5 && can('Staff Advance Recovery', 'create')" class="btn-secondary btn-sm" @click.stop="openRecover(b)">Recover</button></td>
+                <td class="text-right"><button v-if="b.balance > 0.5 && can('Staff Advance Recovery', 'submit')" class="btn-secondary btn-sm" @click.stop="openRecover(b)">Recover</button></td>
               </tr>
             </tbody>
           </table>

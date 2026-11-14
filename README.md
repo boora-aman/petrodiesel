@@ -7,7 +7,7 @@ It covers the daily routine of an IOCL / BPCL / HPCL / Nayara / Jio-bp outlet: n
 ## Install
 
 ```bash
-bench get-app https://github.com/boora-aman/petrodiesel --branch develop
+bench get-app https://github.com/boora-aman/petrodiesel --branch rebuild/indian-retail-outlet
 bench --site <site> install-app erpnext petrodiesel
 bench --site <site> migrate
 ```
@@ -57,7 +57,7 @@ The tests use the demo masters and roll back their own data.
 
 ## PetroDesk frontend (Vue 3 + frappe-ui)
 
-A mobile-first app for the forecourt at **`/petrodesk`** (login, role-based home, shift closing wizard, tanker
+A mobile-first app for the forecourt at **`/petrodiesel`** (login, role-based home, shift closing wizard, tanker
 decantation, dips, DSR, pump tests, prices, credit customers, approvals, reports, alerts, outlet setup). It uses
 the same backend: every calculation is previewed on the server (`petrodiesel.api.preview`) while the user types,
 and saving goes through the same validation, workflows and ERPNext postings as Desk.
@@ -65,7 +65,7 @@ and saving goes through the same validation, workflows and ERPNext postings as D
 ```bash
 cd apps/petrodiesel/frontend
 yarn install
-yarn build          # outputs to petrodiesel/public/frontend and petrodiesel/www/petrodesk.html
+yarn build          # outputs to petrodiesel/public/frontend and petrodiesel/www/petrodiesel.html
 yarn dev            # dev server on :8087 proxying to the bench (set FRAPPE_WEB_SERVER_PORT if not 8000)
 ```
 
@@ -132,6 +132,10 @@ The **Petrol Pump** workspace has number cards for today and the month, charts f
 - **Totalizers** are cumulative and never reset. A replaced meter needs the nozzle's totalizer updated by a manager before the next shift.
 - **Test fuel** returned to the tank is not a sale; it is excluded from billed litres and from DSR net sales.
 - **Shrinkage:** the permissible loss % differs by OMC and product, so set it per item.
+
+## Deployment
+
+See [DEPLOY.md](DEPLOY.md) for a step-by-step VPS setup with demo data.
 
 ## License
 

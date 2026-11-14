@@ -1,5 +1,5 @@
 # Copyright (c) 2026, Aman Boora and contributors
-"""Serve the PetroDesk SPA at /petrodesk."""
+"""Serve the PetroDesk SPA at /petrodiesel."""
 
 import frappe
 

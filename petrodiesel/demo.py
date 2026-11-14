@@ -262,6 +262,8 @@ def ensure_masters(company, acc):
 			"parent_warehouse": parent_wh, "company": company}, name=f"Tank {tank} - {ABBR}").name
 	lube_wh = _get_or_insert({"doctype": "Warehouse", "warehouse_name": "Lube Store", "parent_warehouse": parent_wh,
 		"company": company}, name=f"Lube Store - {ABBR}").name
+	_get_or_insert({"doctype": "Warehouse", "warehouse_name": "Lube Godown", "parent_warehouse": parent_wh,
+		"company": company}, name=f"Lube Godown - {ABBR}")
 
 	# parties
 	_get_or_insert({"doctype": "Customer", "customer_name": "Retail Customer (Walk-in)",

@@ -32,12 +32,12 @@ export async function refreshCounts() {
 export async function login(usr, pwd) {
   await call('login', { usr, pwd })
   // a new CSRF token is issued for the logged-in session; reload to pick it up
-  window.location.href = '/petrodesk'
+  window.location.href = '/petrodiesel'
 }
 
 export async function logout() {
   await call('logout')
-  window.location.href = '/petrodesk/login'
+  window.location.href = '/petrodiesel/login'
 }
 
 export const hasRole = (...roles) =>

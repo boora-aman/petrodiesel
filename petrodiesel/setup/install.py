@@ -143,6 +143,9 @@ def setup():
 	grant_erpnext_permissions()
 	create_workflows()
 	set_settings_defaults()
+	# Logged-in users opening /login or the apps screen go to PetroDesk by default
+	if frappe.get_meta("System Settings").has_field("default_app") and not frappe.db.get_single_value("System Settings", "default_app"):
+		frappe.db.set_single_value("System Settings", "default_app", "petrodiesel")
 	# Fuel items carry a VAT Item Tax Template for sales. ERPNext would otherwise auto-add those
 	# VAT rows to purchase invoices too, where fuel has no input tax credit.
 	if frappe.get_meta("Accounts Settings").has_field("add_taxes_from_item_tax_template"):

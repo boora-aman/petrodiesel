@@ -153,7 +153,7 @@ function linkDoctype(r, c) {
 function linkOf(r, c) {
   const dt = linkDoctype(r, c)
   if (!dt || !r[c.fieldname]) return null
-  return APP_ROUTES[dt] ? `/petrodesk${APP_ROUTES[dt]}${encodeURIComponent(r[c.fieldname])}` : deskUrl(dt, r[c.fieldname])
+  return APP_ROUTES[dt] ? `/petrodiesel${APP_ROUTES[dt]}${encodeURIComponent(r[c.fieldname])}` : deskUrl(dt, r[c.fieldname])
 }
 function openLink(r, c) {
   const dt = linkDoctype(r, c)

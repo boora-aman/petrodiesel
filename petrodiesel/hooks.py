@@ -12,7 +12,7 @@ add_to_apps_screen = [
 		"name": "petrodiesel",
 		"logo": "/assets/petrodiesel/images/logo.svg",
 		"title": "Petrol Pump",
-		"route": "/petrodesk",
+		"route": "/petrodiesel",
 	}
 ]
 
@@ -25,5 +25,19 @@ scheduler_events = {
 
 
 website_route_rules = [
-	{"from_route": "/petrodesk/<path:app_path>", "to_route": "petrodesk"},
+	{"from_route": "/petrodiesel/<path:app_path>", "to_route": "petrodiesel"},
 ]
+
+# Old links to the app keep working
+website_redirects = [
+	{"source": r"/petrodesk(/.*)?", "target": r"/petrodiesel\1"},
+]
+
+# After login, pump staff land in the PetroDesk app instead of the ERPNext desk.
+# The desk is still reachable by opening /desk.
+role_home_page = {
+	"Pump Owner": "petrodiesel",
+	"Pump Manager": "petrodiesel",
+	"Pump Cashier": "petrodiesel",
+	"Pump Stock Keeper": "petrodiesel",
+}

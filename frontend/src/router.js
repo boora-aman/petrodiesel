@@ -41,7 +41,7 @@ const routes = [
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
-const router = createRouter({ history: createWebHistory('/petrodesk'), routes, scrollBehavior: () => ({ top: 0 }) })
+const router = createRouter({ history: createWebHistory('/petrodiesel'), routes, scrollBehavior: () => ({ top: 0 }) })
 
 router.beforeEach(async (to) => {
   if (!session.ready) await loadBoot()

@@ -6,11 +6,11 @@ import frappeui from 'frappe-ui/vite'
 export default defineConfig({
   plugins: [
     frappeui({
-      frontendRoute: '/petrodesk',
+      frontendRoute: '/petrodiesel',
       frappeProxy: { port: 8087 },
       buildConfig: {
         outDir: path.resolve(__dirname, '../petrodiesel/public/frontend'),
-        indexHtmlPath: path.resolve(__dirname, '../petrodiesel/www/petrodesk.html'),
+        indexHtmlPath: path.resolve(__dirname, '../petrodiesel/www/petrodiesel.html'),
         baseUrl: '/assets/petrodiesel/frontend/',
       },
     }),
