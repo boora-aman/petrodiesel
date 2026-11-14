@@ -1,0 +1,111 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "creation": "2026-11-15 14:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "attendant",
+  "attendant_name",
+  "nozzles",
+  "sale_qty",
+  "sale_amount",
+  "credit_amount",
+  "digital_amount",
+  "expected_cash",
+  "cash_handed",
+  "short_excess"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "attendant",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Attendant",
+   "options": "Employee",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attendant_name",
+   "fieldtype": "Data",
+   "label": "Attendant Name",
+   "read_only": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "nozzles",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Nozzles Handled",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "sale_qty",
+   "fieldtype": "Float",
+   "label": "Sale (L)",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "sale_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Sale Value",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "credit_amount",
+   "fieldtype": "Currency",
+   "label": "Credit Slips",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "digital_amount",
+   "fieldtype": "Currency",
+   "label": "UPI / Card / Fleet",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "expected_cash",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Cash Due",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "cash_handed",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Cash Handed Over"
+  },
+  {
+   "columns": 1,
+   "fieldname": "short_excess",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Short (-) / Excess (+)",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-11-15 14:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Petrodiesel",
+ "name": "Shift Attendant Collection",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>PetroDesk — User Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm 15mm; }
+  :root { --teal:#0F766E; --teal-50:#F0FDFA; --ink:#0F172A; --ink2:#475569; --ink3:#94A3B8; --line:#E5E7EB;
+          --ms:#16A34A; --hsd:#D97706; --xp:#7C3AED; --red:#DC2626; --amber:#D97706; --green:#16A34A; }
+  * { box-sizing: border-box; }
+  body { font-family: Inter, "Segoe UI", system-ui, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.5; margin: 0; }
+  h1 { font-size: 22pt; margin: 0 0 4mm; letter-spacing: -0.02em; }
+  h2 { font-size: 15pt; margin: 0 0 3mm; color: var(--teal); letter-spacing: -0.01em; page-break-after: avoid; }
+  h3 { font-size: 11.5pt; margin: 5mm 0 2mm; page-break-after: avoid; }
+  p { margin: 0 0 2.5mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 5mm; }
+  li { margin-bottom: 1mm; }
+  .page { page-break-before: always; }
+  .muted { color: var(--ink2); }
+  .small { font-size: 9pt; }
+  .num { font-variant-numeric: tabular-nums; }
+  .chip { display: inline-block; border-radius: 99px; padding: 0 2.2mm; font-size: 8pt; font-weight: 600; border: 1px solid; }
+  .ms { color: #15803D; background: #DCFCE7; border-color: #86EFAC; }
+  .hsd { color: #B45309; background: #FEF3C7; border-color: #FCD34D; }
+  .xp { color: #6D28D9; background: #F3E8FF; border-color: #D8B4FE; }
+  .box { border: 1px solid var(--line); border-radius: 3mm; padding: 4mm 5mm; margin: 3mm 0; page-break-inside: avoid; }
+  .tip { background: var(--teal-50); border-color: #99F6E4; }
+  .warn { background: #FFFBEB; border-color: #FDE68A; }
+  .bad { background: #FEF2F2; border-color: #FECACA; }
+  .formula { font-family: "JetBrains Mono", Menlo, Consolas, monospace; font-size: 8.8pt; background: #F8FAFC;
+             border: 1px dashed #CBD5E1; border-radius: 2mm; padding: 3mm 4mm; margin: 2mm 0 3mm; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9pt; page-break-inside: avoid; }
+  th { background: #F8FAFC; color: var(--ink2); text-align: left; font-size: 8pt; text-transform: uppercase; letter-spacing: .04em;
+       padding: 2mm 2.5mm; border-bottom: 1px solid var(--line); }
+  td { padding: 1.8mm 2.5mm; border-bottom: 1px solid #F1F5F9; vertical-align: top; }
+  td.r, th.r { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.total td { font-weight: 600; border-top: 1px solid var(--line); background: #F8FAFC; }
+  .shot { display: block; max-width: 100%; max-height: 92mm; width: auto; margin: 2mm auto 1mm; border: 1px solid var(--line); border-radius: 2.5mm; }
+  .cap { text-align: center; }
+  .cap { font-size: 8.5pt; color: var(--ink2); margin-bottom: 4mm; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 9mm; margin-bottom: 2.5mm; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 6mm; height: 6mm; border-radius: 50%;
+       background: var(--teal); color: #fff; font-size: 8.5pt; font-weight: 600; display: flex; align-items: center; justify-content: center; }
+  .toc a { color: var(--ink); text-decoration: none; }
+  .toc li { margin-bottom: 1.5mm; }
+  .cover { height: 260mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover-top { background: var(--teal); color: #fff; border-radius: 5mm; padding: 14mm 12mm; }
+  .cover-top h1 { color: #fff; font-size: 34pt; margin: 6mm 0 2mm; }
+  .tag { font-size: 14pt; opacity: .9; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4mm; margin-top: 10mm; }
+  .kpis div { background: rgba(255,255,255,.12); border-radius: 3mm; padding: 4mm; font-size: 9.5pt; }
+  .kpis b { display: block; font-size: 15pt; }
+  .role { display: grid; grid-template-columns: 34mm 1fr; gap: 2mm 4mm; }
+  .role b { color: var(--teal); }
+  .timeline { display: grid; grid-template-columns: 22mm 1fr; gap: 1.6mm 4mm; font-size: 9.5pt; }
+  .timeline .t { font-weight: 600; color: var(--teal); text-align: right; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ COVER -->
+<section class="cover">
+  <div class="cover-top">
+    <svg width="54" height="54" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#fff" fill-opacity=".15"/><path d="M18 50V16a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4v34z" fill="#fff"/><rect x="22" y="17" width="14" height="10" rx="2" fill="#0F766E"/><path d="M40 24h4l4 5v15a3 3 0 0 1-6 0v-8h-2" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><rect x="14" y="50" width="30" height="4" rx="2" fill="#fff"/></svg>
+    <h1>PetroDesk</h1>
+    <div class="tag">Every litre, every rupee, reconciled.</div>
+    <p style="margin-top:6mm;max-width:150mm">The user guide for running an Indian fuel retail outlet (IOCL / BPCL / HPCL / Nayara / Jio-bp) with PetroDesk and ERPNext: shift closing, attendant cash, tankers, dips, the Daily Stock Register, credit customers and staff advances.</p>
+    <div class="kpis">
+      <div><b>Shift closing</b>Meter readings → attendant cash → drawer count</div>
+      <div><b>Stock</b>Tanker decantation, dips, DSR with loss limits</div>
+      <div><b>Accounts</b>Every closing posts invoices &amp; journals to ERPNext</div>
+    </div>
+  </div>
+  <div>
+    <h3>Contents</h3>
+    <ol class="toc">
+      <li>The pump in PetroDesk: tanks, machines, sides, nozzles, attendants</li>
+      <li>How the money is checked (the logic, with a worked example)</li>
+      <li>Who does what (roles) and the daily routine</li>
+      <li>Closing a shift, step by step</li>
+      <li>Approving, and what gets posted to ERPNext</li>
+      <li>Tankers, dips, pump tests and the Daily Stock Register</li>
+      <li>Credit customers, bills and payments</li>
+      <li>Staff advances, shop purchases and stock transfers</li>
+      <li>Prices, reports and the dashboard</li>
+      <li>Common situations and how to handle them</li>
+    </ol>
+    <p class="small muted">App: http://petro.localhost:8007/petrodesk · Back office: http://petro.localhost:8007/desk</p>
+  </div>
+</section>
+
+<!-- ============================================================ 1. MODEL -->
+<section class="page">
+  <h2>1. The pump in PetroDesk</h2>
+  <p>PetroDesk describes your forecourt exactly the way it is built. Read this page first; everything else follows from it.</p>
+
+  <svg viewBox="0 0 720 330" width="100%" style="margin:2mm 0 3mm">
+    <defs><style>.l{font:600 12px Inter,sans-serif;fill:#0F172A}.s{font:11px Inter,sans-serif;fill:#475569}.w{font:600 11px Inter,sans-serif;fill:#fff}</style></defs>
+    <!-- tanks -->
+    <text x="10" y="18" class="s">UNDERGROUND TANKS</text>
+    <rect x="10" y="28" width="150" height="46" rx="23" fill="#DCFCE7" stroke="#16A34A"/><text x="85" y="56" text-anchor="middle" class="l">T1-MS · 20,000 L</text>
+    <rect x="10" y="84" width="150" height="46" rx="23" fill="#FEF3C7" stroke="#D97706"/><text x="85" y="112" text-anchor="middle" class="l">T2-HSD · 20,000 L</text>
+    <!-- machine -->
+    <text x="250" y="18" class="s">MACHINE (DISPENSING UNIT / MPD)</text>
+    <rect x="250" y="28" width="250" height="262" rx="12" fill="#F8FAFC" stroke="#94A3B8"/>
+    <text x="375" y="50" text-anchor="middle" class="l">DU-1</text>
+    <line x1="375" y1="60" x2="375" y2="280" stroke="#CBD5E1" stroke-dasharray="4 4"/>
+    <text x="312" y="76" text-anchor="middle" class="s">Side A</text><text x="438" y="76" text-anchor="middle" class="s">Side B</text>
+    <rect x="265" y="88" width="95" height="40" rx="8" fill="#DCFCE7" stroke="#16A34A"/><text x="312" y="107" text-anchor="middle" class="l">N1 · MS</text><text x="312" y="121" text-anchor="middle" class="s">meter 12,73,198</text>
+    <rect x="265" y="138" width="95" height="40" rx="8" fill="#FEF3C7" stroke="#D97706"/><text x="312" y="157" text-anchor="middle" class="l">N2 · HSD</text><text x="312" y="171" text-anchor="middle" class="s">meter 28,79,286</text>
+    <rect x="390" y="88" width="95" height="40" rx="8" fill="#DCFCE7" stroke="#16A34A"/><text x="438" y="107" text-anchor="middle" class="l">N3 · MS</text><text x="438" y="121" text-anchor="middle" class="s">meter 12,01,880</text>
+    <rect x="390" y="138" width="95" height="40" rx="8" fill="#FEF3C7" stroke="#D97706"/><text x="438" y="157" text-anchor="middle" class="l">N4 · HSD</text><text x="438" y="171" text-anchor="middle" class="s">meter 29,16,693</text>
+    <!-- attendants -->
+    <rect x="265" y="214" width="95" height="56" rx="10" fill="#0F766E"/><text x="312" y="238" text-anchor="middle" class="w">Vikas</text><text x="312" y="254" text-anchor="middle" class="w" style="font-weight:400">attendant, side A</text>
+    <rect x="390" y="214" width="95" height="56" rx="10" fill="#0F766E"/><text x="438" y="238" text-anchor="middle" class="w">Sonu</text><text x="438" y="254" text-anchor="middle" class="w" style="font-weight:400">attendant, side B</text>
+    <line x1="312" y1="180" x2="312" y2="212" stroke="#0F766E" stroke-width="2"/><line x1="438" y1="180" x2="438" y2="212" stroke="#0F766E" stroke-width="2"/>
+    <!-- pipes -->
+    <path d="M160 51 C 210 51, 220 108, 265 108" fill="none" stroke="#16A34A" stroke-width="2"/>
+    <path d="M160 51 C 230 40, 360 40, 390 108" fill="none" stroke="#16A34A" stroke-width="1.5" stroke-dasharray="5 3"/>
+    <path d="M160 107 C 210 107, 220 158, 265 158" fill="none" stroke="#D97706" stroke-width="2"/>
+    <path d="M160 107 C 240 200, 360 200, 390 158" fill="none" stroke="#D97706" stroke-width="1.5" stroke-dasharray="5 3"/>
+    <!-- cashier -->
+    <text x="540" y="18" class="s">SALES ROOM</text>
+    <rect x="540" y="28" width="170" height="120" rx="12" fill="#F0FDFA" stroke="#0F766E"/>
+    <text x="625" y="55" text-anchor="middle" class="l">Cashier / shift in-charge</text>
+    <text x="625" y="78" text-anchor="middle" class="s">takes cash from each attendant,</text>
+    <text x="625" y="94" text-anchor="middle" class="s">counts the drawer,</text>
+    <text x="625" y="110" text-anchor="middle" class="s">closes the shift in PetroDesk</text>
+    <path d="M485 242 C 560 242, 600 200, 625 150" fill="none" stroke="#0F766E" stroke-width="2" marker-end="url(#a)"/>
+    <text x="600" y="215" class="s">cash handed over</text>
+    <rect x="540" y="266" width="170" height="30" rx="10" fill="#fff" stroke="#E5E7EB"/><text x="625" y="286" text-anchor="middle" class="l">then manager approves</text>
+  </svg>
+
+  <table>
+    <tr><th style="width:30mm">Term</th><th>What it is</th><th style="width:48mm">In PetroDesk</th></tr>
+    <tr><td><b>Tank</b></td><td>Underground tank holding one fuel. Each has a calibration chart (dip in mm → litres).</td><td>Fuel Tank Master. One ERPNext warehouse per tank, so stock is tank-wise.</td></tr>
+    <tr><td><b>Machine</b></td><td>The dispensing unit (DU / MPD) on the island. Has a W&amp;M stamping date.</td><td>Dispensing Unit (DU-1, DU-2…).</td></tr>
+    <tr><td><b>Side</b></td><td>A machine usually has two faces, A and B, so two vehicles can fill at once.</td><td>The <i>Side</i> on each nozzle.</td></tr>
+    <tr><td><b>Nozzle</b></td><td>One hose for one fuel, fed from one tank. Has its own <b>totalizer</b> (cumulative litres meter that never resets).</td><td>Fuel Nozzle Master (DU1-N1…). Remembers its last closing reading.</td></tr>
+    <tr><td><b>Attendant (DSM)</b></td><td>The person filling vehicles. Takes cash, UPI, cards, fleet cards and credit slips from customers.</td><td>Chosen per side (or per nozzle) in each shift.</td></tr>
+    <tr><td><b>Cashier</b></td><td>Shift in-charge in the sales room. Collects from attendants, counts the drawer, closes the shift.</td><td>Role <i>Pump Cashier</i>.</td></tr>
+  </table>
+
+  <div class="box tip"><b>The one rule to remember.</b> Litres are measured per <b>nozzle</b> (meter readings). Money is checked per <b>attendant</b> (what his nozzles sold vs what he handed over), and then for the whole <b>drawer</b>. Machines and sides are shown for sales and performance; they do not hold money.</div>
+</section>
+
+<!-- ============================================================ 2. LOGIC -->
+<section class="page">
+  <h2>2. How the money is checked</h2>
+  <p>A shift closing answers three questions, in this order.</p>
+
+  <h3>① How much did each nozzle sell? (litres)</h3>
+  <div class="formula">Meter litres  = Closing reading − Opening reading
+Sale litres   = Meter litres − Test litres          (5 L measure test fuel goes back to the tank)
+Sale value    = Sale litres × Rate                   (rate = today's price, or two rows if price changed mid-shift)</div>
+  <p>The opening reading is filled in automatically from the nozzle's last closing. You type only the closing totalizer and any test litres.</p>
+
+  <h3>② How much cash must each attendant hand over?</h3>
+  <div class="formula">Cash due      = Sale value of HIS nozzles
+              − Credit slips HE filled             (fuel given on credit to fleet customers)
+              − UPI / card / fleet card HE took
+Short/Excess  = Cash he handed over − Cash due      (minus = short, plus = excess)</div>
+  <p>This is how you know <b>which attendant</b> was short. If one boy runs both sides of a machine, both sides are his. If two boys share a machine (side A and side B), each is checked separately. If a boy moves between machines, all his nozzles add up.</p>
+
+  <h3>③ Does the cash drawer tally?</h3>
+  <div class="formula">Expected cash = Fuel sold for cash (all nozzles − all credit slips)
+              + Lubricant / shop sales
+              − All UPI / card / fleet (attendants' and counter)
+              − Expenses paid from cash − Staff advances − Cash given to fleet drivers
+              + Opening cash left by the previous shift
+Short/Excess  = Cash counted (by denomination) − Expected cash</div>
+  <p>When everything is in order, <b>the drawer's short/excess equals the sum of the attendants' short/excess</b>. Lube sales, counter UPI, expenses and advances live only at drawer level.</p>
+
+  <div class="page"></div><h2>Worked example — Evening shift, 15-11-2026</h2><p>Four attendants, two machines, one per side. Numbers are from a real closing in the demo.</p>
+  <table>
+    <tr><th>Attendant</th><th>Nozzles</th><th class="r">Sale value</th><th class="r">UPI / card</th><th class="r">Cash due</th><th class="r">Handed</th><th class="r">Short / excess</th></tr>
+    <tr><td>Vikas</td><td>DU1-N1, N2 (DU-1 side A)</td><td class="r">15,273.42</td><td class="r">1,500.00</td><td class="r">13,773.42</td><td class="r">13,773</td><td class="r">−0.42</td></tr>
+    <tr><td>Sonu</td><td>DU1-N3, N4 (DU-1 side B)</td><td class="r">17,838.64</td><td class="r">3,200.00</td><td class="r">14,638.64</td><td class="r">14,639</td><td class="r">+0.36</td></tr>
+    <tr><td>Deepak</td><td>DU2-N1, N2 (DU-2 side A)</td><td class="r">21,219.26</td><td class="r">2,500.00</td><td class="r">18,719.26</td><td class="r">18,619</td><td class="r" style="color:#DC2626">−100.26</td></tr>
+    <tr><td>Neha</td><td>DU2-N3, N4 (DU-2 side B)</td><td class="r">23,890.18</td><td class="r">3,000.00</td><td class="r">20,890.18</td><td class="r">20,890</td><td class="r">−0.18</td></tr>
+    <tr class="total"><td colspan="2">Total</td><td class="r">78,221.50</td><td class="r">10,200.00</td><td class="r">68,021.50</td><td class="r">67,921</td><td class="r">−100.50</td></tr>
+  </table>
+  <p>Drawer: expected = 78,221.50 − 10,200 + 2,000 opening cash = <b class="num">70,021.50</b>. Counted = 67,921 handed + 2,000 opening = <b class="num">69,921</b>. Drawer short = <b class="num">−100.50</b>, the same as the attendants' total. Deepak is the one to talk to.</p>
+  <h3>Other ways your staff may work — all handled the same way</h3>
+  <table>
+    <tr><th>Situation</th><th>What you do in Meter readings</th><th>Result</th></tr>
+    <tr><td>One attendant runs the whole machine</td><td>Pick the same person for Side A and Side B.</td><td>One card for him with all 4 nozzles.</td></tr>
+    <tr><td>One attendant per side (as above)</td><td>Pick a different person per side.</td><td>Each checked separately.</td></tr>
+    <tr><td>Attendant changes mid-shift</td><td>Pick the attendant on each nozzle row; if one nozzle was shared, add a second row for it (like a price change row) and give each row its own attendant.</td><td>Each gets exactly the litres he sold.</td></tr>
+    <tr><td>Relief attendant covers one nozzle</td><td>Change the attendant on that nozzle only.</td><td>Relief gets his own card.</td></tr>
+  </table>
+  <div class="box warn"><b>If the two don't match:</b> something was collected or paid at the counter (lube sale, counter UPI, an expense, an advance) or an attendant's UPI/card was entered under the counter. The difference tells you how much.</div>
+</section>
+
+<!-- ============================================================ 3. ROLES & DAY -->
+<section class="page">
+  <h2>3. Who does what, and the daily routine</h2>
+  <div class="role box">
+    <b>Pump Owner</b><span>Everything: settings, prices, approvals, staff advances, users. Sees all money.</span>
+    <b>Pump Manager</b><span>Approves shift closings and tanker receipts, submits the DSR, manages masters, records advances and recoveries.</span>
+    <b>Pump Cashier</b><span>Closes shifts (sends for approval), records credit slips, dips and pump tests, gives advances, makes credit bills.</span>
+    <b>Pump Stock Keeper</b><span>Tanker receipts, dips, pump tests, shop purchases, stock transfers; prepares the DSR. Does not see sales money.</span>
+  </div>
+
+  <h3>A normal day</h3>
+  <div class="timeline">
+    <span class="t">06:00</span><span><b>Prices</b> — enter the OMC's prices for the day (Price Updates). PetroDesk keeps the history.</span>
+    <span class="t">06:05</span><span><b>Morning dip</b> — product dip, water dip, temperature, density at 15°C for every tank.</span>
+    <span class="t">06:15</span><span><b>Pump test</b> — 5 L measure on every nozzle; outside ±15 ml the nozzle is put under maintenance.</span>
+    <span class="t">anytime</span><span><b>Tanker receipt</b> — seals, density vs challan (±3 kg/m³), dips before/after decantation.</span>
+    <span class="t">14:00</span><span><b>Morning shift closing</b> by the cashier → sent for approval.</span>
+    <span class="t">22:00</span><span><b>Evening shift closing</b>. Opening cash is carried from the morning shift.</span>
+    <span class="t">06:00</span><span><b>Night shift closing</b> (next morning).</span>
+    <span class="t">daily</span><span><b>Approvals</b> — the manager approves closings and tankers; each approval posts to ERPNext.</span>
+    <span class="t">night</span><span><b>Night dip</b>, then the <b>Daily Stock Register</b>: opening + receipts − sales vs the closing dip.</span>
+    <span class="t">weekly</span><span><b>Credit bills</b> to fleet customers, <b>payments</b> received, <b>advance recoveries</b>.</span>
+  </div>
+
+  <h3>Logging in</h3>
+  <p>Open <b>/petrodesk</b> in any browser (phone, tablet or PC). Each user sees a home screen and menu for their role. The back office (ERPNext Desk) is at <b>/desk</b>.</p>
+  <img class="shot" src="img/home.jpg" style="max-height:70mm" />
+  <div class="cap">Owner's home: today's sales, cash short/excess, stock, credit dues, tanks and alerts.</div>
+</section>
+
+<!-- ============================================================ 4. SHIFT CLOSING -->
+<section class="page">
+  <h2>4. Closing a shift, step by step</h2>
+  <p>Shift Closing → <b>New shift closing</b>. The bar at the top always shows sale litres, gross sales, expected cash, counted cash and the short/excess, updating as you type.</p>
+
+  <h3>Step 1 — Meter readings</h3>
+  <ol class="steps">
+    <li>Check date and shift. Tap <b>Load active nozzles</b>: every nozzle appears with its opening reading and today's rate.</li>
+    <li>For each machine, pick the attendant for <b>Side A</b> and <b>Side B</b> (top right of the machine card). This fills all nozzles of that side. You can still change a single nozzle.</li>
+    <li>Type the <b>closing reading</b> of every nozzle. Add <b>test litres</b> (+5 button) if a 5 L test was done.</li>
+    <li>If the price changed during the shift, use <b>+ Price change row</b>: the second row starts where the first ended.</li>
+  </ol>
+  <img class="shot" src="img/shift-meter.jpg" />
+  <div class="cap">Machine DU-1 with side A (Vikas) and side B (Sonu). Opening and rate are filled automatically.</div>
+
+  <h3>Step 2 — Credit &amp; other sales</h3>
+  <ul>
+    <li><b>Credit slips</b>: customer, vehicle (picking the vehicle fills the customer, fuel, driver and rate), slip number, litres, and <b>Filled by</b> (the attendant). A meter shows the customer's credit limit; over the limit the shift cannot be approved.</li>
+    <li><b>Lubricant &amp; shop sales</b> (GST 18% inclusive) and <b>cash paid to fleet drivers</b> (billed to the customer).</li>
+  </ul>
+</section>
+
+<section class="page">
+  <h3>Step 3 — Attendant collections</h3>
+  <p>One card per attendant. Enter what each one collected on UPI, card and fleet card, and the <b>cash he handed over</b>. PetroDesk shows his cash due and his short/excess immediately.</p>
+  <img class="shot" src="img/shift-attendant.jpg" style="max-height:78mm" />
+  <div class="cap">Vikas sold ₹15,273.42, took ₹1,500 on UPI, so he owes ₹13,773.42 in cash. He handed ₹13,773 → short ₹0.42.</div>
+  <p>Below the attendants is <b>Counter collections</b> for UPI/card taken at the cashier's counter (e.g. for lubricants), plus expenses and staff advances paid from cash.</p>
+
+  <h3>Step 4 — Cash count</h3>
+  <ol class="steps">
+    <li>Count notes and coins by denomination (− / + buttons). The total is calculated.</li>
+    <li>Opening cash (left by the previous shift) is filled automatically.</li>
+    <li>Enter how much you <b>leave for the next shift</b>; the rest is shown as <b>hand to owner / safe</b>.</li>
+    <li>If the short/excess is above ₹100 (set in Settings), a reason is required.</li>
+  </ol>
+  <img class="shot" src="img/shift-cash.jpg" style="max-height:78mm" />
+  <div class="cap">The reconciliation on the right adds up exactly as in section 2.</div>
+</section>
+
+<section class="page">
+  <h3>Step 5 — Review and submit</h3>
+  <p>The review shows the totals, the <b>attendant table</b> and the <b>machine-wise sales</b> (litres per machine side), plus anything still missing (closing readings, attendants, cash count, reasons). Then:</p>
+  <ul>
+    <li><b>Save draft</b> — keep working later.</li>
+    <li><b>Submit for approval</b> — sends it to the manager. The cashier can no longer edit it.</li>
+  </ul>
+  <img class="shot" src="img/shift-review.jpg" />
+  <div class="cap">Review: attendants with their short/excess, and machine-wise sales (DU-1 A/B, DU-2 A/B).</div>
+
+  <h2 style="margin-top:6mm">5. Approving, and what reaches ERPNext</h2>
+  <p>The manager opens <b>Approvals</b> (or the shift) and clicks <b>Approve</b> or <b>Reject</b> (with a reason). Rejected closings go back to the cashier, who clicks <b>Revise</b>, corrects and resubmits. Closings within tolerance can be approved in bulk.</p>
+  <table>
+    <tr><th>On approval PetroDesk creates</th><th>Contents</th></tr>
+    <tr><td>Retail fuel Sales Invoice</td><td>Walk-in customer, fuel sold for cash/UPI/card, stock out of each tank's warehouse, VAT included in price.</td></tr>
+    <tr><td>Lubricant Sales Invoice</td><td>Shop items, GST 18% inclusive, stock out of the lube store.</td></tr>
+    <tr><td>Credit Sales Invoices</td><td>One per credit customer, each line with vehicle and slip number.</td></tr>
+    <tr><td>Settlement Journal Entry</td><td>Clears the walk-in invoices against cash (less opening cash), each UPI/card/fleet account, expenses, staff advances, driver cash (to the customer) and the cash short/excess account.</td></tr>
+  </table>
+  <p class="small muted">Nozzle meters move forward. Cancelling (manager) reverses everything; later shifts on the same nozzles must be cancelled first.</p>
+</section>
+
+<!-- ============================================================ 6. STOCK -->
+<section class="page">
+  <h2>6. Tankers, dips, pump tests and the DSR</h2>
+  <h3>Tanker receipt (decantation)</h3>
+  <ol class="steps">
+    <li>OMC invoice no, tank lorry no, supplier. Safety checklist: seals intact, sales stopped from that tank, water paste test.</li>
+    <li>For each compartment: tank, invoice litres, rate (last purchase rate is suggested).</li>
+    <li>Density: challan density and the observed density corrected to 15°C. Outside ±3 kg/m³ it shows <b>Do not decant</b>; only a manager can accept with remarks.</li>
+    <li>Dip before and after (mm) and any sales during decantation → received litres and short/excess are calculated from the tank chart.</li>
+    <li>Send for verification → manager accepts → a Purchase Invoice (invoice litres) and a Stock Entry for the transit shortage are posted.</li>
+  </ol>
+  <img class="shot" src="img/tanker.jpg" />
+  <div class="cap">12,000 L invoiced, 11,999.28 L received → 0.72 L short booked as transit loss.</div>
+
+  <h3>Tank dip reading</h3>
+  <p>Choose the type (Morning, Night, Shift change, Before/After decantation, Surprise). Enter product dip and water dip in mm; litres come from the calibration chart and are compared with ERPNext book stock. Water in a tank raises a warning.</p>
+  <h3>Pump test (5 litre measure)</h3>
+  <p>Enter the error in ml for each nozzle (+ means the customer got more). Within ±15 ml per 5 L = Pass. A failed nozzle is set <b>Under Maintenance</b> and disappears from shift closing until a manager sets it active again.</p>
+</section>
+
+<section class="page">
+  <h3>Daily Stock Register (DSR)</h3>
+  <div class="formula">Book closing  = Opening dip stock + Receipts − (Meter sales − Testing)
+Gain / Loss   = Closing dip stock − Book closing
+Within limit  = loss is not more than the permissible % of net sales (MS ≈ 0.6 %, HSD ≈ 0.25 %, set per fuel)</div>
+  <ol class="steps">
+    <li>Pick the business date and tap <b>Fetch day's data</b>: opening (yesterday's closing), receipts (tankers) and sales (approved shifts) fill in per tank.</li>
+    <li>Closing stock comes from the Night (Closing) dip. If none was taken, type the closing dip mm in the table. Until then it shows <b>Waiting for closing dips</b>.</li>
+    <li>The manager submits. ERPNext tank stock is set to the physical dip (a Stock Reconciliation), so the books match the tanks every day.</li>
+  </ol>
+  <img class="shot" src="img/dsr.jpg" />
+  <div class="cap">DSR before the closing dips are entered — no gain/loss is judged yet.</div>
+</section>
+
+<!-- ============================================================ 7. CREDIT -->
+<section class="page">
+  <h2>7. Credit customers, bills and payments</h2>
+  <ul>
+    <li><b>Credit Customers</b> lists every fleet customer with outstanding, limit and % used. Open one to see its statement (vehicle and slip-wise, running balance), vehicles, invoices and payments.</li>
+    <li><b>Vehicles</b>: add each vehicle with its default fuel and driver; slips then fill automatically.</li>
+    <li><b>Receive payment</b>: amount, mode, reference. It is adjusted against the oldest unpaid invoices first.</li>
+    <li><b>Credit Bill</b>: choose customer and period, <b>Fetch entries</b>. You get opening balance, everything billed (vehicle, slip, litres, rate), payments received and the amount due — which always equals the customer's ledger. Print it on A4 and send it.</li>
+  </ul>
+  <img class="shot" src="img/credit-bill.jpg" />
+  <div class="cap">Credit bill for Sharma Logistics, 30-10 to 14-11.</div>
+</section>
+
+<!-- ============================================================ 8. ADVANCES ETC -->
+<section class="page">
+  <h2>8. Staff advances, shop purchases and stock transfers</h2>
+  <h3>Staff advances</h3>
+  <ul>
+    <li>An advance can be given <b>from the shift</b> (Collections → Advances to staff, paid from the drawer) or <b>from the office</b> (Staff Advances → Give advance).</li>
+    <li><b>Record recovery</b>: <i>Cash return</i> (money comes back, posted at once) or <i>Salary deduction</i> (an HR payroll deduction is created for the chosen month; it is cut when salary is processed).</li>
+    <li>The balance screen shows given, recovered and due for every employee; click a name for the full ledger. You cannot recover more than is due.</li>
+  </ul>
+  <img class="shot" src="img/advances.jpg" />
+  <div class="cap">Staff advance balances. Shift advances and office advances are both counted.</div>
+  <h3>Shop purchases</h3>
+  <p>Lubricants and accessories bought from a distributor: supplier, bill no, items, qty, rate. On submit a Purchase Invoice adds the stock to the lube store. (Fuel always comes in through Tanker Receipt.)</p>
+  <h3>Stock transfers</h3>
+  <p>Move shop stock between stores, or fuel <b>tank to tank</b> (same fuel only). Available quantity is checked.</p>
+</section>
+
+<!-- ============================================================ 9. REPORTS -->
+<section class="page">
+  <h2>9. Prices, reports and the dashboard</h2>
+  <p><b>Price Updates</b>: enter today's prices; the old price is shown with the change. Prices are kept as dated history, so every shift uses the right rate.</p>
+  <img class="shot" src="img/home-machines.jpg" />
+  <div class="cap">Dashboard: machine-wise sales today (per machine side) and attendant collection today.</div>
+  <table>
+    <tr><th>Report</th><th>Use it to</th></tr>
+    <tr><td>Attendant Collection</td><td>See cash due, handed and short/excess per attendant per shift.</td></tr>
+    <tr><td>Machine-wise Sales</td><td>Litres and value per machine, side and nozzle — which machine works hardest.</td></tr>
+    <tr><td>Daily Sales Summary · Monthly Sales Analysis</td><td>Day-by-day and month-by-month litres, sales, credit, digital, growth.</td></tr>
+    <tr><td>Shift Cash Reconciliation · Cashier Performance</td><td>Drawer short/excess per shift and per cashier.</td></tr>
+    <tr><td>Comprehensive Daily Operations</td><td>Everything about one day on one page.</td></tr>
+    <tr><td>Tank Stock Status · Tank Stock Movement · Stock Variance Register</td><td>Stock, space left, days of cover, daily movement and DSR gain/loss.</td></tr>
+    <tr><td>Tanker Receipt Register</td><td>Shortages and density for every decantation.</td></tr>
+    <tr><td>Credit Customer Statement · Staff Advance Balance</td><td>Customer ledger by vehicle; advances due per employee.</td></tr>
+    <tr><td>Payment Mode Collection · Expense Category Analysis · Fuel Price History · Compliance Expiry</td><td>Collections by mode, expenses by head, price trend, licences and stamping due.</td></tr>
+  </table>
+  <p class="small muted">Every report: date shortcuts, sort by any column, filter rows, page through, CSV export and print.</p>
+</section>
+
+<!-- ============================================================ 10. FAQ -->
+<section class="page">
+  <h2>10. Common situations</h2>
+  <table>
+    <tr><th style="width:62mm">You see / need</th><th>What to do</th></tr>
+    <tr><td>"Opening reading does not match the last closing"</td><td>An earlier shift for that nozzle is still not approved, or a reading was mistyped. Approve shifts in order, or correct the reading.</td></tr>
+    <tr><td>A nozzle meter was replaced or reset</td><td>Setup → Dispensing units → <b>Meter change</b> (old final reading, new start reading) <i>between</i> shifts. The next shift opens from the new meter.</td></tr>
+    <tr><td>Price changed in the middle of a shift</td><td>Add a <b>price change row</b> for each nozzle: first row up to the change at the old rate, second row after it at the new rate.</td></tr>
+    <tr><td>Attendant short, drawer tallies (or the other way)</td><td>Check counter UPI/card, lube sales, expenses and advances — they belong to the drawer, not to an attendant. Make sure each attendant's UPI/card is on his card, not the counter.</td></tr>
+    <tr><td>Attendant missing in Collections</td><td>Pick him on the Side A / Side B selector (or on the nozzle) in Meter readings.</td></tr>
+    <tr><td>"Credit limit exceeded"</td><td>The customer must pay first, or the owner raises the limit in ERPNext (Customer → Credit Limit).</td></tr>
+    <tr><td>Tanker density outside ±3 kg/m³</td><td>Do not decant. Raise a complaint with the OMC. A manager can accept with remarks only if the OMC instructs.</td></tr>
+    <tr><td>Pump test failed</td><td>Nozzle goes Under Maintenance. Call the DU engineer / Legal Metrology. After repair: Setup → <b>Set active</b>.</td></tr>
+    <tr><td>DSR says "Waiting for closing dips"</td><td>Record the Night (Closing) dip and fetch again, or type the closing dip mm in the DSR table.</td></tr>
+    <tr><td>Recover an advance from salary</td><td>Staff Advances → Recover → Salary deduction. The employee needs a salary structure in HR.</td></tr>
+    <tr><td>Something to change after approval</td><td>Manager cancels the document (latest first) and the cashier creates a corrected one.</td></tr>
+  </table>
+  <div class="box tip"><b>Demo logins</b> (password <b>Demo@12345</b>): owner@petro.demo · manager@petro.demo · cashier@petro.demo · stock@petro.demo</div>
+  <p class="small muted" style="text-align:center">PetroDesk works on phones too: bottom tabs and a + button for quick entries.</p>
+</section>
+</body>
+</html>

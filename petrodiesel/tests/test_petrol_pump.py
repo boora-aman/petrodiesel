@@ -175,6 +175,7 @@ class TestPetrolPump(IntegrationTestCase):
 		doc.submit()
 		doc.reload()
 		self.assertTrue(doc.purchase_invoice)
+		self.assertAlmostEqual(frappe.db.get_value("Purchase Invoice", doc.purchase_invoice, "grand_total"), 2000 * 97.6, places=2)
 		self.assertAlmostEqual(doc.items[0].shortage_qty, 12, delta=3)
 		self.assertTrue(doc.adjustment_entry)
 		self.assertAlmostEqual(get_tank_book_stock("T4-XP95"), before + 2000 - doc.items[0].shortage_qty, places=1)

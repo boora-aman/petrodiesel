@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 0,
  "autoname": "naming_series:",
- "creation": "2026-11-14 12:00:00.000000",
+ "creation": "2026-11-15 14:00:00.000000",
  "default_print_format": "Shift Closing Report",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -31,9 +31,19 @@
   "driver_cash",
   "tab_collection",
   "payments",
+  "sb_attendant",
+  "attendant_collection",
+  "sb_machine",
+  "machine_summary",
   "expenses",
   "employee_advances",
   "sb_cash",
+  "opening_float",
+  "previous_entry",
+  "cb_float",
+  "cash_to_next_shift",
+  "cash_to_safe",
+  "sb_denoms",
   "denominations",
   "tab_summary",
   "total_meter_qty",
@@ -218,6 +228,31 @@
    "options": "Shift Payment"
   },
   {
+   "description": "One row per attendant: what his nozzles sold, minus his credit slips and UPI/card/fleet collections, against the cash he handed over.",
+   "fieldname": "sb_attendant",
+   "fieldtype": "Section Break",
+   "label": "Attendant-wise Collection"
+  },
+  {
+   "fieldname": "attendant_collection",
+   "fieldtype": "Table",
+   "label": "Attendants",
+   "options": "Shift Attendant Collection"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "sb_machine",
+   "fieldtype": "Section Break",
+   "label": "Machine-wise Sales"
+  },
+  {
+   "fieldname": "machine_summary",
+   "fieldtype": "Table",
+   "label": "Machines",
+   "options": "Shift Machine Summary",
+   "read_only": 1
+  },
+  {
    "fieldname": "expenses",
    "fieldtype": "Table",
    "label": "Shift Expenses (paid from cash)",
@@ -232,7 +267,41 @@
   {
    "fieldname": "sb_cash",
    "fieldtype": "Section Break",
-   "label": "Cash Count"
+   "label": "Cash Count & Handover"
+  },
+  {
+   "description": "Cash left in the drawer by the previous shift. Fetched automatically.",
+   "fieldname": "opening_float",
+   "fieldtype": "Currency",
+   "label": "Opening Cash (from previous shift)"
+  },
+  {
+   "fieldname": "previous_entry",
+   "fieldtype": "Link",
+   "label": "Previous Shift Entry",
+   "no_copy": 1,
+   "options": "Shift Sale Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cb_float",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cash_to_next_shift",
+   "fieldtype": "Currency",
+   "label": "Cash Left for Next Shift"
+  },
+  {
+   "fieldname": "cash_to_safe",
+   "fieldtype": "Currency",
+   "label": "Cash Handed to Owner / Safe",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sb_denoms",
+   "fieldtype": "Section Break",
+   "label": ""
   },
   {
    "fieldname": "denominations",
@@ -399,7 +468,7 @@
  "index_web_pages_for_search": 0,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-14 12:00:00.000000",
+ "modified": "2026-11-15 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Shift Sale Entry",

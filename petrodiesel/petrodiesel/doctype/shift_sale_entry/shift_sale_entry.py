@@ -46,10 +46,38 @@ class ShiftSaleEntry(Document):
 		self.validate_credit_rows()
 		self.calculate_other_rows()
 		self.allocate_fuel()
+		self.set_opening_float()
 		self.calculate_totals()
+		self.calculate_machine_summary()
 		self.validate_credit_limits()
 		if self.docstatus == 0:
 			self.status = "Draft"
+
+	def compute(self):
+		"""Totals only, without validation errors (used by live previews)."""
+		self.set_missing_rates()
+		self.calculate_nozzle_rows()
+		for row in self.credit_sales:
+			row.amount = flt(flt(row.qty) * flt(row.rate), 2)
+		self.calculate_other_rows()
+		try:
+			self.allocate_fuel()
+		except frappe.ValidationError:
+			frappe.clear_messages()
+			self._buckets = OrderedDict()
+			self._credit_alloc = []
+			for row in self.nozzle_readings:
+				wh = frappe.get_cached_value("Fuel Tank Master", row.tank, "warehouse") if row.tank else None
+				key = (row.fuel_item, flt(row.rate), wh)
+				self._buckets[key] = flt(self._buckets.get(key, 0) + flt(row.sale_qty), QTY_PRECISION)
+			for c in self.credit_sales:
+				for k in self._buckets:
+					if k[0] == c.fuel_item:
+						self._buckets[k] = flt(self._buckets[k] - flt(c.qty), QTY_PRECISION)
+						break
+		self.set_opening_float()
+		self.calculate_totals()
+		self.calculate_machine_summary()
 
 	def before_submit(self):
 		self.validate_reading_chain()
@@ -267,8 +295,84 @@ class ShiftSaleEntry(Document):
 		self.expected_cash = flt(
 			self.retail_amount - self.digital_amount - self.expense_amount
 			- self.advance_amount - self.driver_cash_amount, 2)
+		self.expected_cash = flt(self.expected_cash + flt(self.opening_float), 2)
 		self.cash_counted = flt(sum(flt(r.amount) for r in self.denominations), 2)
 		self.short_excess = flt(self.cash_counted - self.expected_cash, 2)
+		self.cash_to_next_shift = flt(self.cash_to_next_shift, 2)
+		if self.cash_to_next_shift < 0 or (self.cash_counted and self.cash_to_next_shift > self.cash_counted):
+			frappe.throw(_("Cash left for the next shift must be between 0 and the cash counted."))
+		self.cash_to_safe = flt(self.cash_counted - self.cash_to_next_shift, 2)
+
+	def set_opening_float(self):
+		"""Opening cash = what the previous shift at this outlet left in the drawer."""
+		if self.docstatus != 0 or self.flags.keep_float:
+			return
+		prev = get_previous_shift_entry(self.station, self.posting_date, self.shift, exclude=self.name)
+		self.previous_entry = prev.name if prev else None
+		self.opening_float = flt(prev.cash_to_next_shift) if prev else 0
+
+	def calculate_machine_summary(self):
+		"""Sales per machine side (info) and the cash reconciliation per attendant."""
+		self.calculate_machine_sales()
+		self.calculate_attendant_collection()
+
+	def calculate_machine_sales(self):
+		sides = OrderedDict()
+		for row in self.nozzle_readings:
+			if not row.nozzle:
+				continue
+			du, side = frappe.get_cached_value("Fuel Nozzle Master", row.nozzle, ["dispensing_unit", "side"])
+			m = sides.setdefault((du, side or ""), {"nozzles": [], "attendants": [], "sale_qty": 0.0, "sale_amount": 0.0})
+			if row.nozzle not in m["nozzles"]:
+				m["nozzles"].append(row.nozzle)
+			name = row.attendant_name or (frappe.get_cached_value("Employee", row.attendant, "employee_name") if row.attendant else None)
+			if name and name not in m["attendants"]:
+				m["attendants"].append(name)
+			m["sale_qty"] += flt(row.sale_qty)
+			m["sale_amount"] += flt(row.amount)
+		self.set("machine_summary", [])
+		for (du, side), m in sides.items():
+			self.append("machine_summary", {"dispensing_unit": du, "side": side, "nozzles": ", ".join(m["nozzles"]),
+				"attendants": ", ".join(m["attendants"]), "sale_qty": flt(m["sale_qty"], 2), "sale_amount": flt(m["sale_amount"], 2)})
+
+	def calculate_attendant_collection(self):
+		"""Per attendant: nozzle sales − his credit slips − his digital collections = cash he must hand over."""
+		handed = {r.attendant: flt(r.cash_handed) for r in self.get("attendant_collection", []) if r.attendant}
+		people = OrderedDict()
+
+		def person(emp):
+			return people.setdefault(emp, {"nozzles": [], "sale_qty": 0.0, "sale_amount": 0.0, "credit": 0.0, "digital": 0.0})
+
+		for row in self.nozzle_readings:
+			if not row.attendant:
+				continue
+			p = person(row.attendant)
+			if row.nozzle not in p["nozzles"]:
+				p["nozzles"].append(row.nozzle)
+			p["sale_qty"] += flt(row.sale_qty)
+			p["sale_amount"] += flt(row.amount)
+		for c in self.credit_sales:
+			if c.attendant and c.attendant in people:
+				people[c.attendant]["credit"] += flt(c.amount)
+		for pay in self.payments:
+			if pay.attendant and pay.attendant in people:
+				people[pay.attendant]["digital"] += flt(pay.amount)
+		self.set("attendant_collection", [])
+		for emp, p in people.items():
+			due = flt(p["sale_amount"] - p["credit"] - p["digital"], 2)
+			cash = handed.get(emp, 0)
+			self.append("attendant_collection", {
+				"attendant": emp,
+				"attendant_name": frappe.get_cached_value("Employee", emp, "employee_name"),
+				"nozzles": ", ".join(p["nozzles"]),
+				"sale_qty": flt(p["sale_qty"], 2),
+				"sale_amount": flt(p["sale_amount"], 2),
+				"credit_amount": flt(p["credit"], 2),
+				"digital_amount": flt(p["digital"], 2),
+				"expected_cash": due,
+				"cash_handed": cash,
+				"short_excess": flt(cash - due, 2) if cash else 0,
+			})
 
 	def validate_credit_limits(self):
 		if not self.credit_sales:
@@ -415,7 +519,7 @@ class ShiftSaleEntry(Document):
 				gt = flt(frappe.db.get_value("Sales Invoice", inv, "grand_total"))
 				add(debtors, credit=gt, party_type="Customer", party=walkin, ref=inv)
 
-		add(station.cash_account, debit=self.cash_counted, remark=_("Cash counted"))
+		add(station.cash_account, debit=flt(self.cash_counted) - flt(self.opening_float), remark=_("Cash counted less opening cash"))
 		per_account = defaultdict(float)
 		for p in self.payments:
 			per_account[get_mode_of_payment_account(p.mode_of_payment, self.company)] += flt(p.amount)
@@ -498,6 +602,18 @@ class ShiftSaleEntry(Document):
 				"last_shift_entry": prev.name if prev else None,
 				"last_reading_on": prev.posting_date if prev else None,
 			})
+
+
+def get_previous_shift_entry(station, posting_date, shift, exclude=None):
+	"""Latest submitted shift entry at the station before this date/shift."""
+	seq = frappe.db.get_value("Shift Master", shift, "sequence") or 0
+	rows = frappe.db.sql("""select s.name, s.cash_to_next_shift from `tabShift Sale Entry` s
+		left join `tabShift Master` sm on sm.name = s.shift
+		where s.station = %(station)s and s.docstatus = 1 and s.name != %(exclude)s
+		and (s.posting_date < %(date)s or (s.posting_date = %(date)s and ifnull(sm.sequence, 0) < %(seq)s))
+		order by s.posting_date desc, sm.sequence desc, s.creation desc limit 1""",
+		{"station": station, "date": posting_date, "seq": seq, "exclude": exclude or ""}, as_dict=True)
+	return rows[0] if rows else None
 
 
 def get_previous_entry_for_nozzle(nozzle, exclude=None):

@@ -128,8 +128,13 @@ class TankerReceipt(Document):
 				"cost_center": cost_center,
 			})
 		pi.set_missing_values()
+		# OMC invoice rate is the landed cost; fuel carries no input tax credit, so no tax rows
+		pi.taxes_and_charges = None
+		pi.set("taxes", [])
 		for row, src in zip(pi.items, self.items):
 			row.rate = src.rate
+			row.item_tax_template = None
+			row.item_tax_rate = "{}"
 		pi.calculate_taxes_and_totals()
 		pi.flags.ignore_permissions = True
 		pi.insert()

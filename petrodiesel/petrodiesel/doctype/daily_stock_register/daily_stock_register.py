@@ -44,6 +44,13 @@ class DailyStockRegister(Document):
 				row.closing_stock = dip_to_volume(row.tank, row.closing_dip_mm)
 			row.net_sales = flt(flt(row.meter_sales) - flt(row.test_qty), 2)
 			row.book_closing = flt(flt(row.opening_stock) + flt(row.receipts) - row.net_sales, 2)
+			if not flt(row.permissible_percent):
+				row.permissible_percent = flt(frappe.get_cached_value("Item", row.fuel_item, "permissible_loss_percent")) or default_perm
+			if not flt(row.closing_stock) and not flt(row.closing_dip_mm):
+				# closing dip not taken yet: nothing to compare
+				row.variance = row.variance_percent = row.cumulative_variance = 0
+				row.within_limit = 1
+				continue
 			row.variance = flt(flt(row.closing_stock) - row.book_closing, 2)
 			row.variance_percent = flt(row.variance * 100 / row.net_sales, 3) if row.net_sales else 0
 			if not flt(row.permissible_percent):

@@ -143,6 +143,10 @@ def setup():
 	grant_erpnext_permissions()
 	create_workflows()
 	set_settings_defaults()
+	# Fuel items carry a VAT Item Tax Template for sales. ERPNext would otherwise auto-add those
+	# VAT rows to purchase invoices too, where fuel has no input tax credit.
+	if frappe.get_meta("Accounts Settings").has_field("add_taxes_from_item_tax_template"):
+		frappe.db.set_single_value("Accounts Settings", "add_taxes_from_item_tax_template", 0)
 	frappe.db.commit()
 
 

@@ -45,6 +45,23 @@ class TankDipReading(Document):
 				})
 
 
+	def on_cancel(self):
+		for row in self.readings:
+			refresh_last_dip(row.tank)
+
+
+def refresh_last_dip(tank):
+	"""Point the tank's last dip at its latest submitted dip reading."""
+	last = frappe.db.sql("""select r.dip_mm, r.dip_stock, timestamp(d.posting_date, d.posting_time) at
+		from `tabTank Dip Detail` r join `tabTank Dip Reading` d on d.name = r.parent
+		where r.tank = %s and d.docstatus = 1 order by d.posting_date desc, d.posting_time desc limit 1""", tank, as_dict=True)
+	frappe.db.set_value("Fuel Tank Master", tank, {
+		"last_dip_mm": last[0].dip_mm if last else 0,
+		"last_dip_stock": last[0].dip_stock if last else 0,
+		"last_dip_on": last[0].at if last else None,
+	})
+
+
 @frappe.whitelist()
 def get_tanks(station: str) -> list[dict]:
 	frappe.has_permission("Tank Dip Reading", "create", throw=True)

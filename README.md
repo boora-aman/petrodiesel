@@ -55,6 +55,23 @@ The tests use the demo masters and roll back their own data.
 11. **Opening stock:** post a Stock Reconciliation (Opening Stock) per tank.
 12. **Prices:** submit the first Fuel Price Update.
 
+## PetroDesk frontend (Vue 3 + frappe-ui)
+
+A mobile-first app for the forecourt at **`/petrodesk`** (login, role-based home, shift closing wizard, tanker
+decantation, dips, DSR, pump tests, prices, credit customers, approvals, reports, alerts, outlet setup). It uses
+the same backend: every calculation is previewed on the server (`petrodiesel.api.preview`) while the user types,
+and saving goes through the same validation, workflows and ERPNext postings as Desk.
+
+```bash
+cd apps/petrodiesel/frontend
+yarn install
+yarn build          # outputs to petrodiesel/public/frontend and petrodiesel/www/petrodesk.html
+yarn dev            # dev server on :8087 proxying to the bench (set FRAPPE_WEB_SERVER_PORT if not 8000)
+```
+
+`bench build` also builds it (root `package.json`). The UI design came from Google Stitch screens
+(`docs/google_stitch_prompt.md`).
+
 ## Roles
 
 | Role | Can do |

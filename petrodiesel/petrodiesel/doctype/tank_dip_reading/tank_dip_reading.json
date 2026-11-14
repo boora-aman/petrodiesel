@@ -2,7 +2,7 @@
  "actions": [],
  "allow_rename": 0,
  "autoname": "naming_series:",
- "creation": "2026-11-14 12:00:00.000000",
+ "creation": "2026-11-15 14:00:00.000000",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -153,7 +153,7 @@
  "index_web_pages_for_search": 0,
  "is_submittable": 1,
  "links": [],
- "modified": "2026-11-14 12:00:00.000000",
+ "modified": "2026-11-15 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Tank Dip Reading",
@@ -206,6 +206,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -215,9 +216,11 @@
    "report": 1,
    "role": "Pump Stock Keeper",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
+   "amend": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -227,6 +230,7 @@
    "report": 1,
    "role": "Pump Cashier",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

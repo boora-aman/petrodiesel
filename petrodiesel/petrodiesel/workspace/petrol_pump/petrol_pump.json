@@ -18,8 +18,8 @@
    "label": "Daily Stock Variance"
   }
  ],
- "content": "[{\"id\": \"346b81a32e\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today at the outlet</b></span>\", \"col\": 12}}, {\"id\": \"c5d06058d6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Sale Today (L)\", \"col\": 4}}, {\"id\": \"d740b875a8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Gross Sales Today\", \"col\": 4}}, {\"id\": \"bdd103bca4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Credit Sales Today\", \"col\": 4}}, {\"id\": \"1d03d29a2d\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Digital Collection Today\", \"col\": 4}}, {\"id\": \"cc85c7c548\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cash Short (-) Excess (+) Today\", \"col\": 4}}, {\"id\": \"afee53d8f0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Gross Sales This Month\", \"col\": 4}}, {\"id\": \"e005368b5e\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Sale This Month (L)\", \"col\": 4}}, {\"id\": \"5b2b7d1fe2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Stock in Tanks (L)\", \"col\": 4}}, {\"id\": \"0489bcc491\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Credit Outstanding\", \"col\": 4}}, {\"id\": \"64cfa7397b\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Stock Gain (+) Loss (-) This Month (L)\", \"col\": 4}}, {\"id\": \"7f3fa7aa05\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"490b2834e6\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Entry</b></span>\", \"col\": 12}}, {\"id\": \"9a673e0505\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shift Closing\", \"col\": 3}}, {\"id\": \"0e43b077dd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tanker Receipt\", \"col\": 3}}, {\"id\": \"67eb47b1f3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dip Reading\", \"col\": 3}}, {\"id\": \"97aa3bf997\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Daily Stock Register\", \"col\": 3}}, {\"id\": \"aea5c23dcf\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Price Update\", \"col\": 3}}, {\"id\": \"a46a8b3b27\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Pump Test\", \"col\": 3}}, {\"id\": \"84c7cf423a\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Receive Payment\", \"col\": 3}}, {\"id\": \"7cd717b8fa\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tank Stock\", \"col\": 3}}, {\"id\": \"33cfd1ff8d\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"858bcc8403\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Daily Fuel Sales\", \"col\": 6}}, {\"id\": \"5d154bad97\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Collection Mix\", \"col\": 6}}, {\"id\": \"9e91e3ad06\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Tank Levels\", \"col\": 6}}, {\"id\": \"1659f821f7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Daily Stock Variance\", \"col\": 6}}, {\"id\": \"0df6f113d2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"6f207f8b5d\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Masters & Reports</b></span>\", \"col\": 12}}, {\"id\": \"83ebf381a1\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}, {\"id\": \"d67f2c2285\", \"type\": \"card\", \"data\": {\"card_name\": \"Purchases & Stock\", \"col\": 4}}, {\"id\": \"fdf1f864d6\", \"type\": \"card\", \"data\": {\"card_name\": \"Credit Customers\", \"col\": 4}}, {\"id\": \"2139f1870b\", \"type\": \"card\", \"data\": {\"card_name\": \"Sales Reports\", \"col\": 4}}, {\"id\": \"481005efaa\", \"type\": \"card\", \"data\": {\"card_name\": \"Stock Reports\", \"col\": 4}}, {\"id\": \"b12e6d8494\", \"type\": \"card\", \"data\": {\"card_name\": \"Outlet Setup\", \"col\": 4}}, {\"id\": \"5f13e6dbce\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"9a22bfd2c6\", \"type\": \"card\", \"data\": {\"card_name\": \"Accounts\", \"col\": 4}}]",
- "creation": "2026-11-14 20:00:00.000000",
+ "content": "[{\"id\": \"346b81a32e\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Today at the outlet</b></span>\", \"col\": 12}}, {\"id\": \"c5d06058d6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Sale Today (L)\", \"col\": 4}}, {\"id\": \"d740b875a8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Gross Sales Today\", \"col\": 4}}, {\"id\": \"bdd103bca4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Credit Sales Today\", \"col\": 4}}, {\"id\": \"1d03d29a2d\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Digital Collection Today\", \"col\": 4}}, {\"id\": \"cc85c7c548\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Cash Short (-) Excess (+) Today\", \"col\": 4}}, {\"id\": \"afee53d8f0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Gross Sales This Month\", \"col\": 4}}, {\"id\": \"e005368b5e\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Sale This Month (L)\", \"col\": 4}}, {\"id\": \"5b2b7d1fe2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Fuel Stock in Tanks (L)\", \"col\": 4}}, {\"id\": \"0489bcc491\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Credit Outstanding\", \"col\": 4}}, {\"id\": \"64cfa7397b\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Stock Gain (+) Loss (-) This Month (L)\", \"col\": 4}}, {\"id\": \"7f3fa7aa05\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"490b2834e6\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Quick Entry</b></span>\", \"col\": 12}}, {\"id\": \"9a673e0505\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Shift Closing\", \"col\": 3}}, {\"id\": \"0e43b077dd\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tanker Receipt\", \"col\": 3}}, {\"id\": \"67eb47b1f3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Dip Reading\", \"col\": 3}}, {\"id\": \"97aa3bf997\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Daily Stock Register\", \"col\": 3}}, {\"id\": \"aea5c23dcf\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Price Update\", \"col\": 3}}, {\"id\": \"a46a8b3b27\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Pump Test\", \"col\": 3}}, {\"id\": \"84c7cf423a\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Receive Payment\", \"col\": 3}}, {\"id\": \"7cd717b8fa\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Tank Stock\", \"col\": 3}}, {\"id\": \"33cfd1ff8d\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"858bcc8403\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Daily Fuel Sales\", \"col\": 6}}, {\"id\": \"5d154bad97\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Collection Mix\", \"col\": 6}}, {\"id\": \"9e91e3ad06\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Tank Levels\", \"col\": 6}}, {\"id\": \"1659f821f7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Daily Stock Variance\", \"col\": 6}}, {\"id\": \"0df6f113d2\", \"type\": \"spacer\", \"data\": {\"col\": 12}}, {\"id\": \"6f207f8b5d\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Masters & Reports</b></span>\", \"col\": 12}}, {\"id\": \"83ebf381a1\", \"type\": \"card\", \"data\": {\"card_name\": \"Daily Operations\", \"col\": 4}}, {\"id\": \"d67f2c2285\", \"type\": \"card\", \"data\": {\"card_name\": \"Purchases & Stock\", \"col\": 4}}, {\"id\": \"fdf1f864d6\", \"type\": \"card\", \"data\": {\"card_name\": \"Credit Customers\", \"col\": 4}}, {\"id\": \"2139f1870b\", \"type\": \"card\", \"data\": {\"card_name\": \"Sales Reports\", \"col\": 4}}, {\"id\": \"ffea8619f5\", \"type\": \"card\", \"data\": {\"card_name\": \"Staff Advances\", \"col\": 4}}, {\"id\": \"481005efaa\", \"type\": \"card\", \"data\": {\"card_name\": \"Stock Reports\", \"col\": 4}}, {\"id\": \"b12e6d8494\", \"type\": \"card\", \"data\": {\"card_name\": \"Outlet Setup\", \"col\": 4}}, {\"id\": \"5f13e6dbce\", \"type\": \"card\", \"data\": {\"card_name\": \"Compliance\", \"col\": 4}}, {\"id\": \"9a22bfd2c6\", \"type\": \"card\", \"data\": {\"card_name\": \"Accounts\", \"col\": 4}}]",
+ "creation": "2026-11-15 14:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -97,7 +97,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Purchases & Stock",
-   "link_count": 5,
+   "link_count": 7,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -108,6 +108,28 @@
    "label": "Tanker Receipt",
    "link_count": 0,
    "link_to": "Tanker Receipt",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Shop Purchase",
+   "link_count": 0,
+   "link_to": "Shop Purchase",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Internal Stock Transfer",
+   "link_count": 0,
+   "link_to": "Internal Stock Transfer",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -160,7 +182,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Credit Customers",
-   "link_count": 6,
+   "link_count": 7,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -182,6 +204,17 @@
    "label": "Customer Vehicle",
    "link_count": 0,
    "link_to": "Customer Vehicle",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Credit Bill",
+   "link_count": 0,
+   "link_to": "Credit Bill",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -234,7 +267,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Reports",
-   "link_count": 6,
+   "link_count": 12,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -305,10 +338,117 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Attendant Collection",
+   "link_count": 0,
+   "link_to": "Attendant Collection",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Machine-wise Sales",
+   "link_count": 0,
+   "link_to": "Machine-wise Sales",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Cashier Performance",
+   "link_count": 0,
+   "link_to": "Cashier Performance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Monthly Sales Analysis",
+   "link_count": 0,
+   "link_to": "Monthly Sales Analysis",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Expense Category Analysis",
+   "link_count": 0,
+   "link_to": "Expense Category Analysis",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Comprehensive Daily Operations",
+   "link_count": 0,
+   "link_to": "Comprehensive Daily Operations",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Staff Advances",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Staff Advance",
+   "link_count": 0,
+   "link_to": "Staff Advance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Staff Advance Recovery",
+   "link_count": 0,
+   "link_to": "Staff Advance Recovery",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Staff Advance Balance",
+   "link_count": 0,
+   "link_to": "Staff Advance Balance",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Stock Reports",
-   "link_count": 3,
+   "link_count": 4,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -341,6 +481,17 @@
    "label": "Tanker Receipt Register",
    "link_count": 0,
    "link_to": "Tanker Receipt Register",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Tank Stock Movement",
+   "link_count": 0,
+   "link_to": "Tank Stock Movement",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -546,7 +697,7 @@
    "type": "Link"
   }
  ],
- "modified": "2026-11-14 20:00:00.000000",
+ "modified": "2026-11-15 14:00:00.000000",
  "modified_by": "Administrator",
  "module": "Petrodiesel",
  "name": "Petrol Pump",

@@ -7,3 +7,5 @@ node_modules
 __pycache__
 .claude/
 
+petrodiesel/public/frontend/
+petrodiesel/www/petrodesk.html

@@ -12,7 +12,7 @@ add_to_apps_screen = [
 		"name": "petrodiesel",
 		"logo": "/assets/petrodiesel/images/logo.svg",
 		"title": "Petrol Pump",
-		"route": "/desk/petrodiesel/petrol-pump",
+		"route": "/petrodesk",
 	}
 ]
 
@@ -23,3 +23,7 @@ scheduler_events = {
 	"daily": ["petrodiesel.tasks.daily"],
 }
 
+
+website_route_rules = [
+	{"from_route": "/petrodesk/<path:app_path>", "to_route": "petrodesk"},
+]

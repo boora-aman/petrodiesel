@@ -318,6 +318,8 @@ def ensure_masters(company, acc):
 			frappe.db.set_value("Employee", emp, "user_id", email)
 	frappe.flags.demo_employees = employees
 
+	ensure_payroll(company, employees)
+
 	# station
 	if not frappe.db.exists("Fuel Station", STATION):
 		frappe.get_doc({
@@ -364,6 +366,32 @@ def ensure_masters(company, acc):
 	s.update({"default_station": STATION, "fuel_price_list": "Standard Selling", "fuel_item_group": "Fuel",
 		"lube_item_group": "Lubricants", "fuel_tax_template": fuel_tpl, "lube_tax_template": lube_tpl})
 	s.save(ignore_permissions=True)
+
+
+def ensure_payroll(company, employees):
+	"""Minimal payroll so advances can be recovered from salary (HRMS)."""
+	if "hrms" not in frappe.get_installed_apps():
+		return
+	if not frappe.db.exists("Salary Component", "Basic"):
+		frappe.get_doc({"doctype": "Salary Component", "salary_component": "Basic", "salary_component_abbr": "B",
+			"type": "Earning"}).insert(ignore_permissions=True)
+	name = "Pump Staff Monthly"
+	if not frappe.db.exists("Salary Structure", name):
+		ss = frappe.get_doc({"doctype": "Salary Structure", "name": name, "__newname": name, "company": company,
+			"payroll_frequency": "Monthly", "currency": "INR", "is_active": "Yes",
+			"earnings": [{"salary_component": "Basic", "abbr": "B", "amount_based_on_formula": 1, "formula": "base"}]})
+		ss.insert(ignore_permissions=True)
+		ss.submit()
+	year = getdate(today()).year
+	start = f"{year if getdate(today()).month >= 4 else year - 1}-04-01"
+	for desig, emps in employees.items():
+		for emp in emps:
+			if not frappe.db.exists("Salary Structure Assignment", {"employee": emp, "docstatus": 1}):
+				a = frappe.get_doc({"doctype": "Salary Structure Assignment", "employee": emp, "salary_structure": name,
+					"company": company, "from_date": start, "base": 18000 if desig in ("Cashier", "Stock Keeper") else 14000,
+					"currency": "INR"})
+				a.insert(ignore_permissions=True)
+				a.submit()
 
 
 def horizontal_volume(h, dia, length):
@@ -556,8 +584,12 @@ def shift_entry(date, shift_name, end_time, attendants, cashiers, submit=True):
 		lo, hi = SHIFT_SALES[fuel]
 		sale = round(random.uniform(lo, hi) / 2, 2)  # two nozzles per fuel per tank pair
 		test = 5.0 if shift_name == "Morning" else 0.0
+		side_key = n["nozzle"][:3] + ("A" if n["nozzle"][-1] in "12" else "B")
+		roster = frappe.flags.setdefault("demo_roster", {})
+		if side_key not in roster and attendants:
+			roster[side_key] = attendants[len(roster) % len(attendants)]
 		doc.append("nozzle_readings", {**n, "closing_reading": round(n["opening_reading"] + sale + test, 2),
-			"test_qty": test, "attendant": random.choice(attendants) if attendants else None})
+			"test_qty": test, "attendant": roster.get(side_key)})
 	doc.run_method("validate")  # compute totals for realistic collections below
 
 	# credit slips (diesel mostly)
@@ -604,12 +636,24 @@ def shift_entry(date, shift_name, end_time, attendants, cashiers, submit=True):
 	upi = round(retail * random.uniform(0.30, 0.42), 0)
 	card = round(retail * random.uniform(0.06, 0.12), 0)
 	fleet = round(retail * random.uniform(0.02, 0.06), 0)
-	doc.append("payments", {"mode_of_payment": "UPI", "amount": upi, "reference_no": f"UPI-{random.randint(10**5, 10**6)}",
-		"terminal_id": "Paytm QR-1"})
-	doc.append("payments", {"mode_of_payment": "Credit / Debit Card", "amount": card,
-		"reference_no": f"BATCH-{random.randint(100, 999)}", "terminal_id": "HDFC POS-1"})
-	doc.append("payments", {"mode_of_payment": "IOCL Fleet Card", "amount": fleet,
-		"reference_no": f"XTRA-{random.randint(100, 999)}", "terminal_id": "XTRAPOWER EDC"})
+	# each attendant collects UPI / card / fleet on his own terminal and fills credit slips
+	people = list(dict.fromkeys(r.attendant for r in doc.nozzle_readings if r.attendant))
+	for mode, amt, ref, term in (("UPI", upi, "UPI", "QR"), ("Credit / Debit Card", card, "BATCH", "POS"),
+			("IOCL Fleet Card", fleet, "XTRA", "EDC")):
+		left = amt
+		for i, emp in enumerate(people):
+			part = left if i == len(people) - 1 else round(amt / len(people) * random.uniform(0.7, 1.3), 0)
+			part = min(part, left)
+			left -= part
+			if part > 0:
+				doc.append("payments", {"mode_of_payment": mode, "amount": part, "attendant": emp,
+					"reference_no": f"{ref}-{random.randint(100, 999)}", "terminal_id": f"{term}-{i + 1}"})
+	hsd_people = list(dict.fromkeys(r.attendant for r in doc.nozzle_readings if r.attendant and r.fuel_item == "HSD")) or people
+	for c in doc.credit_sales:
+		c.attendant = random.choice(hsd_people) if c.fuel_item == "HSD" else random.choice(people)
+	doc.run_method("validate")
+	for a in doc.attendant_collection:  # attendants hand over cash, sometimes a little short
+		a.cash_handed = max(a.expected_cash + random.choice([0, 0, 0, -10, -20, 10]), 0)
 	doc.run_method("validate")
 
 	variance = random.choice([0, 0, 0, -10, -20, -50, 10, 20, -120])

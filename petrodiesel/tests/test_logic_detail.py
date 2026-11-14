@@ -113,7 +113,7 @@ class TestLogicDetail(IntegrationTestCase):
 		self.assertEqual(doc.total_meter_qty, 400)
 		self.assertEqual(doc.total_test_qty, 5)
 		self.assertEqual(doc.total_sale_qty, 395)
-		expected = flt(retail_fuel + 520 - 3000 - 150 - 400 - 500, 2)
+		expected = flt(retail_fuel + 520 - 3000 - 150 - 400 - 500 + flt(doc.opening_float), 2)
 		self.assertAlmostEqual(doc.expected_cash, expected, places=1)
 		self.assertEqual(doc.cash_counted, 5300)
 		self.assertAlmostEqual(doc.short_excess, flt(5300 - expected, 2), places=1)
