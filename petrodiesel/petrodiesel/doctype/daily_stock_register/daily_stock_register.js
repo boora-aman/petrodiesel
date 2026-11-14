@@ -7,14 +7,21 @@ frappe.ui.form.on("Daily Stock Register", {
 	},
 	async onload(frm) {
 		if (frm.is_new() && !frm.doc.station) {
-			const station = await frappe.db.get_single_value("Petrodiesel Settings", "default_station");
+			const station = await frappe.db.get_single_value(
+				"Petrodiesel Settings",
+				"default_station"
+			);
 			if (station) frm.set_value("station", station);
 		}
 	},
 	refresh(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.stock_reconciliation) {
-			frm.add_custom_button(__("Stock Reconciliation"), () =>
-				frappe.set_route("Form", "Stock Reconciliation", frm.doc.stock_reconciliation), __("View"));
+			frm.add_custom_button(
+				__("Stock Reconciliation"),
+				() =>
+					frappe.set_route("Form", "Stock Reconciliation", frm.doc.stock_reconciliation),
+				__("View")
+			);
 		}
 		if (frm.doc.items && frm.doc.items.length) {
 			const ok = frm.doc.all_within_limit;
@@ -26,7 +33,8 @@ frappe.ui.form.on("Daily Stock Register", {
 		}
 	},
 	fetch_data(frm) {
-		if (!frm.doc.station || !frm.doc.posting_date) return frappe.msgprint(__("Select station and date."));
+		if (!frm.doc.station || !frm.doc.posting_date)
+			return frappe.msgprint(__("Select station and date."));
 		frm.call({ doc: frm.doc, method: "fetch_data", freeze: true }).then(() => frm.refresh());
 	},
 });
@@ -35,7 +43,10 @@ frappe.ui.form.on("Daily Stock Register Item", {
 	async closing_dip_mm(frm, cdt, cdn) {
 		const row = locals[cdt][cdn];
 		if (!row.tank || !flt(row.closing_dip_mm)) return;
-		const r = await frappe.call("petrodiesel.petrodiesel.utils.get_dip_volume", { tank: row.tank, dip_mm: row.closing_dip_mm });
+		const r = await frappe.call("petrodiesel.petrodiesel.utils.get_dip_volume", {
+			tank: row.tank,
+			dip_mm: row.closing_dip_mm,
+		});
 		await frappe.model.set_value(cdt, cdn, "closing_stock", r.message.gross);
 	},
 	closing_stock: (frm, cdt, cdn) => petro_dsr.calc(frm, cdt, cdn),
@@ -53,11 +64,23 @@ const petro_dsr = {
 		r.book_closing = flt(flt(r.opening_stock) + flt(r.receipts) - r.net_sales, 2);
 		r.variance = flt(flt(r.closing_stock) - r.book_closing, 2);
 		r.variance_percent = r.net_sales ? flt((r.variance * 100) / r.net_sales, 3) : 0;
-		r.within_limit = r.variance >= -(flt(r.permissible_percent) * Math.max(r.net_sales, 0)) / 100 - 0.01 ? 1 : 0;
+		r.within_limit =
+			r.variance >= -(flt(r.permissible_percent) * Math.max(r.net_sales, 0)) / 100 - 0.01
+				? 1
+				: 0;
 		const items = frm.doc.items || [];
-		frm.doc.total_receipts = flt(items.reduce((a, x) => a + flt(x.receipts), 0), 2);
-		frm.doc.total_sales = flt(items.reduce((a, x) => a + flt(x.net_sales), 0), 2);
-		frm.doc.total_variance = flt(items.reduce((a, x) => a + flt(x.variance), 0), 2);
+		frm.doc.total_receipts = flt(
+			items.reduce((a, x) => a + flt(x.receipts), 0),
+			2
+		);
+		frm.doc.total_sales = flt(
+			items.reduce((a, x) => a + flt(x.net_sales), 0),
+			2
+		);
+		frm.doc.total_variance = flt(
+			items.reduce((a, x) => a + flt(x.variance), 0),
+			2
+		);
 		frm.doc.all_within_limit = items.every((x) => x.within_limit) ? 1 : 0;
 		frm.refresh_fields();
 	},

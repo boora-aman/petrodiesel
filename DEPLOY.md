@@ -68,7 +68,7 @@ chmod -R o+rx /home/frappe
 ```bash
 bench get-app erpnext --branch version-16
 bench get-app hrms --branch version-16
-bench get-app https://github.com/boora-aman/petrodiesel --branch rebuild/indian-retail-outlet
+bench get-app https://github.com/boora-aman/petrodiesel --branch main
 ```
 
 `get-app` installs PetroDesk's frontend dependencies and builds it (`yarn build` in `apps/petrodiesel/frontend`).

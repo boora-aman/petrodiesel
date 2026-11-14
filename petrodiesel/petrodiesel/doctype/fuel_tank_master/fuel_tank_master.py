@@ -23,18 +23,41 @@ class FuelTankMaster(Document):
 		company = frappe.get_cached_value("Fuel Station", self.station, "company")
 		wh_company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
 		if wh_company != company:
-			frappe.throw(_("Warehouse {0} belongs to {1}, not {2}.").format(self.warehouse, wh_company, company))
+			frappe.throw(
+				_("Warehouse {0} belongs to {1}, not {2}.").format(self.warehouse, wh_company, company)
+			)
 		if frappe.get_cached_value("Item", self.fuel_item, "petro_product_type") != "Fuel":
-			frappe.throw(_("Item {0} is not marked as Fuel (Item > Petrol Pump > Product Type).").format(self.fuel_item))
-		other = frappe.db.get_value("Fuel Tank Master", {"warehouse": self.warehouse, "name": ["!=", self.name]})
+			frappe.throw(
+				_("Item {0} is not marked as Fuel (Item > Petrol Pump > Product Type).").format(
+					self.fuel_item
+				)
+			)
+		other = frappe.db.get_value(
+			"Fuel Tank Master", {"warehouse": self.warehouse, "name": ["!=", self.name]}
+		)
 		if other:
-			frappe.throw(_("Warehouse {0} is already used by tank {1}. Use one warehouse per tank.").format(self.warehouse, other))
+			frappe.throw(
+				_("Warehouse {0} is already used by tank {1}. Use one warehouse per tank.").format(
+					self.warehouse, other
+				)
+			)
 		self.calibration_data.sort(key=lambda r: flt(r.dip_mm))
 		prev = None
 		for i, row in enumerate(self.calibration_data, 1):
 			row.idx = i
-			if prev and (flt(row.dip_mm) == flt(prev.dip_mm) or flt(row.volume_liters) < flt(prev.volume_liters)):
-				frappe.throw(_("Calibration chart row {0}: dips must be unique and volumes must increase with dip.").format(i))
+			if prev and (
+				flt(row.dip_mm) == flt(prev.dip_mm) or flt(row.volume_liters) < flt(prev.volume_liters)
+			):
+				frappe.throw(
+					_(
+						"Calibration chart row {0}: dips must be unique and volumes must increase with dip."
+					).format(i)
+				)
 			prev = row
-		if self.calibration_data and flt(self.calibration_data[-1].volume_liters) > flt(self.capacity_liters) * 1.05:
-			frappe.msgprint(_("Calibration chart volume exceeds tank capacity. Check the chart."), indicator="orange")
+		if (
+			self.calibration_data
+			and flt(self.calibration_data[-1].volume_liters) > flt(self.capacity_liters) * 1.05
+		):
+			frappe.msgprint(
+				_("Calibration chart volume exceeds tank capacity. Check the chart."), indicator="orange"
+			)

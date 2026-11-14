@@ -13,7 +13,13 @@ def _station_cond(filters, alias="s"):
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = [
-		{"label": _("Entry"), "fieldname": "name", "fieldtype": "Link", "options": "Shift Sale Entry", "width": 150},
+		{
+			"label": _("Entry"),
+			"fieldname": "name",
+			"fieldtype": "Link",
+			"options": "Shift Sale Entry",
+			"width": 150,
+		},
 		{"label": _("Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 95},
 		{"label": _("Shift"), "fieldname": "shift", "fieldtype": "Data", "width": 80},
 		{"label": _("Cashier"), "fieldname": "cashier_name", "fieldtype": "Data", "width": 120},
@@ -32,11 +38,15 @@ def execute(filters=None):
 		cond += " and s.cashier = %(cashier)s"
 	if filters.only_variance:
 		cond += " and abs(s.short_excess) >= 1"
-	data = frappe.db.sql(f"""
+	data = frappe.db.sql(
+		f"""
 		select s.name, s.posting_date, s.shift, s.cashier_name,
 			s.gross_sales - s.credit_sales_amount retail, s.digital_amount, s.expense_amount, s.advance_amount,
 			s.driver_cash_amount, s.expected_cash, s.cash_counted, s.short_excess, s.remarks
 		from `tabShift Sale Entry` s left join `tabShift Master` sm on sm.name = s.shift
 		where s.docstatus = 1 and s.posting_date between %(from_date)s and %(to_date)s {cond}
-		order by s.posting_date, sm.sequence""", filters, as_dict=True)
+		order by s.posting_date, sm.sequence""",
+		filters,
+		as_dict=True,
+	)
 	return columns, data

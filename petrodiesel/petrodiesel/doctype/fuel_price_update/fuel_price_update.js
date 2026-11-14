@@ -7,12 +7,17 @@ frappe.ui.form.on("Fuel Price Update", {
 	},
 	async onload(frm) {
 		if (frm.is_new() && !frm.doc.price_list) {
-			frm.set_value("price_list", await frappe.db.get_single_value("Petrodiesel Settings", "fuel_price_list"));
+			frm.set_value(
+				"price_list",
+				await frappe.db.get_single_value("Petrodiesel Settings", "fuel_price_list")
+			);
 		}
 	},
 	async get_items(frm) {
-		const r = await frappe.call("petrodiesel.petrodiesel.doctype.fuel_price_update.fuel_price_update.get_fuel_items",
-			{ effective_date: frm.doc.effective_date, price_list: frm.doc.price_list });
+		const r = await frappe.call(
+			"petrodiesel.petrodiesel.doctype.fuel_price_update.fuel_price_update.get_fuel_items",
+			{ effective_date: frm.doc.effective_date, price_list: frm.doc.price_list }
+		);
 		frm.clear_table("items");
 		(r.message || []).forEach((i) => frm.add_child("items", i));
 		frm.refresh_field("items");

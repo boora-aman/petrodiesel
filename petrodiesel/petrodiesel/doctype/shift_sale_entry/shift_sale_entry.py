@@ -15,6 +15,7 @@ recorded against them. On submit the shift is posted to ERPNext:
 
 from __future__ import annotations
 
+import itertools
 from collections import OrderedDict, defaultdict
 
 import frappe
@@ -33,8 +34,15 @@ READING_TOLERANCE = 0.01
 
 
 class ShiftSaleEntry(Document):
-	ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry",
-		"Sales Invoice", "Journal Entry", "Repost Item Valuation", "Serial and Batch Bundle")
+	ignore_linked_doctypes = (
+		"GL Entry",
+		"Stock Ledger Entry",
+		"Payment Ledger Entry",
+		"Sales Invoice",
+		"Journal Entry",
+		"Repost Item Valuation",
+		"Serial and Batch Bundle",
+	)
 
 	# ------------------------------------------------------------------ validate
 	def validate(self):
@@ -107,7 +115,9 @@ class ShiftSaleEntry(Document):
 	def set_missing_rates(self):
 		for row in self.nozzle_readings:
 			if not row.fuel_item and row.nozzle:
-				row.fuel_item, row.tank = frappe.db.get_value("Fuel Nozzle Master", row.nozzle, ["fuel_item", "tank"])
+				row.fuel_item, row.tank = frappe.db.get_value(
+					"Fuel Nozzle Master", row.nozzle, ["fuel_item", "tank"]
+				)
 			if not flt(row.rate) and row.fuel_item:
 				row.rate = get_fuel_rate(row.fuel_item, self.posting_date)
 		for row in self.credit_sales:
@@ -127,24 +137,38 @@ class ShiftSaleEntry(Document):
 		station_nozzles = set(frappe.get_all("Fuel Nozzle Master", {"station": self.station}, pluck="name"))
 		for row in self.nozzle_readings:
 			if row.nozzle not in station_nozzles:
-				frappe.throw(_("Row {0}: Nozzle {1} does not belong to station {2}.").format(row.idx, row.nozzle, self.station))
+				frappe.throw(
+					_("Row {0}: Nozzle {1} does not belong to station {2}.").format(
+						row.idx, row.nozzle, self.station
+					)
+				)
 			if flt(row.closing_reading) < flt(row.opening_reading):
 				frappe.throw(
-					_("Row {0}: Closing reading {1} is less than opening reading {2} for nozzle {3}. "
-					"If the meter was replaced, update the nozzle totalizer first.").format(
-						row.idx, row.closing_reading, row.opening_reading, row.nozzle))
+					_(
+						"Row {0}: Closing reading {1} is less than opening reading {2} for nozzle {3}. "
+						"If the meter was replaced, update the nozzle totalizer first."
+					).format(row.idx, row.closing_reading, row.opening_reading, row.nozzle)
+				)
 			if flt(row.test_qty) < 0 or flt(row.test_qty) > flt(row.meter_qty):
-				frappe.throw(_("Row {0}: Test quantity must be between 0 and the meter quantity.").format(row.idx))
+				frappe.throw(
+					_("Row {0}: Test quantity must be between 0 and the meter quantity.").format(row.idx)
+				)
 			if flt(row.rate) <= 0 and flt(row.sale_qty) > 0:
-				frappe.throw(_("Row {0}: Rate is missing for {1}. Submit a Fuel Price Update first.").format(row.idx, row.fuel_item))
+				frappe.throw(
+					_("Row {0}: Rate is missing for {1}. Submit a Fuel Price Update first.").format(
+						row.idx, row.fuel_item
+					)
+				)
 
 		# multiple rows for one nozzle (e.g. price change at 06:00) must chain
 		for nozzle, rows in self._rows_by_nozzle().items():
-			for prev, cur in zip(rows, rows[1:]):
+			for prev, cur in itertools.pairwise(rows):
 				if abs(flt(cur.opening_reading) - flt(prev.closing_reading)) > READING_TOLERANCE:
 					frappe.throw(
 						_("Nozzle {0}: row {1} opening ({2}) must equal row {3} closing ({4}).").format(
-							nozzle, cur.idx, cur.opening_reading, prev.idx, prev.closing_reading))
+							nozzle, cur.idx, cur.opening_reading, prev.idx, prev.closing_reading
+						)
+					)
 
 	def _rows_by_nozzle(self):
 		out = defaultdict(list)
@@ -162,33 +186,54 @@ class ShiftSaleEntry(Document):
 		sse = frappe.qb.DocType("Shift Sale Entry")
 		dup = (
 			frappe.qb.from_(snr)
-			.join(sse).on(snr.parent == sse.name)
+			.join(sse)
+			.on(snr.parent == sse.name)
 			.select(sse.name, snr.nozzle)
 			.where(
-				(sse.docstatus < 2) & (sse.name != (self.name or "")) & (sse.station == self.station)
-				& (sse.posting_date == self.posting_date) & (sse.shift == self.shift) & (snr.nozzle.isin(nozzles))
+				(sse.docstatus < 2)
+				& (sse.name != (self.name or ""))
+				& (sse.station == self.station)
+				& (sse.posting_date == self.posting_date)
+				& (sse.shift == self.shift)
+				& (snr.nozzle.isin(nozzles))
 			)
 			.limit(1)
 			.run(as_dict=True)
 		)
 		if dup:
-			frappe.throw(_("Nozzle {0} is already recorded in {1} for this date and shift.").format(
-				dup[0].nozzle, frappe.bold(dup[0].name)))
+			frappe.throw(
+				_("Nozzle {0} is already recorded in {1} for this date and shift.").format(
+					dup[0].nozzle, frappe.bold(dup[0].name)
+				)
+			)
 
 	def validate_reading_chain(self):
 		for nozzle, rows in self._rows_by_nozzle().items():
-			n = frappe.db.get_value("Fuel Nozzle Master", nozzle,
-				["last_reading", "opening_totalizer", "last_reading_on", "last_shift_entry"], as_dict=True)
+			n = frappe.db.get_value(
+				"Fuel Nozzle Master",
+				nozzle,
+				["last_reading", "opening_totalizer", "last_reading_on", "last_shift_entry"],
+				as_dict=True,
+			)
 			expected = flt(n.last_reading)
 			if abs(flt(rows[0].opening_reading) - expected) > READING_TOLERANCE:
 				frappe.throw(
-					_("Nozzle {0}: opening reading {1} does not match the last closing reading {2}{3}. "
-					"Submit earlier shifts in order, or correct the reading.").format(
-						nozzle, rows[0].opening_reading, expected,
-						f" ({n.last_shift_entry})" if n.last_shift_entry else ""))
+					_(
+						"Nozzle {0}: opening reading {1} does not match the last closing reading {2}{3}. "
+						"Submit earlier shifts in order, or correct the reading."
+					).format(
+						nozzle,
+						rows[0].opening_reading,
+						expected,
+						f" ({n.last_shift_entry})" if n.last_shift_entry else "",
+					)
+				)
 			if n.last_reading_on and getdate(self.posting_date) < getdate(n.last_reading_on):
-				frappe.throw(_("Nozzle {0} already has a reading on {1}, after this business date.").format(
-					nozzle, n.last_reading_on))
+				frappe.throw(
+					_("Nozzle {0} already has a reading on {1}, after this business date.").format(
+						nozzle, n.last_reading_on
+					)
+				)
 
 	def validate_credit_rows(self):
 		for row in self.credit_sales:
@@ -198,10 +243,15 @@ class ShiftSaleEntry(Document):
 				frappe.throw(_("Credit row {0}: rate is missing.").format(row.idx))
 			row.amount = flt(flt(row.qty) * flt(row.rate), 2)
 			if row.vehicle:
-				owner, active = frappe.db.get_value("Customer Vehicle", row.vehicle, ["customer", "is_active"])
+				owner, active = frappe.db.get_value(
+					"Customer Vehicle", row.vehicle, ["customer", "is_active"]
+				)
 				if owner != row.customer:
-					frappe.throw(_("Credit row {0}: vehicle {1} belongs to {2}, not {3}.").format(
-						row.idx, row.vehicle, owner, row.customer))
+					frappe.throw(
+						_("Credit row {0}: vehicle {1} belongs to {2}, not {3}.").format(
+							row.idx, row.vehicle, owner, row.customer
+						)
+					)
 				if not cint(active):
 					frappe.throw(_("Credit row {0}: vehicle {1} is inactive.").format(row.idx, row.vehicle))
 		for row in self.driver_cash:
@@ -214,7 +264,8 @@ class ShiftSaleEntry(Document):
 			row.amount = flt(flt(row.qty) * flt(row.rate), 2)
 			if not row.warehouse:
 				row.warehouse = station_wh or frappe.db.get_value(
-					"Item Default", {"parent": row.item_code, "company": self.company}, "default_warehouse")
+					"Item Default", {"parent": row.item_code, "company": self.company}, "default_warehouse"
+				)
 		for row in self.denominations:
 			row.amount = flt(cint(row.denomination) * cint(row.count), 2)
 
@@ -247,8 +298,10 @@ class ShiftSaleEntry(Document):
 				credit_alloc.append((crow, k[2], take))
 			if need > READING_TOLERANCE:
 				frappe.throw(
-					_("Credit sales of {0} exceed metered sales by {1} L. Check the slips and meter readings.").format(
-						frappe.bold(crow.fuel_item), need))
+					_(
+						"Credit sales of {0} exceed metered sales by {1} L. Check the slips and meter readings."
+					).format(frappe.bold(crow.fuel_item), need)
+				)
 
 		self._buckets = buckets
 		self._credit_alloc = credit_alloc
@@ -265,15 +318,18 @@ class ShiftSaleEntry(Document):
 				summary[crow.fuel_item]["credit_qty"] += flt(crow.qty)
 		self.set("fuel_summary", [])
 		for item, s in summary.items():
-			self.append("fuel_summary", {
-				"fuel_item": item,
-				"meter_qty": flt(s["meter_qty"], QTY_PRECISION),
-				"test_qty": flt(s["test_qty"], QTY_PRECISION),
-				"sale_qty": flt(s["sale_qty"], QTY_PRECISION),
-				"credit_qty": flt(s["credit_qty"], QTY_PRECISION),
-				"retail_qty": flt(s["sale_qty"] - s["credit_qty"], QTY_PRECISION),
-				"amount": flt(s["amount"], 2),
-			})
+			self.append(
+				"fuel_summary",
+				{
+					"fuel_item": item,
+					"meter_qty": flt(s["meter_qty"], QTY_PRECISION),
+					"test_qty": flt(s["test_qty"], QTY_PRECISION),
+					"sale_qty": flt(s["sale_qty"], QTY_PRECISION),
+					"credit_qty": flt(s["credit_qty"], QTY_PRECISION),
+					"retail_qty": flt(s["sale_qty"] - s["credit_qty"], QTY_PRECISION),
+					"amount": flt(s["amount"], 2),
+				},
+			)
 
 	def calculate_totals(self):
 		self.total_meter_qty = flt(sum(flt(r.meter_qty) for r in self.nozzle_readings), QTY_PRECISION)
@@ -293,8 +349,13 @@ class ShiftSaleEntry(Document):
 
 		self.retail_amount = flt(retail_fuel + self.other_sales_amount, 2)
 		self.expected_cash = flt(
-			self.retail_amount - self.digital_amount - self.expense_amount
-			- self.advance_amount - self.driver_cash_amount, 2)
+			self.retail_amount
+			- self.digital_amount
+			- self.expense_amount
+			- self.advance_amount
+			- self.driver_cash_amount,
+			2,
+		)
 		self.expected_cash = flt(self.expected_cash + flt(self.opening_float), 2)
 		self.cash_counted = flt(sum(flt(r.amount) for r in self.denominations), 2)
 		self.short_excess = flt(self.cash_counted - self.expected_cash, 2)
@@ -322,26 +383,43 @@ class ShiftSaleEntry(Document):
 			if not row.nozzle:
 				continue
 			du, side = frappe.get_cached_value("Fuel Nozzle Master", row.nozzle, ["dispensing_unit", "side"])
-			m = sides.setdefault((du, side or ""), {"nozzles": [], "attendants": [], "sale_qty": 0.0, "sale_amount": 0.0})
+			m = sides.setdefault(
+				(du, side or ""), {"nozzles": [], "attendants": [], "sale_qty": 0.0, "sale_amount": 0.0}
+			)
 			if row.nozzle not in m["nozzles"]:
 				m["nozzles"].append(row.nozzle)
-			name = row.attendant_name or (frappe.get_cached_value("Employee", row.attendant, "employee_name") if row.attendant else None)
+			name = row.attendant_name or (
+				frappe.get_cached_value("Employee", row.attendant, "employee_name") if row.attendant else None
+			)
 			if name and name not in m["attendants"]:
 				m["attendants"].append(name)
 			m["sale_qty"] += flt(row.sale_qty)
 			m["sale_amount"] += flt(row.amount)
 		self.set("machine_summary", [])
 		for (du, side), m in sides.items():
-			self.append("machine_summary", {"dispensing_unit": du, "side": side, "nozzles": ", ".join(m["nozzles"]),
-				"attendants": ", ".join(m["attendants"]), "sale_qty": flt(m["sale_qty"], 2), "sale_amount": flt(m["sale_amount"], 2)})
+			self.append(
+				"machine_summary",
+				{
+					"dispensing_unit": du,
+					"side": side,
+					"nozzles": ", ".join(m["nozzles"]),
+					"attendants": ", ".join(m["attendants"]),
+					"sale_qty": flt(m["sale_qty"], 2),
+					"sale_amount": flt(m["sale_amount"], 2),
+				},
+			)
 
 	def calculate_attendant_collection(self):
-		"""Per attendant: nozzle sales − his credit slips − his digital collections = cash he must hand over."""
-		handed = {r.attendant: flt(r.cash_handed) for r in self.get("attendant_collection", []) if r.attendant}
+		"""Per attendant: nozzle sales - his credit slips - his digital collections = cash he must hand over."""
+		handed = {
+			r.attendant: flt(r.cash_handed) for r in self.get("attendant_collection", []) if r.attendant
+		}
 		people = OrderedDict()
 
 		def person(emp):
-			return people.setdefault(emp, {"nozzles": [], "sale_qty": 0.0, "sale_amount": 0.0, "credit": 0.0, "digital": 0.0})
+			return people.setdefault(
+				emp, {"nozzles": [], "sale_qty": 0.0, "sale_amount": 0.0, "credit": 0.0, "digital": 0.0}
+			)
 
 		for row in self.nozzle_readings:
 			if not row.attendant:
@@ -361,18 +439,21 @@ class ShiftSaleEntry(Document):
 		for emp, p in people.items():
 			due = flt(p["sale_amount"] - p["credit"] - p["digital"], 2)
 			cash = handed.get(emp, 0)
-			self.append("attendant_collection", {
-				"attendant": emp,
-				"attendant_name": frappe.get_cached_value("Employee", emp, "employee_name"),
-				"nozzles": ", ".join(p["nozzles"]),
-				"sale_qty": flt(p["sale_qty"], 2),
-				"sale_amount": flt(p["sale_amount"], 2),
-				"credit_amount": flt(p["credit"], 2),
-				"digital_amount": flt(p["digital"], 2),
-				"expected_cash": due,
-				"cash_handed": cash,
-				"short_excess": flt(cash - due, 2) if cash else 0,
-			})
+			self.append(
+				"attendant_collection",
+				{
+					"attendant": emp,
+					"attendant_name": frappe.get_cached_value("Employee", emp, "employee_name"),
+					"nozzles": ", ".join(p["nozzles"]),
+					"sale_qty": flt(p["sale_qty"], 2),
+					"sale_amount": flt(p["sale_amount"], 2),
+					"credit_amount": flt(p["credit"], 2),
+					"digital_amount": flt(p["digital"], 2),
+					"expected_cash": due,
+					"cash_handed": cash,
+					"short_excess": flt(cash - due, 2) if cash else 0,
+				},
+			)
 
 	def validate_credit_limits(self):
 		if not self.credit_sales:
@@ -388,19 +469,28 @@ class ShiftSaleEntry(Document):
 			limit = flt(get_credit_limit(customer, self.company))
 			if not limit:
 				continue
-			outstanding = flt(get_customer_outstanding(customer, self.company, ignore_outstanding_sales_order=True))
+			outstanding = flt(
+				get_customer_outstanding(customer, self.company, ignore_outstanding_sales_order=True)
+			)
 			if outstanding + amount > limit:
 				msg = _("Credit limit of {0} exceeded: limit {1}, outstanding {2}, this shift {3}.").format(
-					frappe.bold(customer), frappe.format(limit, "Currency"),
-					frappe.format(outstanding, "Currency"), frappe.format(amount, "Currency"))
+					frappe.bold(customer),
+					frappe.format(limit, "Currency"),
+					frappe.format(outstanding, "Currency"),
+					frappe.format(amount, "Currency"),
+				)
 				frappe.throw(msg, title=_("Credit Limit Exceeded"))
 
 	def validate_cash_variance(self):
 		tol = flt(get_settings().cash_variance_tolerance)
 		if tol and abs(flt(self.short_excess)) > tol and not self.remarks:
-			frappe.throw(_("Cash {0} of {1} is above the tolerance of {2}. Enter the reason in Remarks.").format(
-				_("shortage") if self.short_excess < 0 else _("excess"),
-				frappe.format(abs(self.short_excess), "Currency"), frappe.format(tol, "Currency")))
+			frappe.throw(
+				_("Cash {0} of {1} is above the tolerance of {2}. Enter the reason in Remarks.").format(
+					_("shortage") if self.short_excess < 0 else _("excess"),
+					frappe.format(abs(self.short_excess), "Currency"),
+					frappe.format(tol, "Currency"),
+				)
+			)
 
 	# ------------------------------------------------------------------ postings
 	def make_postings(self):
@@ -411,21 +501,28 @@ class ShiftSaleEntry(Document):
 		# retail fuel invoice
 		retail_items = [
 			{"item_code": item, "qty": qty, "rate": rate, "warehouse": wh}
-			for (item, rate, wh), qty in self._buckets.items() if qty > 0
+			for (item, rate, wh), qty in self._buckets.items()
+			if qty > 0
 		]
 		if retail_items:
-			si = self._make_invoice(station.walk_in_customer, retail_items, settings.fuel_tax_template,
-				_("Retail fuel sales"))
+			si = self._make_invoice(
+				station.walk_in_customer, retail_items, settings.fuel_tax_template, _("Retail fuel sales")
+			)
 			self.db_set("retail_fuel_invoice", si.name)
 
 		# lubricant / shop invoice
 		lube_items = [
 			{"item_code": r.item_code, "qty": r.qty, "rate": r.rate, "warehouse": r.warehouse}
-			for r in self.other_sales if flt(r.qty)
+			for r in self.other_sales
+			if flt(r.qty)
 		]
 		if lube_items:
-			si = self._make_invoice(station.walk_in_customer, lube_items, settings.lube_tax_template,
-				_("Lubricant and shop sales"))
+			si = self._make_invoice(
+				station.walk_in_customer,
+				lube_items,
+				settings.lube_tax_template,
+				_("Lubricant and shop sales"),
+			)
 			self.db_set("lube_invoice", si.name)
 
 		# credit invoices, one per customer
@@ -435,17 +532,35 @@ class ShiftSaleEntry(Document):
 		for customer, allocs in by_customer.items():
 			items = []
 			for crow, wh, qty in allocs:
-				desc = " | ".join(x for x in [
-					crow.fuel_item,
-					f"Vehicle: {crow.vehicle}" if crow.vehicle else "",
-					f"Slip: {crow.slip_no}" if crow.slip_no else "",
-					f"Driver: {crow.driver_name}" if crow.driver_name else "",
-				] if x)
-				items.append({"item_code": crow.fuel_item, "qty": qty, "rate": crow.rate, "warehouse": wh,
-					"description": desc, "petro_vehicle": crow.vehicle, "petro_slip_no": crow.slip_no})
+				desc = " | ".join(
+					x
+					for x in [
+						crow.fuel_item,
+						f"Vehicle: {crow.vehicle}" if crow.vehicle else "",
+						f"Slip: {crow.slip_no}" if crow.slip_no else "",
+						f"Driver: {crow.driver_name}" if crow.driver_name else "",
+					]
+					if x
+				)
+				items.append(
+					{
+						"item_code": crow.fuel_item,
+						"qty": qty,
+						"rate": crow.rate,
+						"warehouse": wh,
+						"description": desc,
+						"petro_vehicle": crow.vehicle,
+						"petro_slip_no": crow.slip_no,
+					}
+				)
 			slips = ", ".join(sorted({c.slip_no for c, _w, _q in allocs if c.slip_no}))
-			si = self._make_invoice(customer, items, settings.fuel_tax_template,
-				_("Credit fuel sales") + (f" (slips {slips})" if slips else ""), po_no=slips[:140] or None)
+			si = self._make_invoice(
+				customer,
+				items,
+				settings.fuel_tax_template,
+				_("Credit fuel sales") + (f" (slips {slips})" if slips else ""),
+				po_no=slips[:140] or None,
+			)
 			for crow in {c.name: c for c, _w, _q in allocs}.values():
 				crow.db_set("sales_invoice", si.name)
 
@@ -453,30 +568,35 @@ class ShiftSaleEntry(Document):
 
 	def _make_invoice(self, customer, items, tax_template, remarks, po_no=None):
 		si = frappe.new_doc("Sales Invoice")
-		si.update({
-			"company": self.company,
-			"customer": customer,
-			"posting_date": self.posting_date,
-			"set_posting_time": 1,
-			"posting_time": self.end_time or "23:59:00",
-			"due_date": self.posting_date,
-			"update_stock": 1,
-			"ignore_pricing_rule": 1,
-			"disable_rounded_total": 1,
-			"cost_center": frappe.get_cached_value("Fuel Station", self.station, "cost_center"),
-			"fuel_station": self.station,
-			"shift_sale_entry": self.name,
-			"remarks": f"{remarks} - {self.name}",
-			"po_no": po_no,
-		})
+		si.update(
+			{
+				"company": self.company,
+				"customer": customer,
+				"posting_date": self.posting_date,
+				"set_posting_time": 1,
+				"posting_time": self.end_time or "23:59:00",
+				"due_date": self.posting_date,
+				"update_stock": 1,
+				"ignore_pricing_rule": 1,
+				"disable_rounded_total": 1,
+				"cost_center": frappe.get_cached_value("Fuel Station", self.station, "cost_center"),
+				"fuel_station": self.station,
+				"shift_sale_entry": self.name,
+				"remarks": f"{remarks} - {self.name}",
+				"po_no": po_no,
+			}
+		)
 		for it in items:
-			row = si.append("items", {
-				"item_code": it["item_code"],
-				"qty": it["qty"],
-				"rate": it["rate"],
-				"price_list_rate": it["rate"],
-				"warehouse": it["warehouse"],
-			})
+			row = si.append(
+				"items",
+				{
+					"item_code": it["item_code"],
+					"qty": it["qty"],
+					"rate": it["rate"],
+					"price_list_rate": it["rate"],
+					"warehouse": it["warehouse"],
+				},
+			)
 			for f in ("description", "petro_vehicle", "petro_slip_no"):
 				if it.get(f):
 					row.set(f, it[f])
@@ -503,9 +623,13 @@ class ShiftSaleEntry(Document):
 			if not flt(debit) and not flt(credit):
 				return
 			acct_type = frappe.get_cached_value("Account", account, "account_type")
-			row = {"account": account, "debit_in_account_currency": flt(debit, 2),
-				"credit_in_account_currency": flt(credit, 2), "cost_center": cost_center,
-				"user_remark": remark}
+			row = {
+				"account": account,
+				"debit_in_account_currency": flt(debit, 2),
+				"credit_in_account_currency": flt(credit, 2),
+				"cost_center": cost_center,
+				"user_remark": remark,
+			}
 			if party and acct_type in ("Receivable", "Payable"):
 				row.update({"party_type": party_type, "party": party})
 			if ref:
@@ -519,7 +643,11 @@ class ShiftSaleEntry(Document):
 				gt = flt(frappe.db.get_value("Sales Invoice", inv, "grand_total"))
 				add(debtors, credit=gt, party_type="Customer", party=walkin, ref=inv)
 
-		add(station.cash_account, debit=flt(self.cash_counted) - flt(self.opening_float), remark=_("Cash counted less opening cash"))
+		add(
+			station.cash_account,
+			debit=flt(self.cash_counted) - flt(self.opening_float),
+			remark=_("Cash counted less opening cash"),
+		)
 		per_account = defaultdict(float)
 		for p in self.payments:
 			per_account[get_mode_of_payment_account(p.mode_of_payment, self.company)] += flt(p.amount)
@@ -531,12 +659,21 @@ class ShiftSaleEntry(Document):
 			if not station.employee_advance_account:
 				frappe.throw(_("Set Employee Advance Account on Fuel Station {0}.").format(self.station))
 			for a in self.employee_advances:
-				add(station.employee_advance_account, debit=a.amount, party_type="Employee", party=a.employee,
-					remark=a.remarks)
+				add(
+					station.employee_advance_account,
+					debit=a.amount,
+					party_type="Employee",
+					party=a.employee,
+					remark=a.remarks,
+				)
 		for d in self.driver_cash:
-			add(get_party_account("Customer", d.customer, self.company), debit=d.amount,
-				party_type="Customer", party=d.customer,
-				remark=f"Driver cash {d.vehicle or ''} slip {d.slip_no or ''}".strip())
+			add(
+				get_party_account("Customer", d.customer, self.company),
+				debit=d.amount,
+				party_type="Customer",
+				party=d.customer,
+				remark=f"Driver cash {d.vehicle or ''} slip {d.slip_no or ''}".strip(),
+			)
 
 		total_dr = sum(flt(r["debit_in_account_currency"]) for r in lines)
 		total_cr = sum(flt(r["credit_in_account_currency"]) for r in lines)
@@ -549,13 +686,17 @@ class ShiftSaleEntry(Document):
 			return
 
 		je = frappe.new_doc("Journal Entry")
-		je.update({
-			"voucher_type": "Journal Entry",
-			"company": self.company,
-			"posting_date": self.posting_date,
-			"user_remark": _("Shift settlement {0} ({1}, {2})").format(self.name, self.shift, self.posting_date),
-			"shift_sale_entry": self.name,
-		})
+		je.update(
+			{
+				"voucher_type": "Journal Entry",
+				"company": self.company,
+				"posting_date": self.posting_date,
+				"user_remark": _("Shift settlement {0} ({1}, {2})").format(
+					self.name, self.shift, self.posting_date
+				),
+				"shift_sale_entry": self.name,
+			}
+		)
 		for r in lines:
 			je.append("accounts", r)
 		je.flags.ignore_permissions = True
@@ -567,7 +708,9 @@ class ShiftSaleEntry(Document):
 		docs = []
 		if self.settlement_journal:
 			docs.append(("Journal Entry", self.settlement_journal))
-		for name in frappe.get_all("Sales Invoice", {"shift_sale_entry": self.name, "docstatus": 1}, pluck="name"):
+		for name in frappe.get_all(
+			"Sales Invoice", {"shift_sale_entry": self.name, "docstatus": 1}, pluck="name"
+		):
 			docs.append(("Sales Invoice", name))
 		for doctype, name in docs:
 			doc = frappe.get_doc(doctype, name)
@@ -579,40 +722,64 @@ class ShiftSaleEntry(Document):
 	# ------------------------------------------------------------------ nozzles
 	def update_nozzles(self):
 		for nozzle, rows in self._rows_by_nozzle().items():
-			frappe.db.set_value("Fuel Nozzle Master", nozzle, {
-				"last_reading": flt(rows[-1].closing_reading),
-				"last_shift_entry": self.name,
-				"last_reading_on": self.posting_date,
-			})
+			frappe.db.set_value(
+				"Fuel Nozzle Master",
+				nozzle,
+				{
+					"last_reading": flt(rows[-1].closing_reading),
+					"last_shift_entry": self.name,
+					"last_reading_on": self.posting_date,
+				},
+			)
 
 	def validate_cancel_order(self):
 		for nozzle in self._rows_by_nozzle():
 			last_entry = frappe.db.get_value("Fuel Nozzle Master", nozzle, "last_shift_entry")
 			if last_entry and last_entry != self.name:
-				frappe.throw(_("Nozzle {0} has a later shift {1}. Cancel that shift first.").format(nozzle, last_entry))
-			if frappe.db.exists("Nozzle Meter Change", {"nozzle": nozzle, "docstatus": 1,
-					"posting_date": [">=", self.posting_date], "creation": [">", self.creation]}):
-				frappe.throw(_("Nozzle {0} had a meter change after this shift. Cancel the meter change first.").format(nozzle))
+				frappe.throw(
+					_("Nozzle {0} has a later shift {1}. Cancel that shift first.").format(nozzle, last_entry)
+				)
+			if frappe.db.exists(
+				"Nozzle Meter Change",
+				{
+					"nozzle": nozzle,
+					"docstatus": 1,
+					"posting_date": [">=", self.posting_date],
+					"creation": [">", self.creation],
+				},
+			):
+				frappe.throw(
+					_(
+						"Nozzle {0} had a meter change after this shift. Cancel the meter change first."
+					).format(nozzle)
+				)
 
 	def revert_nozzles(self):
 		for nozzle, rows in self._rows_by_nozzle().items():
 			prev = get_previous_entry_for_nozzle(nozzle, exclude=self.name)
-			frappe.db.set_value("Fuel Nozzle Master", nozzle, {
-				"last_reading": flt(rows[0].opening_reading),
-				"last_shift_entry": prev.name if prev else None,
-				"last_reading_on": prev.posting_date if prev else None,
-			})
+			frappe.db.set_value(
+				"Fuel Nozzle Master",
+				nozzle,
+				{
+					"last_reading": flt(rows[0].opening_reading),
+					"last_shift_entry": prev.name if prev else None,
+					"last_reading_on": prev.posting_date if prev else None,
+				},
+			)
 
 
 def get_previous_shift_entry(station, posting_date, shift, exclude=None):
 	"""Latest submitted shift entry at the station before this date/shift."""
 	seq = frappe.db.get_value("Shift Master", shift, "sequence") or 0
-	rows = frappe.db.sql("""select s.name, s.cash_to_next_shift from `tabShift Sale Entry` s
+	rows = frappe.db.sql(
+		"""select s.name, s.cash_to_next_shift from `tabShift Sale Entry` s
 		left join `tabShift Master` sm on sm.name = s.shift
 		where s.station = %(station)s and s.docstatus = 1 and s.name != %(exclude)s
 		and (s.posting_date < %(date)s or (s.posting_date = %(date)s and ifnull(sm.sequence, 0) < %(seq)s))
 		order by s.posting_date desc, sm.sequence desc, s.creation desc limit 1""",
-		{"station": station, "date": posting_date, "seq": seq, "exclude": exclude or ""}, as_dict=True)
+		{"station": station, "date": posting_date, "seq": seq, "exclude": exclude or ""},
+		as_dict=True,
+	)
 	return rows[0] if rows else None
 
 
@@ -622,8 +789,10 @@ def get_previous_entry_for_nozzle(nozzle, exclude=None):
 	sm = frappe.qb.DocType("Shift Master")
 	rows = (
 		frappe.qb.from_(snr)
-		.join(sse).on(snr.parent == sse.name)
-		.left_join(sm).on(sm.name == sse.shift)
+		.join(sse)
+		.on(snr.parent == sse.name)
+		.left_join(sm)
+		.on(sm.name == sse.shift)
 		.select(sse.name, sse.posting_date)
 		.where((snr.nozzle == nozzle) & (sse.docstatus == 1) & (sse.name != (exclude or "")))
 		.orderby(sse.posting_date, order=frappe.qb.desc)
@@ -648,14 +817,16 @@ def get_nozzles(station: str, posting_date: str | None = None) -> list[dict]:
 	out = []
 	for n in nozzles:
 		opening = flt(n.last_reading)
-		out.append({
-			"nozzle": n.name,
-			"fuel_item": n.fuel_item,
-			"tank": n.tank,
-			"opening_reading": opening,
-			"closing_reading": opening,
-			"rate": get_fuel_rate(n.fuel_item, posting_date),
-		})
+		out.append(
+			{
+				"nozzle": n.name,
+				"fuel_item": n.fuel_item,
+				"tank": n.tank,
+				"opening_reading": opening,
+				"closing_reading": opening,
+				"rate": get_fuel_rate(n.fuel_item, posting_date),
+			}
+		)
 	return out
 
 

@@ -7,7 +7,7 @@ It covers the daily routine of an IOCL / BPCL / HPCL / Nayara / Jio-bp outlet: n
 ## Install
 
 ```bash
-bench get-app https://github.com/boora-aman/petrodiesel --branch rebuild/indian-retail-outlet
+bench get-app https://github.com/boora-aman/petrodiesel --branch main
 bench --site <site> install-app erpnext petrodiesel
 bench --site <site> migrate
 ```

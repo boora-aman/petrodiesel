@@ -26,16 +26,29 @@ class TestLogicDetail(IntegrationTestCase):
 		ensure_demo_masters()
 		for i, name in enumerate(TEST_SHIFTS, start=81):
 			if not frappe.db.exists("Shift Master", name):
-				frappe.get_doc({"doctype": "Shift Master", "shift_name": name, "sequence": i,
-					"start_time": "00:00:00", "end_time": "23:00:00", "is_active": 0}).insert()
+				frappe.get_doc(
+					{
+						"doctype": "Shift Master",
+						"shift_name": name,
+						"sequence": i,
+						"start_time": "00:00:00",
+						"end_time": "23:00:00",
+						"is_active": 0,
+					}
+				).insert()
 
 	def setUp(self):
 		frappe.set_user("Administrator")
 		for wf in ("Shift Sale Entry Approval", "Tanker Receipt Approval"):
 			frappe.db.set_value("Workflow", wf, "is_active", 0)
 		frappe.clear_cache()
-		self._used = set(frappe.get_all("Shift Sale Entry",
-			{"posting_date": today(), "docstatus": ["<", 2], "shift": ["in", TEST_SHIFTS]}, pluck="shift"))
+		self._used = set(
+			frappe.get_all(
+				"Shift Sale Entry",
+				{"posting_date": today(), "docstatus": ["<", 2], "shift": ["in", TEST_SHIFTS]},
+				pluck="shift",
+			)
+		)
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -60,7 +73,9 @@ class TestLogicDetail(IntegrationTestCase):
 	# ---------------------------------------------------------------- auto-fetch
 	def test_get_nozzles_fetches_opening_and_rate(self):
 		rows = get_nozzles(STATION, today())
-		self.assertEqual(len(rows), frappe.db.count("Fuel Nozzle Master", {"station": STATION, "status": "Active"}))
+		self.assertEqual(
+			len(rows), frappe.db.count("Fuel Nozzle Master", {"station": STATION, "status": "Active"})
+		)
 		for r in rows:
 			last = frappe.db.get_value("Fuel Nozzle Master", r["nozzle"], "last_reading")
 			self.assertEqual(flt(r["opening_reading"]), flt(last))
@@ -82,8 +97,17 @@ class TestLogicDetail(IntegrationTestCase):
 		hsd = get_fuel_rate("HSD", today())
 		doc = self.new_shift(nozzles=["DU1-N1", "DU1-N2"], sale=200)
 		doc.nozzle_readings[0].test_qty = 5  # MS nozzle: 200 metered, 195 sold
-		doc.append("credit_sales", {"customer": "Gupta Transport Co.", "vehicle": "HR38AB4521", "fuel_item": "HSD",
-			"qty": 50, "rate": hsd, "slip_no": "S1"})
+		doc.append(
+			"credit_sales",
+			{
+				"customer": "Gupta Transport Co.",
+				"vehicle": "HR38AB4521",
+				"fuel_item": "HSD",
+				"qty": 50,
+				"rate": hsd,
+				"slip_no": "S1",
+			},
+		)
 		doc.append("other_sales", {"item_code": "COOLANT-1L", "qty": 2, "rate": 260})
 		doc.append("driver_cash", {"customer": "Gupta Transport Co.", "vehicle": "HR38AB4521", "amount": 500})
 		doc.append("payments", {"mode_of_payment": "UPI", "amount": 3000})
@@ -126,7 +150,9 @@ class TestLogicDetail(IntegrationTestCase):
 		doc.update({"station": STATION, "posting_date": today(), "shift": self.free_shift()})
 		o = n["opening_reading"]
 		doc.append("nozzle_readings", {**n, "closing_reading": o + 100, "rate": ms})
-		doc.append("nozzle_readings", {**n, "opening_reading": o + 100, "closing_reading": o + 160, "rate": ms + 1})
+		doc.append(
+			"nozzle_readings", {**n, "opening_reading": o + 100, "closing_reading": o + 160, "rate": ms + 1}
+		)
 		demo.count_cash(doc, 0)
 		doc.run_method("validate")
 		demo.count_cash(doc, doc.expected_cash)
@@ -165,8 +191,16 @@ class TestLogicDetail(IntegrationTestCase):
 	def test_settlement_journal_lines(self):
 		hsd = get_fuel_rate("HSD", today())
 		doc = self.new_shift(nozzles=["DU1-N2"], sale=300)
-		doc.append("credit_sales", {"customer": "Sharma Logistics", "vehicle": "HR26CX9081", "fuel_item": "HSD",
-			"qty": 40, "rate": hsd})
+		doc.append(
+			"credit_sales",
+			{
+				"customer": "Sharma Logistics",
+				"vehicle": "HR26CX9081",
+				"fuel_item": "HSD",
+				"qty": 40,
+				"rate": hsd,
+			},
+		)
 		doc.append("driver_cash", {"customer": "Sharma Logistics", "amount": 1000})
 		doc.append("payments", {"mode_of_payment": "UPI", "amount": 4000})
 		doc.append("payments", {"mode_of_payment": "IOCL Fleet Card", "amount": 1500})
@@ -191,10 +225,14 @@ class TestLogicDetail(IntegrationTestCase):
 		cash = frappe.db.get_value("Fuel Station", STATION, "cash_account")
 		self.assertAlmostEqual(by_acc[cash][0], doc.cash_counted)
 		# credit invoice carries vehicle and slip
-		si = frappe.get_all("Sales Invoice", {"shift_sale_entry": doc.name, "customer": "Sharma Logistics"}, pluck="name")
+		si = frappe.get_all(
+			"Sales Invoice", {"shift_sale_entry": doc.name, "customer": "Sharma Logistics"}, pluck="name"
+		)
 		item = frappe.get_doc("Sales Invoice", si[0]).items[0]
 		self.assertEqual(item.petro_vehicle, "HR26CX9081")
-		self.assertEqual(frappe.db.get_value("Shift Credit Sale", doc.credit_sales[0].name, "sales_invoice"), si[0])
+		self.assertEqual(
+			frappe.db.get_value("Shift Credit Sale", doc.credit_sales[0].name, "sales_invoice"), si[0]
+		)
 		# VAT posted on retail fuel invoice, GST template not applied to fuel
 		taxes = frappe.get_doc("Sales Invoice", doc.retail_fuel_invoice).taxes
 		self.assertTrue(any("VAT" in t.account_head for t in taxes))
@@ -231,25 +269,50 @@ class TestLogicDetail(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("Fuel Nozzle Master", "DU2-N1", "last_reading"), closing)
 		first.reload()
 		first.cancel()
-		self.assertEqual(frappe.db.get_value("Fuel Nozzle Master", "DU2-N1", "last_reading"),
-			first.nozzle_readings[0].opening_reading)
+		self.assertEqual(
+			frappe.db.get_value("Fuel Nozzle Master", "DU2-N1", "last_reading"),
+			first.nozzle_readings[0].opening_reading,
+		)
 
 	def test_credit_limit_stops_shift(self):
-		frappe.db.set_value("Customer Credit Limit", {"parent": "Kisan Agro Services", "company": COMPANY},
-			"credit_limit", 1)
+		frappe.db.set_value(
+			"Customer Credit Limit", {"parent": "Kisan Agro Services", "company": COMPANY}, "credit_limit", 1
+		)
 		doc = self.new_shift(nozzles=["DU1-N2"], sale=100)
-		doc.append("credit_sales", {"customer": "Kisan Agro Services", "vehicle": "HR30T1199", "fuel_item": "HSD",
-			"qty": 20, "rate": get_fuel_rate("HSD", today())})
+		doc.append(
+			"credit_sales",
+			{
+				"customer": "Kisan Agro Services",
+				"vehicle": "HR30T1199",
+				"fuel_item": "HSD",
+				"qty": 20,
+				"rate": get_fuel_rate("HSD", today()),
+			},
+		)
 		self.assertRaises(frappe.ValidationError, doc.run_method, "validate")
 
 	# ---------------------------------------------------------------- meter change
 	def test_meter_change(self):
 		last = frappe.db.get_value("Fuel Nozzle Master", "DU2-N3", "last_reading")
-		bad = frappe.get_doc({"doctype": "Nozzle Meter Change", "nozzle": "DU2-N3", "posting_date": today(),
-			"old_meter_final_reading": last + 5, "new_meter_start_reading": 0})
+		bad = frappe.get_doc(
+			{
+				"doctype": "Nozzle Meter Change",
+				"nozzle": "DU2-N3",
+				"posting_date": today(),
+				"old_meter_final_reading": last + 5,
+				"new_meter_start_reading": 0,
+			}
+		)
 		self.assertRaises(frappe.ValidationError, bad.insert)
-		mc = frappe.get_doc({"doctype": "Nozzle Meter Change", "nozzle": "DU2-N3", "posting_date": today(),
-			"old_meter_final_reading": last, "new_meter_start_reading": 10}).insert()
+		mc = frappe.get_doc(
+			{
+				"doctype": "Nozzle Meter Change",
+				"nozzle": "DU2-N3",
+				"posting_date": today(),
+				"old_meter_final_reading": last,
+				"new_meter_start_reading": 10,
+			}
+		).insert()
 		mc.submit()
 		n = next(r for r in get_nozzles(STATION, today()) if r["nozzle"] == "DU2-N3")
 		self.assertEqual(n["opening_reading"], 10)
@@ -269,11 +332,29 @@ class TestLogicDetail(IntegrationTestCase):
 		before = get_tank_book_stock("T1-MS", today(), "09:00:00")
 		dip_b = demo.volume_to_dip("T1-MS", before)
 		dip_a = demo.volume_to_dip("T1-MS", before + 1000 + 20)
-		doc = frappe.get_doc({"doctype": "Tanker Receipt", "station": STATION, "posting_date": today(),
-			"posting_time": "09:00:00", "supplier": "Indian Oil Corporation Ltd", "supplier_invoice_no": "X-1",
-			"truck_no": "HR67Z0001", "seals_intact": 0,
-			"items": [{"tank": "T1-MS", "invoice_qty": 1000, "rate": 91, "challan_density": 745,
-				"density_at_15": 746, "dip_before_mm": dip_b, "dip_after_mm": dip_a}]})
+		doc = frappe.get_doc(
+			{
+				"doctype": "Tanker Receipt",
+				"station": STATION,
+				"posting_date": today(),
+				"posting_time": "09:00:00",
+				"supplier": "Indian Oil Corporation Ltd",
+				"supplier_invoice_no": "X-1",
+				"truck_no": "HR67Z0001",
+				"seals_intact": 0,
+				"items": [
+					{
+						"tank": "T1-MS",
+						"invoice_qty": 1000,
+						"rate": 91,
+						"challan_density": 745,
+						"density_at_15": 746,
+						"dip_before_mm": dip_b,
+						"dip_after_mm": dip_a,
+					}
+				],
+			}
+		)
 		self.assertRaises(frappe.ValidationError, doc.insert)  # seals broken without remarks
 		doc.remarks = "Seal 2 broken, informed IOCL"
 		doc.insert()
@@ -290,11 +371,27 @@ class TestLogicDetail(IntegrationTestCase):
 		self.assertEqual(frappe.db.get_value("Fuel Tank Master", "T1-MS", "last_dip_mm"), dip_a)
 
 	def test_density_override_needs_remarks(self):
-		doc = frappe.get_doc({"doctype": "Tanker Receipt", "station": STATION, "posting_date": today(),
-			"supplier": "Indian Oil Corporation Ltd", "supplier_invoice_no": "X-2", "truck_no": "HR67Z0002",
-			"override_density_check": 1,
-			"items": [{"tank": "T2-HSD", "invoice_qty": 500, "rate": 85, "challan_density": 832,
-				"density_at_15": 837, "received_qty": 500}]})
+		doc = frappe.get_doc(
+			{
+				"doctype": "Tanker Receipt",
+				"station": STATION,
+				"posting_date": today(),
+				"supplier": "Indian Oil Corporation Ltd",
+				"supplier_invoice_no": "X-2",
+				"truck_no": "HR67Z0002",
+				"override_density_check": 1,
+				"items": [
+					{
+						"tank": "T2-HSD",
+						"invoice_qty": 500,
+						"rate": 85,
+						"challan_density": 832,
+						"density_at_15": 837,
+						"received_qty": 500,
+					}
+				],
+			}
+		)
 		self.assertRaises(frappe.ValidationError, doc.insert)
 		doc.remarks = "Accepted under protest"
 		doc.insert()
@@ -304,21 +401,40 @@ class TestLogicDetail(IntegrationTestCase):
 	def test_price_update_old_price_and_change(self):
 		future = add_days(today(), 40)
 		old = get_fuel_rate("HSD", add_days(future, -1))
-		doc = frappe.get_doc({"doctype": "Fuel Price Update", "effective_date": future,
-			"price_list": "Standard Selling", "items": [{"fuel_item": "HSD", "new_price": old - 0.5}]}).insert()
+		doc = frappe.get_doc(
+			{
+				"doctype": "Fuel Price Update",
+				"effective_date": future,
+				"price_list": "Standard Selling",
+				"items": [{"fuel_item": "HSD", "new_price": old - 0.5}],
+			}
+		).insert()
 		self.assertEqual(doc.items[0].old_price, old)
 		self.assertEqual(doc.items[0].change_amount, -0.5)
 		self.assertAlmostEqual(doc.items[0].change_percent, round(-0.5 * 100 / old, 2))
 		doc.submit()
-		dup = frappe.get_doc({"doctype": "Fuel Price Update", "effective_date": future,
-			"price_list": "Standard Selling", "items": [{"fuel_item": "HSD", "new_price": old}]}).insert()
+		dup = frappe.get_doc(
+			{
+				"doctype": "Fuel Price Update",
+				"effective_date": future,
+				"price_list": "Standard Selling",
+				"items": [{"fuel_item": "HSD", "new_price": old}],
+			}
+		).insert()
 		self.assertRaises(frappe.ValidationError, dup.submit)
 
 	# ---------------------------------------------------------------- dip / DSR
 	def test_dip_with_water(self):
-		dip = frappe.get_doc({"doctype": "Tank Dip Reading", "station": STATION, "posting_date": today(),
-			"posting_time": "10:00:00", "reading_type": "Surprise Check",
-			"readings": [{"tank": "T2-HSD", "dip_mm": 1000, "water_dip_mm": 20}]}).insert()
+		dip = frappe.get_doc(
+			{
+				"doctype": "Tank Dip Reading",
+				"station": STATION,
+				"posting_date": today(),
+				"posting_time": "10:00:00",
+				"reading_type": "Surprise Check",
+				"readings": [{"tank": "T2-HSD", "dip_mm": 1000, "water_dip_mm": 20}],
+			}
+		).insert()
 		r = dip.readings[0]
 		self.assertAlmostEqual(r.water_volume, dip_to_volume("T2-HSD", 20), places=1)
 		self.assertAlmostEqual(r.dip_stock, dip_to_volume("T2-HSD", 1000) - r.water_volume, places=1)
@@ -326,28 +442,43 @@ class TestLogicDetail(IntegrationTestCase):
 		self.assertAlmostEqual(r.variance, r.dip_stock - r.book_stock, places=1)
 
 	def test_dsr_fetch_matches_operations(self):
-		date = frappe.db.get_value("Daily Stock Register", {"station": STATION, "docstatus": 1}, "posting_date",
-			order_by="posting_date desc")
+		date = frappe.db.get_value(
+			"Daily Stock Register",
+			{"station": STATION, "docstatus": 1},
+			"posting_date",
+			order_by="posting_date desc",
+		)
 		if not date:
 			self.skipTest("no submitted DSR in demo data")
-		existing = frappe.get_doc("Daily Stock Register", {"station": STATION, "posting_date": date, "docstatus": 1})
+		existing = frappe.get_doc(
+			"Daily Stock Register", {"station": STATION, "posting_date": date, "docstatus": 1}
+		)
 		fresh = frappe.new_doc("Daily Stock Register")
 		fresh.update({"station": STATION, "posting_date": date})
 		fresh.set_data()
 		fresh.calculate()
 		for row in fresh.items:
-			sold = frappe.db.sql("""select coalesce(sum(n.meter_qty),0), coalesce(sum(n.test_qty),0)
+			sold = frappe.db.sql(
+				"""select coalesce(sum(n.meter_qty),0), coalesce(sum(n.test_qty),0)
 				from `tabShift Nozzle Reading` n join `tabShift Sale Entry` s on s.name=n.parent
-				where s.docstatus=1 and s.posting_date=%s and n.tank=%s""", (date, row.tank))[0]
+				where s.docstatus=1 and s.posting_date=%s and n.tank=%s""",
+				(date, row.tank),
+			)[0]
 			self.assertAlmostEqual(row.meter_sales, flt(sold[0]), places=1)
 			self.assertAlmostEqual(row.test_qty, flt(sold[1]), places=1)
-			rec = frappe.db.sql("""select coalesce(sum(i.received_qty),0) from `tabTanker Receipt Item` i
+			rec = frappe.db.sql(
+				"""select coalesce(sum(i.received_qty),0) from `tabTanker Receipt Item` i
 				join `tabTanker Receipt` t on t.name=i.parent where t.docstatus=1 and t.posting_date=%s
-				and i.tank=%s""", (date, row.tank))[0][0]
+				and i.tank=%s""",
+				(date, row.tank),
+			)[0][0]
 			self.assertAlmostEqual(row.receipts, flt(rec), places=1)
-			prev = frappe.db.sql("""select i.closing_stock from `tabDaily Stock Register Item` i
+			prev = frappe.db.sql(
+				"""select i.closing_stock from `tabDaily Stock Register Item` i
 				join `tabDaily Stock Register` d on d.name=i.parent where d.docstatus=1 and d.posting_date=%s
-				and i.tank=%s""", (add_days(date, -1), row.tank))
+				and i.tank=%s""",
+				(add_days(date, -1), row.tank),
+			)
 			if prev:
 				self.assertAlmostEqual(row.opening_stock, flt(prev[0][0]), places=1)
 			self.assertAlmostEqual(row.net_sales, row.meter_sales - row.test_qty, places=2)
@@ -360,7 +491,9 @@ class TestLogicDetail(IntegrationTestCase):
 			self.assertAlmostEqual(row.variance, old[row.tank], places=1)
 
 	def test_dsr_duplicate_blocked(self):
-		date = frappe.db.get_value("Daily Stock Register", {"station": STATION, "docstatus": 1}, "posting_date")
+		date = frappe.db.get_value(
+			"Daily Stock Register", {"station": STATION, "docstatus": 1}, "posting_date"
+		)
 		if not date:
 			self.skipTest("no DSR")
 		doc = frappe.get_doc({"doctype": "Daily Stock Register", "station": STATION, "posting_date": date})
@@ -368,26 +501,49 @@ class TestLogicDetail(IntegrationTestCase):
 
 	# ---------------------------------------------------------------- pump test
 	def test_failed_pump_test_puts_nozzle_under_maintenance(self):
-		doc = frappe.get_doc({"doctype": "Pump Test Log", "station": STATION, "posting_date": today(),
-			"tests": [{"nozzle": "DU2-N2", "measure_liters": 5, "error_ml": -30}]}).insert()
+		doc = frappe.get_doc(
+			{
+				"doctype": "Pump Test Log",
+				"station": STATION,
+				"posting_date": today(),
+				"tests": [{"nozzle": "DU2-N2", "measure_liters": 5, "error_ml": -30}],
+			}
+		).insert()
 		doc.submit()
 		self.assertEqual(frappe.db.get_value("Fuel Nozzle Master", "DU2-N2", "status"), "Under Maintenance")
 		self.assertNotIn("DU2-N2", [r["nozzle"] for r in get_nozzles(STATION, today())])
 
 	# ---------------------------------------------------------------- masters
 	def test_vehicle_number_normalised(self):
-		v = frappe.get_doc({"doctype": "Customer Vehicle", "vehicle_no": "hr 10-ab 0001",
-			"customer": "Kisan Agro Services"}).insert()
+		v = frappe.get_doc(
+			{"doctype": "Customer Vehicle", "vehicle_no": "hr 10-ab 0001", "customer": "Kisan Agro Services"}
+		).insert()
 		self.assertEqual(v.name, "HR10AB0001")
 
 	def test_tank_master_validations(self):
 		t = frappe.get_doc("Fuel Tank Master", "T1-MS")
 		self.assertAlmostEqual(t.current_stock, get_tank_book_stock("T1-MS"), places=1)
-		other = frappe.get_doc({"doctype": "Fuel Tank Master", "tank_id": "TX-1", "station": STATION,
-			"fuel_item": "MS", "warehouse": t.warehouse, "capacity_liters": 1000})
+		other = frappe.get_doc(
+			{
+				"doctype": "Fuel Tank Master",
+				"tank_id": "TX-1",
+				"station": STATION,
+				"fuel_item": "MS",
+				"warehouse": t.warehouse,
+				"capacity_liters": 1000,
+			}
+		)
 		self.assertRaises(frappe.ValidationError, other.insert)  # warehouse reused
-		lube = frappe.get_doc({"doctype": "Fuel Tank Master", "tank_id": "TX-2", "station": STATION,
-			"fuel_item": "COOLANT-1L", "warehouse": f"Lube Store - {demo.ABBR}", "capacity_liters": 1000})
+		lube = frappe.get_doc(
+			{
+				"doctype": "Fuel Tank Master",
+				"tank_id": "TX-2",
+				"station": STATION,
+				"fuel_item": "COOLANT-1L",
+				"warehouse": f"Lube Store - {demo.ABBR}",
+				"capacity_liters": 1000,
+			}
+		)
 		self.assertRaises(frappe.ValidationError, lube.insert)  # not a fuel
 
 	# ---------------------------------------------------------------- roles & workflow
@@ -418,7 +574,9 @@ class TestLogicDetail(IntegrationTestCase):
 		doc = frappe.get_doc("Shift Sale Entry", doc.name)
 		doc = apply_workflow(doc, "Submit for Approval")
 		self.assertEqual(doc.workflow_state, "Pending Approval")
-		self.assertRaises(frappe.ValidationError, apply_workflow, frappe.get_doc("Shift Sale Entry", doc.name), "Approve")
+		self.assertRaises(
+			frappe.ValidationError, apply_workflow, frappe.get_doc("Shift Sale Entry", doc.name), "Approve"
+		)
 		frappe.set_user("manager@petro.demo")
 		doc = apply_workflow(frappe.get_doc("Shift Sale Entry", doc.name), "Approve")
 		self.assertEqual(doc.docstatus, 1)
@@ -428,9 +586,18 @@ class TestLogicDetail(IntegrationTestCase):
 	def test_dashboard_methods(self):
 		from petrodiesel import dashboard
 
-		for m in ("todays_fuel_litres", "todays_gross_sales", "todays_credit_sales", "todays_digital",
-				"todays_short_excess", "month_gross_sales", "month_fuel_litres", "fuel_stock_litres",
-				"credit_outstanding", "month_stock_variance"):
+		for m in (
+			"todays_fuel_litres",
+			"todays_gross_sales",
+			"todays_credit_sales",
+			"todays_digital",
+			"todays_short_excess",
+			"month_gross_sales",
+			"month_fuel_litres",
+			"fuel_stock_litres",
+			"credit_outstanding",
+			"month_stock_variance",
+		):
 			out = getattr(dashboard, m)()
 			self.assertIsInstance(out["value"], (int, float))
 		stock = dashboard.fuel_stock_litres()["value"]
@@ -444,11 +611,19 @@ class TestLogicDetail(IntegrationTestCase):
 		from frappe.desk.query_report import run
 
 		base = {"from_date": add_days(today(), -30), "to_date": today()}
-		for name, extra in [("Daily Sales Summary", {}), ("Nozzle Sales Register", {}),
-				("Shift Cash Reconciliation", {}), ("Payment Mode Collection", {}), ("Attendant Sales", {}),
-				("Tank Stock Status", {}), ("Stock Variance Register", {}), ("Tanker Receipt Register", {}),
-				("Fuel Price History", {}), ("Compliance Expiry", {"days": 400}),
-				("Credit Customer Statement", {"company": COMPANY, "customer": "Gupta Transport Co."})]:
+		for name, extra in [
+			("Daily Sales Summary", {}),
+			("Nozzle Sales Register", {}),
+			("Shift Cash Reconciliation", {}),
+			("Payment Mode Collection", {}),
+			("Attendant Sales", {}),
+			("Tank Stock Status", {}),
+			("Stock Variance Register", {}),
+			("Tanker Receipt Register", {}),
+			("Fuel Price History", {}),
+			("Compliance Expiry", {"days": 400}),
+			("Credit Customer Statement", {"company": COMPANY, "customer": "Gupta Transport Co."}),
+		]:
 			res = run(name, filters={**base, **extra})
 			self.assertIsInstance(res["result"], list, name)
 
@@ -462,9 +637,13 @@ class TestLogicDetail(IntegrationTestCase):
 		self.assertGreater(frappe.db.count("Notification Log"), before)
 
 	def test_dsr_closing_only_from_night_dip(self):
-		if frappe.db.exists("Daily Stock Register", {"station": STATION, "posting_date": today(), "docstatus": ["<", 2]}):
+		if frappe.db.exists(
+			"Daily Stock Register", {"station": STATION, "posting_date": today(), "docstatus": ["<", 2]}
+		):
 			self.skipTest("DSR exists for today")
-		if frappe.db.exists("Tank Dip Reading", {"posting_date": today(), "reading_type": "Night (Closing)", "docstatus": 1}):
+		if frappe.db.exists(
+			"Tank Dip Reading", {"posting_date": today(), "reading_type": "Night (Closing)", "docstatus": 1}
+		):
 			self.skipTest("night dip exists today")
 		dsr = frappe.new_doc("Daily Stock Register")
 		dsr.update({"station": STATION, "posting_date": today()})

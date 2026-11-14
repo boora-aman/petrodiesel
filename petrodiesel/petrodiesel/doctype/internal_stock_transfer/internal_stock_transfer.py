@@ -9,8 +9,13 @@ from frappe.utils import flt
 
 
 class InternalStockTransfer(Document):
-	ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Stock Entry", "Repost Item Valuation",
-		"Serial and Batch Bundle")
+	ignore_linked_doctypes = (
+		"GL Entry",
+		"Stock Ledger Entry",
+		"Stock Entry",
+		"Repost Item Valuation",
+		"Serial and Batch Bundle",
+	)
 
 	def validate(self):
 		self.company = frappe.get_cached_value("Fuel Station", self.station, "company")
@@ -24,8 +29,11 @@ class InternalStockTransfer(Document):
 				frappe.throw(_("Choose two tank warehouses for a tank-to-tank transfer."))
 			fuel = frappe.db.get_value("Fuel Tank Master", src, "fuel_item")
 			if frappe.db.get_value("Fuel Tank Master", dst, "fuel_item") != fuel:
-				frappe.throw(_("Tank {0} holds {1} and tank {2} holds {3}. Fuel can only move between tanks of the same product.").format(
-					src, fuel, dst, frappe.db.get_value("Fuel Tank Master", dst, "fuel_item")))
+				frappe.throw(
+					_(
+						"Tank {0} holds {1} and tank {2} holds {3}. Fuel can only move between tanks of the same product."
+					).format(src, fuel, dst, frappe.db.get_value("Fuel Tank Master", dst, "fuel_item"))
+				)
 			if len(self.items) != 1:
 				frappe.throw(_("A tank-to-tank transfer has exactly one line: the tank's fuel."))
 			if self.items[0].item_code and self.items[0].item_code != fuel:
@@ -34,28 +42,52 @@ class InternalStockTransfer(Document):
 		else:
 			for w in (self.from_warehouse, self.to_warehouse):
 				if w in tank_of:
-					frappe.throw(_("{0} is a fuel tank. Use the type 'Fuel Tank to Tank' to move fuel.").format(w))
+					frappe.throw(
+						_("{0} is a fuel tank. Use the type 'Fuel Tank to Tank' to move fuel.").format(w)
+					)
 			for r in self.items:
 				if frappe.get_cached_value("Item", r.item_code, "petro_product_type") == "Fuel":
-					frappe.throw(_("Row {0}: {1} is fuel and is kept only in tanks.").format(r.idx, r.item_code))
+					frappe.throw(
+						_("Row {0}: {1} is fuel and is kept only in tanks.").format(r.idx, r.item_code)
+					)
 
 		for r in self.items:
-			r.available_qty = flt(frappe.db.get_value("Bin", {"item_code": r.item_code, "warehouse": self.from_warehouse},
-				"actual_qty"))
+			r.available_qty = flt(
+				frappe.db.get_value(
+					"Bin", {"item_code": r.item_code, "warehouse": self.from_warehouse}, "actual_qty"
+				)
+			)
 			if flt(r.qty) <= 0:
 				frappe.throw(_("Row {0}: quantity must be positive.").format(r.idx))
 			if flt(r.qty) > r.available_qty + 0.001:
-				frappe.throw(_("Row {0}: only {1} of {2} available in {3}.").format(r.idx, r.available_qty, r.item_code,
-					self.from_warehouse))
+				frappe.throw(
+					_("Row {0}: only {1} of {2} available in {3}.").format(
+						r.idx, r.available_qty, r.item_code, self.from_warehouse
+					)
+				)
 
 	def on_submit(self):
 		se = frappe.new_doc("Stock Entry")
-		se.update({"stock_entry_type": "Material Transfer", "purpose": "Material Transfer", "company": self.company,
-			"posting_date": self.posting_date, "set_posting_time": 1,
-			"remarks": _("Internal transfer {0}: {1}").format(self.name, self.remarks or "")})
+		se.update(
+			{
+				"stock_entry_type": "Material Transfer",
+				"purpose": "Material Transfer",
+				"company": self.company,
+				"posting_date": self.posting_date,
+				"set_posting_time": 1,
+				"remarks": _("Internal transfer {0}: {1}").format(self.name, self.remarks or ""),
+			}
+		)
 		for r in self.items:
-			se.append("items", {"item_code": r.item_code, "qty": r.qty, "s_warehouse": self.from_warehouse,
-				"t_warehouse": self.to_warehouse})
+			se.append(
+				"items",
+				{
+					"item_code": r.item_code,
+					"qty": r.qty,
+					"s_warehouse": self.from_warehouse,
+					"t_warehouse": self.to_warehouse,
+				},
+			)
 		se.flags.ignore_permissions = True
 		se.insert()
 		se.submit()

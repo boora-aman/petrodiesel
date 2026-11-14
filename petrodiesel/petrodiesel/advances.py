@@ -1,6 +1,6 @@
 # Copyright (c) 2026, Aman Boora and contributors
 # For license information, please see license.txt
-"""Staff advance ledger: shift advances + office advances − recoveries."""
+"""Staff advance ledger: shift advances + office advances - recoveries."""
 
 from __future__ import annotations
 
@@ -10,10 +10,15 @@ from frappe.utils import flt, getdate
 
 def advance_ledger(employee: str | None = None, to_date=None, company: str | None = None) -> list[dict]:
 	"""Chronological ledger rows for one or all employees."""
-	params = {"employee": employee, "to_date": getdate(to_date) if to_date else getdate("2999-12-31"), "company": company}
+	params = {
+		"employee": employee,
+		"to_date": getdate(to_date) if to_date else getdate("2999-12-31"),
+		"company": company,
+	}
 	emp_cond = " and {col} = %(employee)s" if employee else ""
 	co = " and {co} = %(company)s" if company else ""
-	rows = frappe.db.sql(f"""
+	rows = frappe.db.sql(
+		f"""
 		select s.posting_date, 'Shift Sale Entry' voucher_type, s.name voucher_no, a.employee, a.employee_name,
 			a.amount given, 0 recovered, a.remarks
 		from `tabShift Employee Advance` a join `tabShift Sale Entry` s on s.name = a.parent
@@ -26,7 +31,10 @@ def advance_ledger(employee: str | None = None, to_date=None, company: str | Non
 		select posting_date, 'Staff Advance Recovery', name, employee, employee_name, 0, amount, concat(method, ifnull(concat(' - ', remarks), ''))
 		from `tabStaff Advance Recovery` where docstatus = 1 and posting_date <= %(to_date)s
 			{emp_cond.format(col='employee')} {co.format(co='company')}
-		order by posting_date, voucher_no""", params, as_dict=True)
+		order by posting_date, voucher_no""",
+		params,
+		as_dict=True,
+	)
 	return rows
 
 
@@ -50,8 +58,16 @@ def get_balances() -> list[dict]:
 	frappe.has_permission("Staff Advance", "read", throw=True)
 	out = {}
 	for r in advance_ledger():
-		e = out.setdefault(r.employee, {"employee": r.employee, "employee_name": r.employee_name, "given": 0.0,
-			"recovered": 0.0, "last_date": None})
+		e = out.setdefault(
+			r.employee,
+			{
+				"employee": r.employee,
+				"employee_name": r.employee_name,
+				"given": 0.0,
+				"recovered": 0.0,
+				"last_date": None,
+			},
+		)
 		e["given"] += flt(r.given)
 		e["recovered"] += flt(r.recovered)
 		e["last_date"] = r.posting_date

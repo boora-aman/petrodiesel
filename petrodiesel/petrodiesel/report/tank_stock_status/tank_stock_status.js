@@ -3,6 +3,11 @@
 
 frappe.query_reports["Tank Stock Status"] = {
 	filters: [
-		{"fieldname": "station", "label": "Fuel Station", "fieldtype": "Link", "options": "Fuel Station"}
+		{
+			fieldname: "station",
+			label: "Fuel Station",
+			fieldtype: "Link",
+			options: "Fuel Station",
+		},
 	],
 };

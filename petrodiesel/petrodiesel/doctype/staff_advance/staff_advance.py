@@ -21,17 +21,30 @@ class StaffAdvance(Document):
 
 	def on_submit(self):
 		station = frappe.get_cached_doc("Fuel Station", self.station)
-		je = frappe.get_doc({
-			"doctype": "Journal Entry", "voucher_type": "Journal Entry", "company": self.company,
-			"posting_date": self.posting_date,
-			"user_remark": _("Staff advance {0} to {1}: {2}").format(self.name, self.employee_name, self.purpose or ""),
-			"accounts": [
-				{"account": station.employee_advance_account, "debit_in_account_currency": self.amount,
-					"cost_center": station.cost_center, "user_remark": self.employee_name},
-				{"account": get_mode_of_payment_account(self.mode_of_payment, self.company),
-					"credit_in_account_currency": self.amount, "cost_center": station.cost_center},
-			],
-		})
+		je = frappe.get_doc(
+			{
+				"doctype": "Journal Entry",
+				"voucher_type": "Journal Entry",
+				"company": self.company,
+				"posting_date": self.posting_date,
+				"user_remark": _("Staff advance {0} to {1}: {2}").format(
+					self.name, self.employee_name, self.purpose or ""
+				),
+				"accounts": [
+					{
+						"account": station.employee_advance_account,
+						"debit_in_account_currency": self.amount,
+						"cost_center": station.cost_center,
+						"user_remark": self.employee_name,
+					},
+					{
+						"account": get_mode_of_payment_account(self.mode_of_payment, self.company),
+						"credit_in_account_currency": self.amount,
+						"cost_center": station.cost_center,
+					},
+				],
+			}
+		)
 		je.flags.ignore_permissions = True
 		je.insert()
 		je.submit()

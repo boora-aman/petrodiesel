@@ -19,72 +19,216 @@ ROLES = {
 
 CUSTOM_FIELDS = {
 	"Item": [
-		{"fieldname": "petro_section", "fieldtype": "Section Break", "label": "Petrol Pump",
-			"insert_after": "description", "collapsible": 1},
-		{"fieldname": "petro_product_type", "fieldtype": "Select", "label": "Petrol Pump Product Type",
-			"options": "\nFuel\nLubricant\nAccessory\nOther", "insert_after": "petro_section",
-			"in_standard_filter": 1},
+		{
+			"fieldname": "petro_section",
+			"fieldtype": "Section Break",
+			"label": "Petrol Pump",
+			"insert_after": "description",
+			"collapsible": 1,
+		},
+		{
+			"fieldname": "petro_product_type",
+			"fieldtype": "Select",
+			"label": "Petrol Pump Product Type",
+			"options": "\nFuel\nLubricant\nAccessory\nOther",
+			"insert_after": "petro_section",
+			"in_standard_filter": 1,
+		},
 		{"fieldname": "petro_cb", "fieldtype": "Column Break", "insert_after": "petro_product_type"},
-		{"fieldname": "permissible_loss_percent", "fieldtype": "Percent", "label": "Permissible Stock Loss %",
-			"insert_after": "petro_cb", "depends_on": "eval:doc.petro_product_type=='Fuel'",
-			"description": "Evaporation / handling loss allowed as % of sales (e.g. MS 0.6, HSD 0.25)."},
+		{
+			"fieldname": "permissible_loss_percent",
+			"fieldtype": "Percent",
+			"label": "Permissible Stock Loss %",
+			"insert_after": "petro_cb",
+			"depends_on": "eval:doc.petro_product_type=='Fuel'",
+			"description": "Evaporation / handling loss allowed as % of sales (e.g. MS 0.6, HSD 0.25).",
+		},
 	],
 	"Sales Invoice": [
-		{"fieldname": "fuel_station", "fieldtype": "Link", "label": "Fuel Station", "options": "Fuel Station",
-			"insert_after": "customer_name", "read_only": 1, "in_standard_filter": 1},
-		{"fieldname": "shift_sale_entry", "fieldtype": "Link", "label": "Shift Sale Entry",
-			"options": "Shift Sale Entry", "insert_after": "fuel_station", "read_only": 1, "no_copy": 1,
-			"search_index": 1},
+		{
+			"fieldname": "fuel_station",
+			"fieldtype": "Link",
+			"label": "Fuel Station",
+			"options": "Fuel Station",
+			"insert_after": "customer_name",
+			"read_only": 1,
+			"in_standard_filter": 1,
+		},
+		{
+			"fieldname": "shift_sale_entry",
+			"fieldtype": "Link",
+			"label": "Shift Sale Entry",
+			"options": "Shift Sale Entry",
+			"insert_after": "fuel_station",
+			"read_only": 1,
+			"no_copy": 1,
+			"search_index": 1,
+		},
 	],
 	"Sales Invoice Item": [
-		{"fieldname": "petro_vehicle", "fieldtype": "Link", "label": "Vehicle", "options": "Customer Vehicle",
-			"insert_after": "description", "read_only": 1, "in_list_view": 0},
-		{"fieldname": "petro_slip_no", "fieldtype": "Data", "label": "Indent / Slip No",
-			"insert_after": "petro_vehicle", "read_only": 1},
+		{
+			"fieldname": "petro_vehicle",
+			"fieldtype": "Link",
+			"label": "Vehicle",
+			"options": "Customer Vehicle",
+			"insert_after": "description",
+			"read_only": 1,
+			"in_list_view": 0,
+		},
+		{
+			"fieldname": "petro_slip_no",
+			"fieldtype": "Data",
+			"label": "Indent / Slip No",
+			"insert_after": "petro_vehicle",
+			"read_only": 1,
+		},
 	],
 	"Journal Entry": [
-		{"fieldname": "shift_sale_entry", "fieldtype": "Link", "label": "Shift Sale Entry",
-			"options": "Shift Sale Entry", "insert_after": "voucher_type", "read_only": 1, "no_copy": 1,
-			"search_index": 1},
+		{
+			"fieldname": "shift_sale_entry",
+			"fieldtype": "Link",
+			"label": "Shift Sale Entry",
+			"options": "Shift Sale Entry",
+			"insert_after": "voucher_type",
+			"read_only": 1,
+			"no_copy": 1,
+			"search_index": 1,
+		},
 	],
 	"Purchase Invoice": [
-		{"fieldname": "tanker_receipt", "fieldtype": "Link", "label": "Tanker Receipt", "options": "Tanker Receipt",
-			"insert_after": "supplier_name", "read_only": 1, "no_copy": 1, "search_index": 1},
+		{
+			"fieldname": "tanker_receipt",
+			"fieldtype": "Link",
+			"label": "Tanker Receipt",
+			"options": "Tanker Receipt",
+			"insert_after": "supplier_name",
+			"read_only": 1,
+			"no_copy": 1,
+			"search_index": 1,
+		},
 	],
 	"Stock Entry": [
-		{"fieldname": "tanker_receipt", "fieldtype": "Link", "label": "Tanker Receipt", "options": "Tanker Receipt",
-			"insert_after": "stock_entry_type", "read_only": 1, "no_copy": 1, "search_index": 1},
+		{
+			"fieldname": "tanker_receipt",
+			"fieldtype": "Link",
+			"label": "Tanker Receipt",
+			"options": "Tanker Receipt",
+			"insert_after": "stock_entry_type",
+			"read_only": 1,
+			"no_copy": 1,
+			"search_index": 1,
+		},
 	],
 	"Stock Reconciliation": [
-		{"fieldname": "daily_stock_register", "fieldtype": "Link", "label": "Daily Stock Register",
-			"options": "Daily Stock Register", "insert_after": "purpose", "read_only": 1, "no_copy": 1},
+		{
+			"fieldname": "daily_stock_register",
+			"fieldtype": "Link",
+			"label": "Daily Stock Register",
+			"options": "Daily Stock Register",
+			"insert_after": "purpose",
+			"read_only": 1,
+			"no_copy": 1,
+		},
 	],
 }
 
 # role -> list of (doctype, perms) for ERPNext doctypes the pump roles need
 ERP_PERMS = {
 	"Pump Owner": {
-		"read": ["Item", "Customer", "Supplier", "Employee", "Warehouse", "Account", "Cost Center", "Company",
-			"Mode of Payment", "Price List", "Item Price", "Sales Invoice", "Purchase Invoice", "Journal Entry",
-			"Payment Entry", "Stock Entry", "Stock Reconciliation", "Item Group", "UOM", "GL Entry",
-			"Stock Ledger Entry", "Sales Taxes and Charges Template", "Fiscal Year", "Currency"],
+		"read": [
+			"Item",
+			"Customer",
+			"Supplier",
+			"Employee",
+			"Warehouse",
+			"Account",
+			"Cost Center",
+			"Company",
+			"Mode of Payment",
+			"Price List",
+			"Item Price",
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Journal Entry",
+			"Payment Entry",
+			"Stock Entry",
+			"Stock Reconciliation",
+			"Item Group",
+			"UOM",
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Sales Taxes and Charges Template",
+			"Fiscal Year",
+			"Currency",
+		],
 		"write": ["Customer", "Item", "Item Price", "Payment Entry", "Employee"],
 	},
 	"Pump Manager": {
-		"read": ["Item", "Customer", "Supplier", "Employee", "Warehouse", "Account", "Cost Center", "Company",
-			"Mode of Payment", "Price List", "Item Price", "Sales Invoice", "Purchase Invoice", "Journal Entry",
-			"Payment Entry", "Stock Entry", "Stock Reconciliation", "Item Group", "UOM", "GL Entry",
-			"Stock Ledger Entry", "Sales Taxes and Charges Template", "Fiscal Year", "Currency"],
+		"read": [
+			"Item",
+			"Customer",
+			"Supplier",
+			"Employee",
+			"Warehouse",
+			"Account",
+			"Cost Center",
+			"Company",
+			"Mode of Payment",
+			"Price List",
+			"Item Price",
+			"Sales Invoice",
+			"Purchase Invoice",
+			"Journal Entry",
+			"Payment Entry",
+			"Stock Entry",
+			"Stock Reconciliation",
+			"Item Group",
+			"UOM",
+			"GL Entry",
+			"Stock Ledger Entry",
+			"Sales Taxes and Charges Template",
+			"Fiscal Year",
+			"Currency",
+		],
 		"write": ["Customer", "Payment Entry"],
 	},
 	"Pump Cashier": {
-		"read": ["Item", "Customer", "Employee", "Warehouse", "Account", "Company", "Mode of Payment", "Price List",
-			"Item Price", "Sales Invoice", "Item Group", "UOM", "Cost Center", "Fiscal Year", "Currency"],
+		"read": [
+			"Item",
+			"Customer",
+			"Employee",
+			"Warehouse",
+			"Account",
+			"Company",
+			"Mode of Payment",
+			"Price List",
+			"Item Price",
+			"Sales Invoice",
+			"Item Group",
+			"UOM",
+			"Cost Center",
+			"Fiscal Year",
+			"Currency",
+		],
 		"write": [],
 	},
 	"Pump Stock Keeper": {
-		"read": ["Item", "Supplier", "Employee", "Warehouse", "Company", "Purchase Invoice", "Stock Entry",
-			"Stock Reconciliation", "Item Group", "UOM", "Stock Ledger Entry", "Cost Center", "Fiscal Year", "Currency"],
+		"read": [
+			"Item",
+			"Supplier",
+			"Employee",
+			"Warehouse",
+			"Company",
+			"Purchase Invoice",
+			"Stock Entry",
+			"Stock Reconciliation",
+			"Item Group",
+			"UOM",
+			"Stock Ledger Entry",
+			"Cost Center",
+			"Fiscal Year",
+			"Currency",
+		],
 		"write": [],
 	},
 }
@@ -101,7 +245,12 @@ WORKFLOWS = [
 			("Cancelled", 2, "Pump Manager", "Inverse"),
 		],
 		"transitions": [
-			("Draft", "Submit for Approval", "Pending Approval", ["Pump Cashier", "Pump Manager", "Pump Owner"]),
+			(
+				"Draft",
+				"Submit for Approval",
+				"Pending Approval",
+				["Pump Cashier", "Pump Manager", "Pump Owner"],
+			),
 			("Pending Approval", "Approve", "Approved", ["Pump Manager", "Pump Owner"]),
 			("Pending Approval", "Reject", "Rejected", ["Pump Manager", "Pump Owner"]),
 			("Rejected", "Revise", "Draft", ["Pump Cashier", "Pump Manager", "Pump Owner"]),
@@ -119,7 +268,12 @@ WORKFLOWS = [
 			("Cancelled", 2, "Pump Manager", "Inverse"),
 		],
 		"transitions": [
-			("Draft", "Send for Verification", "Pending Verification", ["Pump Stock Keeper", "Pump Manager", "Pump Owner"]),
+			(
+				"Draft",
+				"Send for Verification",
+				"Pending Verification",
+				["Pump Stock Keeper", "Pump Manager", "Pump Owner"],
+			),
 			("Pending Verification", "Accept", "Accepted", ["Pump Manager", "Pump Owner"]),
 			("Pending Verification", "Reject", "Rejected", ["Pump Manager", "Pump Owner"]),
 			("Rejected", "Revise", "Draft", ["Pump Stock Keeper", "Pump Manager", "Pump Owner"]),
@@ -144,7 +298,9 @@ def setup():
 	create_workflows()
 	set_settings_defaults()
 	# Logged-in users opening /login or the apps screen go to PetroDesk by default
-	if frappe.get_meta("System Settings").has_field("default_app") and not frappe.db.get_single_value("System Settings", "default_app"):
+	if frappe.get_meta("System Settings").has_field("default_app") and not frappe.db.get_single_value(
+		"System Settings", "default_app"
+	):
 		frappe.db.set_single_value("System Settings", "default_app", "petrodiesel")
 	# Fuel items carry a VAT Item Tax Template for sales. ERPNext would otherwise auto-add those
 	# VAT rows to purchase invoices too, where fuel has no input tax credit.
@@ -156,8 +312,9 @@ def setup():
 def create_roles():
 	for role, desc in ROLES.items():
 		if not frappe.db.exists("Role", role):
-			frappe.get_doc({"doctype": "Role", "role_name": role, "desk_access": 1, "description": desc}).insert(
-				ignore_permissions=True)
+			frappe.get_doc(
+				{"doctype": "Role", "role_name": role, "desk_access": 1, "description": desc}
+			).insert(ignore_permissions=True)
 
 
 DESK_DOCTYPES = ["Number Card", "Dashboard Chart", "Dashboard Chart Source"]
@@ -182,29 +339,41 @@ def create_workflows():
 	for wf in WORKFLOWS:
 		for state, _ds, _role, style in wf["states"]:
 			if not frappe.db.exists("Workflow State", state):
-				frappe.get_doc({"doctype": "Workflow State", "workflow_state_name": state, "style": style}).insert(
-					ignore_permissions=True)
+				frappe.get_doc(
+					{"doctype": "Workflow State", "workflow_state_name": state, "style": style}
+				).insert(ignore_permissions=True)
 		for _f, action, _t, _r in wf["transitions"]:
 			if not frappe.db.exists("Workflow Action Master", action):
 				frappe.get_doc({"doctype": "Workflow Action Master", "workflow_action_name": action}).insert(
-					ignore_permissions=True)
+					ignore_permissions=True
+				)
 		if frappe.db.exists("Workflow", wf["name"]):
 			continue
 		doc = frappe.new_doc("Workflow")
-		doc.update({
-			"workflow_name": wf["name"],
-			"document_type": wf["document_type"],
-			"workflow_state_field": "workflow_state",
-			"is_active": 1,
-			"send_email_alert": 0,
-			"override_status": 0,
-		})
+		doc.update(
+			{
+				"workflow_name": wf["name"],
+				"document_type": wf["document_type"],
+				"workflow_state_field": "workflow_state",
+				"is_active": 1,
+				"send_email_alert": 0,
+				"override_status": 0,
+			}
+		)
 		for state, docstatus, role, _style in wf["states"]:
 			doc.append("states", {"state": state, "doc_status": str(docstatus), "allow_edit": role})
 		for frm, action, to, roles in wf["transitions"]:
 			for role in roles:
-				doc.append("transitions", {"state": frm, "action": action, "next_state": to, "allowed": role,
-					"allow_self_approval": 1})
+				doc.append(
+					"transitions",
+					{
+						"state": frm,
+						"action": action,
+						"next_state": to,
+						"allowed": role,
+						"allow_self_approval": 1,
+					},
+				)
 		doc.insert(ignore_permissions=True)
 
 

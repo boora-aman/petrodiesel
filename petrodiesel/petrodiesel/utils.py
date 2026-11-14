@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+import itertools
+
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate, nowdate
@@ -31,7 +33,7 @@ def dip_to_volume(tank: str, dip_mm: float) -> float:
 	if dip_mm <= points[0][0]:
 		d0, v0 = points[0]
 		return flt(v0 * dip_mm / d0, 2) if d0 else flt(v0, 2)
-	for (d1, v1), (d2, v2) in zip(points, points[1:]):
+	for (d1, v1), (d2, v2) in itertools.pairwise(points):
 		if d1 <= dip_mm <= d2:
 			if d2 == d1:
 				return flt(v2, 2)

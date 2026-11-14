@@ -7,7 +7,10 @@ frappe.ui.form.on("Pump Test Log", {
 	},
 	async onload(frm) {
 		if (frm.is_new() && !frm.doc.station) {
-			const station = await frappe.db.get_single_value("Petrodiesel Settings", "default_station");
+			const station = await frappe.db.get_single_value(
+				"Petrodiesel Settings",
+				"default_station"
+			);
 			if (station) frm.set_value("station", station);
 		}
 	},

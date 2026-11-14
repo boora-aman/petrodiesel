@@ -12,7 +12,13 @@ def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = [
 		{"label": _("Document"), "fieldname": "doctype", "fieldtype": "Data", "width": 140},
-		{"label": _("Name"), "fieldname": "name", "fieldtype": "Dynamic Link", "options": "doctype", "width": 180},
+		{
+			"label": _("Name"),
+			"fieldname": "name",
+			"fieldtype": "Dynamic Link",
+			"options": "doctype",
+			"width": 180,
+		},
 		{"label": _("Item"), "fieldname": "what", "fieldtype": "Data", "width": 260},
 		{"label": _("Valid Till"), "fieldname": "valid_till", "fieldtype": "Date", "width": 110},
 		{"label": _("Days Left"), "fieldname": "days_left", "fieldtype": "Int", "width": 90},
