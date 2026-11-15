@@ -143,7 +143,7 @@ const router = createRouter({
 router.beforeEach(async (to) => {
 	if (!session.ready) await loadBoot();
 	if (!to.meta.public && !session.loggedIn)
-		return { name: "Login", query: { redirect: to.fullPath } };
+		return { name: "Login", query: to.fullPath === "/" ? {} : { redirect: to.fullPath } };
 	if (to.name === "Login" && session.loggedIn) {
 		const target = postLoginTarget(to.query);
 		if (target !== "/petrodiesel" && !target.startsWith("/petrodiesel/")) {

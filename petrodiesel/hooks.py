@@ -39,6 +39,9 @@ website_route_rules = [
 # Old links to the app keep working
 website_redirects = [
 	{"source": r"/petrodesk(/.*)?", "target": r"/petrodiesel\1"},
+	# the site root (Frappe shows its login or home page there) opens PetroDesk;
+	# guests then land on the PetroDesk sign-in. The ERPNext desk stays at /desk.
+	{"source": r"/^(?:index)?", "target": "/petrodiesel", "redirect_http_status": 302},
 	# the classic Frappe login page opens the PetroDesk sign-in; ?redirect-to= is kept,
 	# so desk links (/login?redirect-to=/desk/...) still land back on the desk after sign-in
 	{
