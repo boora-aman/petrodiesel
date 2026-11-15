@@ -292,6 +292,8 @@ def after_migrate():
 
 
 def setup():
+	# website redirect decisions are cached per path; drop them so /login -> /petrodiesel/login applies
+	frappe.cache.delete_value("website_redirects")
 	create_roles()
 	create_custom_fields(CUSTOM_FIELDS, ignore_validate=True, update=True)
 	grant_erpnext_permissions()

@@ -19,6 +19,9 @@ add_to_apps_screen = [
 after_install = "petrodiesel.setup.install.after_install"
 after_migrate = ["petrodiesel.setup.install.after_migrate"]
 
+# desk: sign-out and session expiry go to the PetroDesk sign-in
+app_include_js = ["/assets/petrodiesel/js/petrodesk_desk.js"]
+
 doc_events = {
 	dt: {"before_cancel": "petrodiesel.petrodiesel.guards.before_cancel"}
 	for dt in ("Sales Invoice", "Journal Entry", "Purchase Invoice", "Stock Entry", "Stock Reconciliation")
