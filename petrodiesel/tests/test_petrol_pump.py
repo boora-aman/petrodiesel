@@ -20,6 +20,7 @@ COMPANY = demo.COMPANY
 
 def ensure_demo_masters():
 	if frappe.db.exists("Fuel Station", STATION):
+		clear_pending_shifts()
 		return
 	demo.ensure_setup_complete()
 	demo.ensure_company()
@@ -27,6 +28,14 @@ def ensure_demo_masters():
 	demo.ensure_masters(COMPANY, acc)
 	demo.opening_stock(COMPANY, add_days(today(), -3))
 	demo.price_update(add_days(today(), -3), {k: v[1] for k, v in demo.FUELS.items()})
+	frappe.db.commit()
+
+
+def clear_pending_shifts():
+	"""Demo data leaves the latest shift waiting for approval. Shifts must be approved in order,
+	so remove such drafts before the tests post their own shifts."""
+	for name in frappe.get_all("Shift Sale Entry", {"station": STATION, "docstatus": 0}, pluck="name"):
+		frappe.delete_doc("Shift Sale Entry", name, force=True, ignore_permissions=True)
 	frappe.db.commit()
 
 
