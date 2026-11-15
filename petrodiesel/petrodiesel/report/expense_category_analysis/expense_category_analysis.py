@@ -28,7 +28,7 @@ def execute(filters=None):
 	cond = _station_cond(filters)
 	if filters.expense_account:
 		cond += " and e.expense_account = %(expense_account)s"
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select e.expense_account, count(*) count, sum(e.amount) total, avg(e.amount) average
 		from `tabShift Expense Detail` e join `tabShift Sale Entry` s on s.name = e.parent

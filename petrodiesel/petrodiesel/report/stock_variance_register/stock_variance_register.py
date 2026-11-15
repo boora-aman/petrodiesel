@@ -49,7 +49,7 @@ def execute(filters=None):
 	cond = _station_cond(filters, "d")
 	if filters.tank:
 		cond += " and i.tank = %(tank)s"
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select d.posting_date, d.name dsr, i.tank, i.fuel_item, i.opening_stock, i.receipts, i.net_sales,
 			i.book_closing, i.closing_stock, i.variance, i.variance_percent, i.permissible_percent,

@@ -91,7 +91,9 @@ def boot():
 		"Item", {"petro_product_type": "Fuel", "disabled": 0}, ["name", "item_name"], order_by="name"
 	)
 	can = {
-		dt: {p: bool(frappe.has_permission(dt, p)) for p in ("read", "create", "submit")}
+		dt: {
+			p: bool(frappe.has_permission(dt, p)) for p in ("read", "create", "submit")
+		}  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.unchecked-frappe-permission-call -- result used as a boolean flag for the UI
 		for dt in (*PREVIEW_DOCTYPES, "Customer", "Payment Entry", "Petrodiesel Settings")
 	}
 	machines = (
@@ -166,7 +168,7 @@ def counts():
 
 # ------------------------------------------------------------------ dashboard
 @frappe.whitelist()
-def dashboard(station=None, date=None):
+def dashboard(station: str | None = None, date: str | None = None):
 	_require_pump_user()
 	station = _station(station)
 	credit_ok = _can_read_credit()
@@ -227,7 +229,7 @@ def dashboard(station=None, date=None):
 
 
 @frappe.whitelist()
-def tanks(station=None):
+def tanks(station: str | None = None):
 	_require_pump_user()
 	station = _station(station)
 	out = []
@@ -938,7 +940,7 @@ def mark_notifications_read():
 
 # ------------------------------------------------------------------ setup
 @frappe.whitelist()
-def setup_data(station=None):
+def setup_data(station: str | None = None):
 	station = _station(station)
 	st = frappe.get_doc("Fuel Station", station)
 	st.check_permission("read")

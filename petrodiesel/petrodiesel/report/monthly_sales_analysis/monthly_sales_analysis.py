@@ -28,7 +28,7 @@ def execute(filters=None):
 		{"label": _("Growth %"), "fieldname": "growth", "fieldtype": "Percent", "width": 90},
 	]
 	cond = _station_cond(filters)
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select date_format(s.posting_date, '%%Y-%%m') month, sum(s.fuel_sales_amount) fuel,
 			sum(s.other_sales_amount) other, sum(s.gross_sales) gross, sum(s.credit_sales_amount) credit,
@@ -39,7 +39,7 @@ def execute(filters=None):
 		filters,
 		as_dict=True,
 	)
-	qty = frappe.db.sql(
+	qty = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select date_format(s.posting_date, '%%Y-%%m') month, n.fuel_item, sum(n.sale_qty) qty
 		from `tabShift Nozzle Reading` n join `tabShift Sale Entry` s on s.name = n.parent

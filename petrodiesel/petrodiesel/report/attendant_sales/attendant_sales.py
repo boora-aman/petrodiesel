@@ -27,7 +27,7 @@ def execute(filters=None):
 		{"label": _("Avg L / Shift"), "fieldname": "avg", "fieldtype": "Float", "width": 120},
 	]
 	cond = _station_cond(filters)
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""select n.attendant, n.attendant_name, count(distinct s.name) shifts,
 		sum(n.sale_qty) qty, sum(n.amount) amount
 		from `tabShift Nozzle Reading` n join `tabShift Sale Entry` s on s.name = n.parent

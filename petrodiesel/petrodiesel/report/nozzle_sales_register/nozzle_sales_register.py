@@ -50,7 +50,7 @@ def execute(filters=None):
 		cond += " and n.nozzle = %(nozzle)s"
 	if filters.fuel_item:
 		cond += " and n.fuel_item = %(fuel_item)s"
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select s.posting_date, s.shift, s.name entry, n.nozzle, n.fuel_item, n.attendant_name,
 			n.opening_reading, n.closing_reading, n.meter_qty, n.test_qty, n.sale_qty, n.rate, n.amount

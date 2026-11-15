@@ -55,7 +55,7 @@ def execute(filters=None):
 	cond = _station_cond(filters, "t")
 	if filters.supplier:
 		cond += " and t.supplier = %(supplier)s"
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select t.name, t.posting_date, t.truck_no, t.supplier_invoice_no, i.tank, i.fuel_item, i.invoice_qty,
 			i.received_qty, i.shortage_qty, i.challan_density, i.density_at_15, i.density_variance, i.density_ok,

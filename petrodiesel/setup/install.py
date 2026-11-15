@@ -306,7 +306,7 @@ def setup():
 	# VAT rows to purchase invoices too, where fuel has no input tax credit.
 	if frappe.get_meta("Accounts Settings").has_field("add_taxes_from_item_tax_template"):
 		frappe.db.set_single_value("Accounts Settings", "add_taxes_from_item_tax_template", 0)
-	frappe.db.commit()
+	frappe.db.commit()  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.frappe-manual-commit -- intentional commit
 
 
 def create_roles():

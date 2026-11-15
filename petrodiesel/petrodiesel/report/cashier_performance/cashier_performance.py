@@ -44,7 +44,7 @@ def execute(filters=None):
 		},
 	]
 	cond = _station_cond(filters)
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select s.cashier, max(s.cashier_name) cashier_name, count(*) shifts, sum(s.total_sale_qty) litres,
 			sum(s.gross_sales) gross, sum(s.digital_amount) digital, sum(s.cash_counted) cash,
@@ -58,7 +58,7 @@ def execute(filters=None):
 		as_dict=True,
 	)
 	worst = {}
-	for r in frappe.db.sql(
+	for r in frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select s.cashier, s.name, s.short_excess from `tabShift Sale Entry` s
 		where s.docstatus = 1 and s.short_excess < 0 and s.posting_date between %(from_date)s and %(to_date)s {cond}

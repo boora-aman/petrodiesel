@@ -85,6 +85,8 @@ jobs:
         working-directory: /home/runner/frappe-bench
         run: |
           bench --site test_site set-config allow_tests true
+          # a few days of demo shifts, tankers and dips so the reports and dashboards have data
+          bench --site test_site execute petrodiesel.demo.setup_demo --kwargs "{'days': 3}"
           bench --site test_site run-tests --app petrodiesel
         env:
           TYPE: server

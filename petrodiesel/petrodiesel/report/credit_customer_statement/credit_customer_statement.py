@@ -49,7 +49,7 @@ def execute(filters=None):
 	)[0][0]
 	rows = []
 	vcond = " and i.petro_vehicle = %(vehicle)s" if filters.vehicle else ""
-	for r in frappe.db.sql(
+	for r in frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select si.posting_date date, si.name voucher, 'Sales Invoice' voucher_type, i.petro_vehicle vehicle,
 			i.petro_slip_no slip_no, i.item_code, i.qty, i.rate, i.amount debit, 0 credit, si.creation

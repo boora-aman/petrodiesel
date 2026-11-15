@@ -36,7 +36,7 @@ def execute(filters=None):
 	cond = " and s.station = %(station)s" if filters.station else ""
 	if filters.attendant:
 		cond += " and a.attendant = %(attendant)s"
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""select s.posting_date, s.shift, s.name entry, a.attendant_name, a.nozzles, a.sale_qty, a.sale_amount,
 			a.credit_amount, a.digital_amount, a.expected_cash, a.cash_handed, a.short_excess
 		from `tabShift Attendant Collection` a join `tabShift Sale Entry` s on s.name = a.parent

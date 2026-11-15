@@ -222,7 +222,7 @@ class DailyStockRegister(Document):
 			cond = "and d.reading_type in %s"
 			params.append(types)
 		order = "asc" if first else "desc"
-		rows = frappe.db.sql(
+		rows = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 			f"""
 			select r.dip_mm, r.dip_stock, r.density_at_15 from `tabTank Dip Detail` r
 			join `tabTank Dip Reading` d on d.name = r.parent

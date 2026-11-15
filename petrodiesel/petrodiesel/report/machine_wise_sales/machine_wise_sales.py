@@ -35,7 +35,7 @@ def execute(filters=None):
 	cond = " and s.station = %(station)s" if filters.station else ""
 	if filters.dispensing_unit:
 		cond += " and nz.dispensing_unit = %(dispensing_unit)s"
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""select nz.dispensing_unit, nz.side, n.fuel_item, n.nozzle, count(distinct s.name) shifts,
 			sum(n.meter_qty) meter_qty, sum(n.test_qty) test_qty, sum(n.sale_qty) sale_qty, sum(n.amount) amount
 		from `tabShift Nozzle Reading` n join `tabShift Sale Entry` s on s.name = n.parent

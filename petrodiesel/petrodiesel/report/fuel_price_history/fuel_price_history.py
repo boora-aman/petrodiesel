@@ -24,7 +24,7 @@ def execute(filters=None):
 		{"label": _("Source"), "fieldname": "source", "fieldtype": "Data", "width": 110},
 	]
 	cond = " and i.fuel_item = %(fuel_item)s" if filters.fuel_item else ""
-	data = frappe.db.sql(
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""select u.effective_date, u.name, i.fuel_item, i.old_price, i.new_price,
 		i.change_amount, i.change_percent, u.source
 		from `tabFuel Price Update Item` i join `tabFuel Price Update` u on u.name = i.parent

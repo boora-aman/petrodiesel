@@ -15,7 +15,7 @@ def execute(filters=None):
 	cond = _station_cond(filters)
 	modes = [
 		m[0]
-		for m in frappe.db.sql(
+		for m in frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 			f"""select distinct p.mode_of_payment from `tabShift Payment` p
 		join `tabShift Sale Entry` s on s.name = p.parent where s.docstatus = 1
 		and s.posting_date between %(from_date)s and %(to_date)s {cond} order by 1""",
@@ -35,7 +35,7 @@ def execute(filters=None):
 	]
 	base = {
 		str(r.posting_date): r
-		for r in frappe.db.sql(
+		for r in frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 			f"""
 		select s.posting_date, sum(s.cash_counted) cash, sum(s.credit_sales_amount) credit
 		from `tabShift Sale Entry` s where s.docstatus = 1 and s.posting_date between %(from_date)s and %(to_date)s {cond}
@@ -44,7 +44,7 @@ def execute(filters=None):
 			as_dict=True,
 		)
 	}
-	for r in frappe.db.sql(
+	for r in frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""select s.posting_date, p.mode_of_payment, sum(p.amount) amt from `tabShift Payment` p
 		join `tabShift Sale Entry` s on s.name = p.parent where s.docstatus = 1
 		and s.posting_date between %(from_date)s and %(to_date)s {cond}

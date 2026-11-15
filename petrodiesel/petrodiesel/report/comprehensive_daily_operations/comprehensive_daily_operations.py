@@ -28,7 +28,7 @@ def execute(filters=None):
 			data.append({"section": None, "particular": r[0], "litres": r[1], "amount": r[2], "indent": 1})
 
 	def child(table, label, litres, amount):
-		return frappe.db.sql(
+		return frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 			f"""
 			select {label}, {litres}, sum({amount}) from `tab{table}` c
 			join `tabShift Sale Entry` s on s.name = c.parent
@@ -42,7 +42,7 @@ def execute(filters=None):
 	section(_("Digital Payments"), child("Shift Payment", "c.mode_of_payment", "null", "c.amount"))
 	section(_("Expenses"), child("Shift Expense Detail", "c.expense_account", "null", "c.amount"))
 
-	t = frappe.db.sql(
+	t = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select count(*) shifts, sum(s.advance_amount) advance, sum(s.driver_cash_amount) driver_cash,
 			sum(s.expected_cash) expected, sum(s.cash_counted) counted, sum(s.short_excess) short_excess
@@ -65,7 +65,7 @@ def execute(filters=None):
 	tcond = _station_cond(filters, "t")
 	section(
 		_("Tanker Receipts"),
-		frappe.db.sql(
+		frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 			f"""
 		select concat(i.tank, ' (', i.fuel_item, ') - Received'), sum(i.received_qty), null
 		from `tabTanker Receipt Item` i join `tabTanker Receipt` t on t.name = i.parent
@@ -84,7 +84,7 @@ def execute(filters=None):
 	dcond = _station_cond(filters, "d")
 	section(
 		_("Stock Gain / Loss"),
-		frappe.db.sql(
+		frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 			f"""
 		select concat(i.tank, ' (', i.fuel_item, ')'), sum(i.variance), null
 		from `tabDaily Stock Register Item` i join `tabDaily Stock Register` d on d.name = i.parent

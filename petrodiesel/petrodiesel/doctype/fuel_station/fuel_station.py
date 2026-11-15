@@ -13,7 +13,7 @@ class FuelStation(Document):
 			if acc and frappe.get_cached_value("Account", acc, "company") != self.company:
 				frappe.throw(
 					_("{0} {1} does not belong to company {2}.").format(
-						self.meta.get_label(field), acc, self.company
+						_(self.meta.get_label(field)), acc, self.company
 					)
 				)
 		for field in ("cost_center",):

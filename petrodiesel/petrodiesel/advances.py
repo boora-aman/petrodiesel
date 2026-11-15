@@ -17,7 +17,7 @@ def advance_ledger(employee: str | None = None, to_date=None, company: str | Non
 	}
 	emp_cond = " and {col} = %(employee)s" if employee else ""
 	co = " and {co} = %(company)s" if company else ""
-	rows = frappe.db.sql(
+	rows = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
 		f"""
 		select s.posting_date, 'Shift Sale Entry' voucher_type, s.name voucher_no, a.employee, a.employee_name,
 			a.amount given, 0 recovered, a.remarks
