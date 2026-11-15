@@ -9,10 +9,22 @@ from frappe.utils import flt
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = [
-		{"label": _("Machine"), "fieldname": "dispensing_unit", "fieldtype": "Link", "options": "Dispensing Unit", "width": 90},
+		{
+			"label": _("Machine"),
+			"fieldname": "dispensing_unit",
+			"fieldtype": "Link",
+			"options": "Dispensing Unit",
+			"width": 90,
+		},
 		{"label": _("Side"), "fieldname": "side", "fieldtype": "Data", "width": 60},
 		{"label": _("Fuel"), "fieldname": "fuel_item", "fieldtype": "Link", "options": "Item", "width": 80},
-		{"label": _("Nozzle"), "fieldname": "nozzle", "fieldtype": "Link", "options": "Fuel Nozzle Master", "width": 90},
+		{
+			"label": _("Nozzle"),
+			"fieldname": "nozzle",
+			"fieldtype": "Link",
+			"options": "Fuel Nozzle Master",
+			"width": 90,
+		},
 		{"label": _("Shifts"), "fieldname": "shifts", "fieldtype": "Int", "width": 70},
 		{"label": _("Meter (L)"), "fieldname": "meter_qty", "fieldtype": "Float", "width": 110},
 		{"label": _("Test (L)"), "fieldname": "test_qty", "fieldtype": "Float", "width": 90},
@@ -23,17 +35,28 @@ def execute(filters=None):
 	cond = " and s.station = %(station)s" if filters.station else ""
 	if filters.dispensing_unit:
 		cond += " and nz.dispensing_unit = %(dispensing_unit)s"
-	data = frappe.db.sql(f"""select nz.dispensing_unit, nz.side, n.fuel_item, n.nozzle, count(distinct s.name) shifts,
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
+		f"""select nz.dispensing_unit, nz.side, n.fuel_item, n.nozzle, count(distinct s.name) shifts,
 			sum(n.meter_qty) meter_qty, sum(n.test_qty) test_qty, sum(n.sale_qty) sale_qty, sum(n.amount) amount
 		from `tabShift Nozzle Reading` n join `tabShift Sale Entry` s on s.name = n.parent
 		join `tabFuel Nozzle Master` nz on nz.name = n.nozzle
 		where s.docstatus = 1 and s.posting_date between %(from_date)s and %(to_date)s {cond}
 		group by nz.dispensing_unit, nz.side, n.fuel_item, n.nozzle order by nz.dispensing_unit, nz.side, n.nozzle""",
-		filters, as_dict=True)
+		filters,
+		as_dict=True,
+	)
 	per = {}
 	for d in data:
 		d.avg = flt(d.sale_qty / d.shifts, 1) if d.shifts else 0
-		per[f"{d.dispensing_unit} {d.side or ''}".strip()] = per.get(f"{d.dispensing_unit} {d.side or ''}".strip(), 0) + flt(d.sale_qty)
-	chart = {"data": {"labels": list(per), "datasets": [{"name": _("Litres"), "values": [flt(v, 0) for v in per.values()]}]},
-		"type": "bar", "fieldtype": "Float"}
+		per[f"{d.dispensing_unit} {d.side or ''}".strip()] = per.get(
+			f"{d.dispensing_unit} {d.side or ''}".strip(), 0
+		) + flt(d.sale_qty)
+	chart = {
+		"data": {
+			"labels": list(per),
+			"datasets": [{"name": _("Litres"), "values": [flt(v, 0) for v in per.values()]}],
+		},
+		"type": "bar",
+		"fieldtype": "Float",
+	}
 	return columns, data, None, chart

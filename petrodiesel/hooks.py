@@ -19,6 +19,11 @@ add_to_apps_screen = [
 after_install = "petrodiesel.setup.install.after_install"
 after_migrate = ["petrodiesel.setup.install.after_migrate"]
 
+doc_events = {
+	dt: {"before_cancel": "petrodiesel.petrodiesel.guards.before_cancel"}
+	for dt in ("Sales Invoice", "Journal Entry", "Purchase Invoice", "Stock Entry", "Stock Reconciliation")
+}
+
 scheduler_events = {
 	"daily": ["petrodiesel.tasks.daily"],
 }
@@ -31,6 +36,14 @@ website_route_rules = [
 # Old links to the app keep working
 website_redirects = [
 	{"source": r"/petrodesk(/.*)?", "target": r"/petrodiesel\1"},
+	# the classic Frappe login page opens the PetroDesk sign-in; ?redirect-to= is kept,
+	# so desk links (/login?redirect-to=/desk/...) still land back on the desk after sign-in
+	{
+		"source": r"/login",
+		"target": "/petrodiesel/login",
+		"redirect_http_status": 302,
+		"forward_query_parameters": True,
+	},
 ]
 
 # After login, pump staff land in the PetroDesk app instead of the ERPNext desk.

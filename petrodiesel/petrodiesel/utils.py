@@ -4,6 +4,8 @@
 
 from __future__ import annotations
 
+import itertools
+
 import frappe
 from frappe import _
 from frappe.utils import flt, getdate, nowdate
@@ -31,7 +33,7 @@ def dip_to_volume(tank: str, dip_mm: float) -> float:
 	if dip_mm <= points[0][0]:
 		d0, v0 = points[0]
 		return flt(v0 * dip_mm / d0, 2) if d0 else flt(v0, 2)
-	for (d1, v1), (d2, v2) in zip(points, points[1:]):
+	for (d1, v1), (d2, v2) in itertools.pairwise(points):
 		if d1 <= dip_mm <= d2:
 			if d2 == d1:
 				return flt(v2, 2)
@@ -114,3 +116,53 @@ def get_company_default(company: str, field: str) -> str | None:
 
 def is_fuel_item(item_code: str) -> bool:
 	return frappe.get_cached_value("Item", item_code, "petro_product_type") == "Fuel"
+
+
+# ------------------------------------------------------------------ guards
+MANAGER_ROLES = ("Pump Owner", "Pump Manager", "System Manager")
+
+
+def is_pump_manager(user: str | None = None) -> bool:
+	return bool(set(frappe.get_roles(user)) & set(MANAGER_ROLES))
+
+
+def validate_not_future(date, label: str | None = None):
+	"""Business documents may not be dated after today (a future date blocks every later entry)."""
+	if date and getdate(date) > getdate(nowdate()):
+		frappe.throw(_("{0} cannot be in the future.").format(label or _("Posting date")))
+
+
+def ensure_no_payments(doctype: str, names: list[str], exclude_journal: str | None = None):
+	"""Refuse to cancel invoices that already have submitted payments or journal allocations."""
+	names = [n for n in names if n]
+	if not names:
+		return
+	per = frappe.qb.DocType("Payment Entry Reference")
+	pe = frappe.qb.DocType("Payment Entry")
+	paid = (
+		frappe.qb.from_(per)
+		.join(pe)
+		.on(pe.name == per.parent)
+		.select(per.reference_name, pe.name)
+		.where((pe.docstatus == 1) & (per.reference_doctype == doctype) & (per.reference_name.isin(names)))
+		.limit(1)
+		.run()
+	)
+	jea = frappe.qb.DocType("Journal Entry Account")
+	je = frappe.qb.DocType("Journal Entry")
+	jq = (
+		frappe.qb.from_(jea)
+		.join(je)
+		.on(je.name == jea.parent)
+		.select(jea.reference_name, je.name)
+		.where((je.docstatus == 1) & (jea.reference_type == doctype) & (jea.reference_name.isin(names)))
+	)
+	if exclude_journal:
+		jq = jq.where(je.name != exclude_journal)
+	paid = paid or jq.limit(1).run()
+	if paid:
+		frappe.throw(
+			_("{0} {1} already has payment {2} against it. Cancel or unallocate that payment first.").format(
+				_(doctype), frappe.bold(paid[0][0]), frappe.bold(paid[0][1])
+			)
+		)

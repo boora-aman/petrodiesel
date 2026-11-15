@@ -7,15 +7,24 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from petrodiesel.petrodiesel.utils import get_settings
+from petrodiesel.petrodiesel.utils import get_settings, validate_not_future
 
 
 class PumpTestLog(Document):
 	def validate(self):
+		validate_not_future(self.posting_date)
+		if not self.tests:
+			frappe.throw(_("Add at least one nozzle test."))
 		tol_per_5l = flt(get_settings().pump_test_tolerance_ml) or 15
 		for row in self.tests:
+			if row.error_ml in (None, ""):
+				frappe.throw(
+					_("Row {0}: enter the measured error (ml) for nozzle {1}.").format(row.idx, row.nozzle)
+				)
 			if frappe.db.get_value("Fuel Nozzle Master", row.nozzle, "station") != self.station:
-				frappe.throw(_("Row {0}: nozzle {1} is not at station {2}.").format(row.idx, row.nozzle, self.station))
+				frappe.throw(
+					_("Row {0}: nozzle {1} is not at station {2}.").format(row.idx, row.nozzle, self.station)
+				)
 			measure = flt(row.measure_liters) or 5
 			allowed = tol_per_5l * measure / 5
 			row.result = "Pass" if abs(flt(row.error_ml)) <= allowed else "Fail"
@@ -26,6 +35,20 @@ class PumpTestLog(Document):
 		if failed:
 			for n in failed:
 				frappe.db.set_value("Fuel Nozzle Master", n, "status", "Under Maintenance")
-			frappe.msgprint(_("Nozzles {0} failed the measure test and were set to Under Maintenance. "
-				"Stop sales and call the DU service engineer / Legal Metrology.").format(", ".join(failed)),
-				indicator="red", title=_("Test Failed"))
+			frappe.msgprint(
+				_(
+					"Nozzles {0} failed the measure test and were set to Under Maintenance. "
+					"Stop sales and call the DU service engineer / Legal Metrology."
+				).format(", ".join(failed)),
+				indicator="red",
+				title=_("Test Failed"),
+			)
+
+	def on_cancel(self):
+		# nozzles this test took out of service go back into service
+		for r in self.tests:
+			if (
+				r.result == "Fail"
+				and frappe.db.get_value("Fuel Nozzle Master", r.nozzle, "status") == "Under Maintenance"
+			):
+				frappe.db.set_value("Fuel Nozzle Master", r.nozzle, "status", "Active")

@@ -13,7 +13,13 @@ def _station_cond(filters, alias="s"):
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = [
-		{"label": _("Cashier"), "fieldname": "cashier", "fieldtype": "Link", "options": "Employee", "width": 110},
+		{
+			"label": _("Cashier"),
+			"fieldname": "cashier",
+			"fieldtype": "Link",
+			"options": "Employee",
+			"width": 110,
+		},
 		{"label": _("Cashier Name"), "fieldname": "cashier_name", "fieldtype": "Data", "width": 150},
 		{"label": _("Shifts"), "fieldname": "shifts", "fieldtype": "Int", "width": 70},
 		{"label": _("Litres"), "fieldname": "litres", "fieldtype": "Float", "width": 110},
@@ -22,12 +28,24 @@ def execute(filters=None):
 		{"label": _("Cash Counted"), "fieldname": "cash", "fieldtype": "Currency", "width": 130},
 		{"label": _("Total Short"), "fieldname": "total_short", "fieldtype": "Currency", "width": 110},
 		{"label": _("Total Excess"), "fieldname": "total_excess", "fieldtype": "Currency", "width": 110},
-		{"label": _("Net Short / Excess"), "fieldname": "net_short_excess", "fieldtype": "Currency", "width": 130},
+		{
+			"label": _("Net Short / Excess"),
+			"fieldname": "net_short_excess",
+			"fieldtype": "Currency",
+			"width": 130,
+		},
 		{"label": _("Avg Short / Shift"), "fieldname": "avg_short", "fieldtype": "Currency", "width": 120},
-		{"label": _("Worst Shift"), "fieldname": "worst_shift", "fieldtype": "Link", "options": "Shift Sale Entry", "width": 150},
+		{
+			"label": _("Worst Shift"),
+			"fieldname": "worst_shift",
+			"fieldtype": "Link",
+			"options": "Shift Sale Entry",
+			"width": 150,
+		},
 	]
 	cond = _station_cond(filters)
-	data = frappe.db.sql(f"""
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
+		f"""
 		select s.cashier, max(s.cashier_name) cashier_name, count(*) shifts, sum(s.total_sale_qty) litres,
 			sum(s.gross_sales) gross, sum(s.digital_amount) digital, sum(s.cash_counted) cash,
 			sum(case when s.short_excess < 0 then s.short_excess else 0 end) total_short,
@@ -35,19 +53,31 @@ def execute(filters=None):
 			sum(s.short_excess) net_short_excess
 		from `tabShift Sale Entry` s
 		where s.docstatus = 1 and s.posting_date between %(from_date)s and %(to_date)s {cond}
-		group by s.cashier order by sum(s.short_excess)""", filters, as_dict=True)
+		group by s.cashier order by sum(s.short_excess)""",
+		filters,
+		as_dict=True,
+	)
 	worst = {}
-	for r in frappe.db.sql(f"""
+	for r in frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
+		f"""
 		select s.cashier, s.name, s.short_excess from `tabShift Sale Entry` s
 		where s.docstatus = 1 and s.short_excess < 0 and s.posting_date between %(from_date)s and %(to_date)s {cond}
-		order by s.short_excess desc""", filters, as_dict=True):
+		order by s.short_excess desc""",
+		filters,
+		as_dict=True,
+	):
 		worst[r.cashier] = r.name
 	for d in data:
 		d["avg_short"] = flt(d.total_short) / d.shifts if d.shifts else 0
 		d["worst_shift"] = worst.get(d.cashier)
 	chart = {
-		"data": {"labels": [d.cashier_name or d.cashier or _("Not Set") for d in data],
-			"datasets": [{"name": _("Net Short / Excess"), "values": [flt(d.net_short_excess, 2) for d in data]}]},
-		"type": "bar", "fieldtype": "Currency",
+		"data": {
+			"labels": [d.cashier_name or d.cashier or _("Not Set") for d in data],
+			"datasets": [
+				{"name": _("Net Short / Excess"), "values": [flt(d.net_short_excess, 2) for d in data]}
+			],
+		},
+		"type": "bar",
+		"fieldtype": "Currency",
 	}
 	return columns, data, None, chart

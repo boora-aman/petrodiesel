@@ -8,5 +8,10 @@ from frappe.model.document import Document
 
 class ShiftMaster(Document):
 	def validate(self):
-		if frappe.db.exists("Shift Master", {"sequence": self.sequence, "is_active": 1, "name": ["!=", self.name]}) and self.is_active:
+		if (
+			frappe.db.exists(
+				"Shift Master", {"sequence": self.sequence, "is_active": 1, "name": ["!=", self.name]}
+			)
+			and self.is_active
+		):
 			frappe.throw(_("Another active shift already has sequence {0}.").format(self.sequence))

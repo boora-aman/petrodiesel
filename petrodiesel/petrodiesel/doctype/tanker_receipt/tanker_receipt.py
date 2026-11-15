@@ -15,24 +15,49 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from petrodiesel.petrodiesel.utils import dip_to_volume, get_settings
+from petrodiesel.petrodiesel.utils import (
+	dip_to_volume,
+	ensure_no_payments,
+	get_settings,
+	is_pump_manager,
+	validate_not_future,
+)
 
 
 class TankerReceipt(Document):
-	ignore_linked_doctypes = ("GL Entry", "Stock Ledger Entry", "Payment Ledger Entry",
-		"Purchase Invoice", "Stock Entry", "Repost Item Valuation", "Serial and Batch Bundle")
+	ignore_linked_doctypes = (
+		"GL Entry",
+		"Stock Ledger Entry",
+		"Payment Ledger Entry",
+		"Purchase Invoice",
+		"Stock Entry",
+		"Repost Item Valuation",
+		"Serial and Batch Bundle",
+	)
 
 	def validate(self):
 		station = frappe.get_cached_doc("Fuel Station", self.station)
 		self.company = station.company
+		validate_not_future(self.posting_date)
+		if not self.items:
+			frappe.throw(_("Add at least one tank."))
 		tolerance = flt(get_settings().density_tolerance) or 3.0
 		density_fail = []
 		for row in self.items:
 			tank = frappe.get_cached_doc("Fuel Tank Master", row.tank)
 			if tank.station != self.station:
-				frappe.throw(_("Row {0}: tank {1} is not at station {2}.").format(row.idx, row.tank, self.station))
+				frappe.throw(
+					_("Row {0}: tank {1} is not at station {2}.").format(row.idx, row.tank, self.station)
+				)
 			row.fuel_item = tank.fuel_item
+			if flt(row.invoice_qty) <= 0 or flt(row.rate) <= 0:
+				frappe.throw(_("Row {0}: invoice quantity and rate must be positive.").format(row.idx))
 			row.amount = flt(flt(row.invoice_qty) * flt(row.rate), 2)
+			if self.docstatus == 1 and not (flt(row.challan_density) and flt(row.density_at_15)):
+				frappe.throw(
+					_("Row {0}: enter the challan density and the observed density at 15°C.").format(row.idx),
+					title=_("Density check missing"),
+				)
 
 			if flt(row.challan_density) and flt(row.density_at_15):
 				row.density_variance = flt(flt(row.density_at_15) - flt(row.challan_density), 1)
@@ -46,22 +71,37 @@ class TankerReceipt(Document):
 			if flt(row.dip_before_mm) or flt(row.dip_after_mm):
 				row.stock_before = dip_to_volume(row.tank, row.dip_before_mm)
 				row.stock_after = dip_to_volume(row.tank, row.dip_after_mm)
-				row.received_qty = flt(row.stock_after - row.stock_before + flt(row.sales_during_decantation), 2)
+				row.received_qty = flt(
+					row.stock_after - row.stock_before + flt(row.sales_during_decantation), 2
+				)
 			elif not flt(row.received_qty):
 				row.received_qty = flt(row.invoice_qty)
+			if flt(row.received_qty) < 0:
+				frappe.throw(
+					_("Row {0}: dip after decantation is below the dip before. Check the dips.").format(
+						row.idx
+					)
+				)
 			row.shortage_qty = flt(flt(row.invoice_qty) - flt(row.received_qty), 2)
 
 			capacity = flt(tank.capacity_liters) * (flt(tank.safe_fill_percent) or 100) / 100
 			if row.stock_after and capacity and row.stock_after > capacity + 1:
-				frappe.msgprint(_("Row {0}: tank {1} filled above safe-fill level ({2} L).").format(
-					row.idx, row.tank, flt(capacity, 0)), indicator="orange", alert=True)
+				frappe.msgprint(
+					_("Row {0}: tank {1} filled above safe-fill level ({2} L).").format(
+						row.idx, row.tank, flt(capacity, 0)
+					),
+					indicator="orange",
+					alert=True,
+				)
 
 		if density_fail and not self.override_density_check:
 			frappe.throw(
-				_("Density variance beyond ±{0} kg/m³ for: {1}. Do not decant. "
-				"Raise a complaint with the OMC, or tick 'Accept Despite Density Variance' with remarks.").format(
-					tolerance, ", ".join(f"{r.tank} ({r.density_variance:+})" for r in density_fail)),
-				title=_("Density Check Failed"))
+				_(
+					"Density variance beyond ±{0} kg/m³ for: {1}. Do not decant. "
+					"Raise a complaint with the OMC, or tick 'Accept Despite Density Variance' with remarks."
+				).format(tolerance, ", ".join(f"{r.tank} ({r.density_variance:+})" for r in density_fail)),
+				title=_("Density Check Failed"),
+			)
 		if self.override_density_check and density_fail and not self.remarks:
 			frappe.throw(_("Enter remarks explaining why the density variance was accepted."))
 		if not self.seals_intact and not self.remarks:
@@ -73,65 +113,78 @@ class TankerReceipt(Document):
 		self.total_amount = flt(sum(flt(r.amount) for r in self.items), 2)
 
 	def before_submit(self):
-		if self.override_density_check and not frappe.db.get_value(
-			"Has Role", {"parent": frappe.session.user, "role": ["in", ["Pump Owner", "Pump Manager", "System Manager"]]}
-		):
+		if self.override_density_check and not is_pump_manager():
 			frappe.throw(_("Only a Pump Manager or Owner can accept a density variance."))
 
 	def on_submit(self):
 		self.make_purchase_invoice()
 		self.make_transit_adjustment()
+		from petrodiesel.petrodiesel.doctype.tank_dip_reading.tank_dip_reading import set_last_dip_if_newer
+
 		for row in self.items:
 			if flt(row.dip_after_mm):
-				frappe.db.set_value("Fuel Tank Master", row.tank, {
-					"last_dip_mm": row.dip_after_mm,
-					"last_dip_stock": row.stock_after,
-					"last_dip_on": f"{self.posting_date} {self.posting_time}",
-				})
+				set_last_dip_if_newer(
+					row.tank, row.dip_after_mm, row.stock_after, self.posting_date, self.posting_time
+				)
+
+	def before_cancel(self):
+		ensure_no_payments("Purchase Invoice", [self.purchase_invoice])
 
 	def on_cancel(self):
-		docs = [("Stock Entry", n) for n in frappe.get_all(
-			"Stock Entry", {"tanker_receipt": self.name, "docstatus": 1}, pluck="name")]
+		docs = [
+			("Stock Entry", n)
+			for n in frappe.get_all(
+				"Stock Entry", {"tanker_receipt": self.name, "docstatus": 1}, pluck="name"
+			)
+		]
 		docs.append(("Purchase Invoice", self.purchase_invoice))
 		for doctype, name in docs:
 			if name and frappe.db.get_value(doctype, name, "docstatus") == 1:
 				doc = frappe.get_doc(doctype, name)
 				doc.flags.ignore_permissions = True
-				doc.flags.ignore_links = True
 				doc.cancel()
+		from petrodiesel.petrodiesel.doctype.tank_dip_reading.tank_dip_reading import refresh_last_dip
+
+		for tank in {r.tank for r in self.items if flt(r.dip_after_mm)}:
+			refresh_last_dip(tank)
 
 	def make_purchase_invoice(self):
 		cost_center = frappe.get_cached_value("Fuel Station", self.station, "cost_center")
 		pi = frappe.new_doc("Purchase Invoice")
-		pi.update({
-			"company": self.company,
-			"supplier": self.supplier,
-			"posting_date": self.posting_date,
-			"set_posting_time": 1,
-			"posting_time": self.posting_time,
-			"bill_no": self.supplier_invoice_no,
-			"bill_date": self.supplier_invoice_date or self.posting_date,
-			"due_date": self.posting_date,
-			"update_stock": 1,
-			"disable_rounded_total": 1,
-			"cost_center": cost_center,
-			"tanker_receipt": self.name,
-			"remarks": _("Tanker {0} decanted via {1}").format(self.truck_no, self.name),
-		})
-		for row in self.items:
-			pi.append("items", {
-				"item_code": row.fuel_item,
-				"qty": row.invoice_qty,
-				"rate": row.rate,
-				"price_list_rate": row.rate,
-				"warehouse": frappe.get_cached_value("Fuel Tank Master", row.tank, "warehouse"),
+		pi.update(
+			{
+				"company": self.company,
+				"supplier": self.supplier,
+				"posting_date": self.posting_date,
+				"set_posting_time": 1,
+				"posting_time": self.posting_time,
+				"bill_no": self.supplier_invoice_no,
+				"bill_date": self.supplier_invoice_date or self.posting_date,
+				"due_date": self.posting_date,
+				"update_stock": 1,
+				"disable_rounded_total": 1,
 				"cost_center": cost_center,
-			})
+				"tanker_receipt": self.name,
+				"remarks": _("Tanker {0} decanted via {1}").format(self.truck_no, self.name),
+			}
+		)
+		for row in self.items:
+			pi.append(
+				"items",
+				{
+					"item_code": row.fuel_item,
+					"qty": row.invoice_qty,
+					"rate": row.rate,
+					"price_list_rate": row.rate,
+					"warehouse": frappe.get_cached_value("Fuel Tank Master", row.tank, "warehouse"),
+					"cost_center": cost_center,
+				},
+			)
 		pi.set_missing_values()
 		# OMC invoice rate is the landed cost; fuel carries no input tax credit, so no tax rows
 		pi.taxes_and_charges = None
 		pi.set("taxes", [])
-		for row, src in zip(pi.items, self.items):
+		for row, src in zip(pi.items, self.items, strict=False):
 			row.rate = src.rate
 			row.item_tax_template = None
 			row.item_tax_rate = "{}"
@@ -154,28 +207,36 @@ class TankerReceipt(Document):
 			if not group:
 				continue
 			se = frappe.new_doc("Stock Entry")
-			se.update({
-				"stock_entry_type": purpose,
-				"purpose": purpose,
-				"company": self.company,
-				"posting_date": self.posting_date,
-				"set_posting_time": 1,
-				"posting_time": self.posting_time,
-				"tanker_receipt": self.name,
-				"remarks": _("Decantation {0} for tanker {1} ({2})").format(
-					_("shortage") if purpose == "Material Issue" else _("excess"), self.truck_no, self.name),
-			})
+			se.update(
+				{
+					"stock_entry_type": purpose,
+					"purpose": purpose,
+					"company": self.company,
+					"posting_date": self.posting_date,
+					"set_posting_time": 1,
+					"posting_time": self.posting_time,
+					"tanker_receipt": self.name,
+					"remarks": _("Decantation {0} for tanker {1} ({2})").format(
+						_("shortage") if purpose == "Material Issue" else _("excess"),
+						self.truck_no,
+						self.name,
+					),
+				}
+			)
 			for r in group:
 				wh = frappe.get_cached_value("Fuel Tank Master", r.tank, "warehouse")
-				se.append("items", {
-					"item_code": r.fuel_item,
-					"qty": abs(r.shortage_qty),
-					"s_warehouse": wh if purpose == "Material Issue" else None,
-					"t_warehouse": wh if purpose == "Material Receipt" else None,
-					"basic_rate": r.rate,
-					"expense_account": account,
-					"cost_center": cost_center,
-				})
+				se.append(
+					"items",
+					{
+						"item_code": r.fuel_item,
+						"qty": abs(r.shortage_qty),
+						"s_warehouse": wh if purpose == "Material Issue" else None,
+						"t_warehouse": wh if purpose == "Material Receipt" else None,
+						"basic_rate": r.rate,
+						"expense_account": account,
+						"cost_center": cost_center,
+					},
+				)
 			se.flags.ignore_permissions = True
 			se.insert()
 			se.submit()

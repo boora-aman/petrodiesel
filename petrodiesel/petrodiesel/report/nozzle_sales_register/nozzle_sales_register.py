@@ -14,9 +14,27 @@ def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	columns = [
 		{"label": _("Date"), "fieldname": "posting_date", "fieldtype": "Date", "width": 95},
-		{"label": _("Shift"), "fieldname": "shift", "fieldtype": "Link", "options": "Shift Master", "width": 85},
-		{"label": _("Entry"), "fieldname": "entry", "fieldtype": "Link", "options": "Shift Sale Entry", "width": 150},
-		{"label": _("Nozzle"), "fieldname": "nozzle", "fieldtype": "Link", "options": "Fuel Nozzle Master", "width": 85},
+		{
+			"label": _("Shift"),
+			"fieldname": "shift",
+			"fieldtype": "Link",
+			"options": "Shift Master",
+			"width": 85,
+		},
+		{
+			"label": _("Entry"),
+			"fieldname": "entry",
+			"fieldtype": "Link",
+			"options": "Shift Sale Entry",
+			"width": 150,
+		},
+		{
+			"label": _("Nozzle"),
+			"fieldname": "nozzle",
+			"fieldtype": "Link",
+			"options": "Fuel Nozzle Master",
+			"width": 85,
+		},
 		{"label": _("Fuel"), "fieldname": "fuel_item", "fieldtype": "Link", "options": "Item", "width": 70},
 		{"label": _("Attendant"), "fieldname": "attendant_name", "fieldtype": "Data", "width": 120},
 		{"label": _("Opening"), "fieldname": "opening_reading", "fieldtype": "Float", "width": 110},
@@ -32,11 +50,15 @@ def execute(filters=None):
 		cond += " and n.nozzle = %(nozzle)s"
 	if filters.fuel_item:
 		cond += " and n.fuel_item = %(fuel_item)s"
-	data = frappe.db.sql(f"""
+	data = frappe.db.sql(  # nosemgrep: tmp.claude-1000.-home-boora--claude-spares-spare-CfC2s3.5539f4da-34d8-44a3-9154-ee671e5b4956.scratchpad.frappe-semgrep-rules.rules.security.frappe-sql-format-injection -- only fixed column/condition fragments are interpolated; values are passed as query params
+		f"""
 		select s.posting_date, s.shift, s.name entry, n.nozzle, n.fuel_item, n.attendant_name,
 			n.opening_reading, n.closing_reading, n.meter_qty, n.test_qty, n.sale_qty, n.rate, n.amount
 		from `tabShift Nozzle Reading` n join `tabShift Sale Entry` s on s.name = n.parent
 		left join `tabShift Master` sm on sm.name = s.shift
 		where s.docstatus = 1 and s.posting_date between %(from_date)s and %(to_date)s {cond}
-		order by s.posting_date, sm.sequence, n.nozzle, n.opening_reading""", filters, as_dict=True)
+		order by s.posting_date, sm.sequence, n.nozzle, n.opening_reading""",
+		filters,
+		as_dict=True,
+	)
 	return columns, data

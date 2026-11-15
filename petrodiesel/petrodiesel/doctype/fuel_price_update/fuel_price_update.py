@@ -32,30 +32,43 @@ class FuelPriceUpdate(Document):
 		for row in self.items:
 			uom = frappe.db.get_value("Item", row.fuel_item, "stock_uom")
 			# close the price that is valid on the effective date
-			prev = frappe.db.sql("""
+			prev = frappe.db.sql(
+				"""
 				select name, valid_from from `tabItem Price`
 				where item_code=%s and price_list=%s and (valid_from is null or valid_from <= %s)
 				and (valid_upto is null or valid_upto >= %s)
-				order by valid_from desc limit 1""", (row.fuel_item, self.price_list, date, date), as_dict=True)
+				order by valid_from desc limit 1""",
+				(row.fuel_item, self.price_list, date, date),
+				as_dict=True,
+			)
 			if prev:
 				p = prev[0]
 				if p.valid_from and getdate(p.valid_from) == date:
-					frappe.throw(_("{0} already has a price from {1} ({2}). Cancel that update first.").format(
-						row.fuel_item, date, p.name))
+					frappe.throw(
+						_("{0} already has a price from {1} ({2}). Cancel that update first.").format(
+							row.fuel_item, date, p.name
+						)
+					)
 				frappe.db.set_value("Item Price", p.name, "valid_upto", add_days(date, -1))
 				row.db_set("previous_item_price", p.name)
-			later = frappe.db.get_value("Item Price", {"item_code": row.fuel_item, "price_list": self.price_list,
-				"valid_from": [">", date]}, "valid_from", order_by="valid_from asc")
-			ip = frappe.get_doc({
-				"doctype": "Item Price",
-				"item_code": row.fuel_item,
-				"price_list": self.price_list,
-				"uom": uom,
-				"price_list_rate": row.new_price,
-				"valid_from": date,
-				"valid_upto": add_days(later, -1) if later else None,
-				"note": _("Fuel Price Update {0}").format(self.name),
-			})
+			later = frappe.db.get_value(
+				"Item Price",
+				{"item_code": row.fuel_item, "price_list": self.price_list, "valid_from": [">", date]},
+				"valid_from",
+				order_by="valid_from asc",
+			)
+			ip = frappe.get_doc(
+				{
+					"doctype": "Item Price",
+					"item_code": row.fuel_item,
+					"price_list": self.price_list,
+					"uom": uom,
+					"price_list_rate": row.new_price,
+					"valid_from": date,
+					"valid_upto": add_days(later, -1) if later else None,
+					"note": _("Fuel Price Update {0}").format(self.name),
+				}
+			)
 			ip.flags.ignore_permissions = True
 			ip.insert()
 			row.db_set("item_price", ip.name)
@@ -73,6 +86,13 @@ class FuelPriceUpdate(Document):
 
 @frappe.whitelist()
 def get_fuel_items(effective_date: str | None = None, price_list: str | None = None) -> list[dict]:
-	items = frappe.get_all("Item", {"petro_product_type": "Fuel", "disabled": 0}, pluck="name", order_by="name")
-	return [{"fuel_item": i, "old_price": get_fuel_rate(i, add_days(effective_date or frappe.utils.today(), -1), price_list)}
-		for i in items]
+	items = frappe.get_all(
+		"Item", {"petro_product_type": "Fuel", "disabled": 0}, pluck="name", order_by="name"
+	)
+	return [
+		{
+			"fuel_item": i,
+			"old_price": get_fuel_rate(i, add_days(effective_date or frappe.utils.today(), -1), price_list),
+		}
+		for i in items
+	]

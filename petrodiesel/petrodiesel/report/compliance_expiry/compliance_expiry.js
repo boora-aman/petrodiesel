@@ -3,6 +3,6 @@
 
 frappe.query_reports["Compliance Expiry"] = {
 	filters: [
-		{"fieldname": "days", "label": "Expiring Within (days)", "fieldtype": "Int", "default": "90"}
+		{ fieldname: "days", label: "Expiring Within (days)", fieldtype: "Int", default: "90" },
 	],
 };

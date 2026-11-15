@@ -25,8 +25,16 @@ class TestNewFeatures(IntegrationTestCase):
 		ensure_demo_masters()
 		for i, name in enumerate(SHIFTS, start=71):
 			if not frappe.db.exists("Shift Master", name):
-				frappe.get_doc({"doctype": "Shift Master", "shift_name": name, "sequence": i, "start_time": "00:00:00",
-					"end_time": "23:00:00", "is_active": 0}).insert()
+				frappe.get_doc(
+					{
+						"doctype": "Shift Master",
+						"shift_name": name,
+						"sequence": i,
+						"start_time": "00:00:00",
+						"end_time": "23:00:00",
+						"is_active": 0,
+					}
+				).insert()
 		cls.emp = frappe.db.get_value("Employee", {"company": COMPANY, "designation": "Attendant"})
 
 	def setUp(self):
@@ -39,19 +47,33 @@ class TestNewFeatures(IntegrationTestCase):
 		doc.update({"station": STATION, "posting_date": today(), "shift": shift})
 		for n in get_nozzles(STATION, today()):
 			if n["nozzle"] in nozzles:
-				doc.append("nozzle_readings", {**n, "closing_reading": n["opening_reading"] + sale, "attendant": self.emp})
+				doc.append(
+					"nozzle_readings",
+					{**n, "closing_reading": n["opening_reading"] + sale, "attendant": self.emp},
+				)
 		return doc
 
 	# ---------------------------------------------------------------- machine-wise
 	def test_attendant_reconciliation_and_machine_sales(self):
 		hsd = get_fuel_rate("HSD", today())
-		emps = frappe.get_all("Employee", {"company": COMPANY, "designation": "Attendant"}, pluck="name", order_by="name")
+		emps = frappe.get_all(
+			"Employee", {"company": COMPANY, "designation": "Attendant"}, pluck="name", order_by="name"
+		)
 		a, b = emps[0], emps[1]
 		doc = self._shift(SHIFTS[0], ["DU1-N1", "DU1-N2", "DU1-N3", "DU1-N4"], sale=100)
 		for r in doc.nozzle_readings:  # side A (N1, N2) = a, side B (N3, N4) = b
 			r.attendant = a if r.nozzle in ("DU1-N1", "DU1-N2") else b
-		doc.append("credit_sales", {"customer": "Gupta Transport Co.", "vehicle": "HR38AB4521", "fuel_item": "HSD",
-			"qty": 20, "rate": hsd, "attendant": b})
+		doc.append(
+			"credit_sales",
+			{
+				"customer": "Gupta Transport Co.",
+				"vehicle": "HR38AB4521",
+				"fuel_item": "HSD",
+				"qty": 20,
+				"rate": hsd,
+				"attendant": b,
+			},
+		)
 		doc.append("payments", {"mode_of_payment": "UPI", "amount": 1000, "attendant": a})
 		doc.append("payments", {"mode_of_payment": "UPI", "amount": 500, "attendant": b})
 		doc.append("payments", {"mode_of_payment": "UPI", "amount": 200})  # counter, nobody's
@@ -117,25 +139,56 @@ class TestNewFeatures(IntegrationTestCase):
 	# ---------------------------------------------------------------- advances
 	def test_staff_advance_give_and_recover(self):
 		before = advance_outstanding(self.emp)
-		adv = frappe.get_doc({"doctype": "Staff Advance", "employee": self.emp, "station": STATION, "amount": 3000,
-			"mode_of_payment": "Cash", "purpose": "Medical", "recovery_method": "Cash Return"}).insert()
+		adv = frappe.get_doc(
+			{
+				"doctype": "Staff Advance",
+				"employee": self.emp,
+				"station": STATION,
+				"amount": 3000,
+				"mode_of_payment": "Cash",
+				"purpose": "Medical",
+				"recovery_method": "Cash Return",
+			}
+		).insert()
 		adv.submit()
 		self.assertTrue(adv.journal_entry)
 		self.assertAlmostEqual(advance_outstanding(self.emp), before + 3000)
 
-		over = frappe.get_doc({"doctype": "Staff Advance Recovery", "employee": self.emp, "station": STATION,
-			"amount": before + 5000, "method": "Cash Return"})
+		over = frappe.get_doc(
+			{
+				"doctype": "Staff Advance Recovery",
+				"employee": self.emp,
+				"station": STATION,
+				"amount": before + 5000,
+				"method": "Cash Return",
+			}
+		)
 		self.assertRaises(frappe.ValidationError, over.insert)
 
-		rec = frappe.get_doc({"doctype": "Staff Advance Recovery", "employee": self.emp, "station": STATION,
-			"amount": 1000, "method": "Cash Return", "mode_of_payment": "Cash"}).insert()
+		rec = frappe.get_doc(
+			{
+				"doctype": "Staff Advance Recovery",
+				"employee": self.emp,
+				"station": STATION,
+				"amount": 1000,
+				"method": "Cash Return",
+				"mode_of_payment": "Cash",
+			}
+		).insert()
 		self.assertAlmostEqual(rec.outstanding, before + 3000)
 		rec.submit()
 		self.assertTrue(rec.journal_entry)
 		self.assertAlmostEqual(advance_outstanding(self.emp), before + 2000)
 
-		sal = frappe.get_doc({"doctype": "Staff Advance Recovery", "employee": self.emp, "station": STATION,
-			"amount": 500, "method": "Salary Deduction"}).insert()
+		sal = frappe.get_doc(
+			{
+				"doctype": "Staff Advance Recovery",
+				"employee": self.emp,
+				"station": STATION,
+				"amount": 500,
+				"method": "Salary Deduction",
+			}
+		).insert()
 		sal.submit()
 		ads = frappe.get_doc("Additional Salary", sal.additional_salary)
 		self.assertEqual(ads.type, "Deduction")
@@ -148,11 +201,21 @@ class TestNewFeatures(IntegrationTestCase):
 	# ---------------------------------------------------------------- credit bill
 	def test_credit_bill_ties_to_ledger(self):
 		frm, to = add_days(today(), -10), today()
-		bill = frappe.get_doc({"doctype": "Credit Bill", "customer": "Gupta Transport Co.", "station": STATION,
-			"from_date": frm, "to_date": to}).insert()
+		bill = frappe.get_doc(
+			{
+				"doctype": "Credit Bill",
+				"customer": "Gupta Transport Co.",
+				"station": STATION,
+				"from_date": frm,
+				"to_date": to,
+			}
+		).insert()
 		self.assertTrue(bill.items)
-		gl = frappe.db.sql("""select coalesce(sum(debit-credit),0) from `tabGL Entry` where is_cancelled=0
-			and party_type='Customer' and party='Gupta Transport Co.' and posting_date <= %s""", to)[0][0]
+		gl = frappe.db.sql(
+			"""select coalesce(sum(debit-credit),0) from `tabGL Entry` where is_cancelled=0
+			and party_type='Customer' and party='Gupta Transport Co.' and posting_date <= %s""",
+			to,
+		)[0][0]
 		self.assertAlmostEqual(bill.closing_balance, flt(gl), places=1)
 		self.assertAlmostEqual(bill.total_billed, sum(r.amount for r in bill.items), places=2)
 		bill.submit()
@@ -161,45 +224,104 @@ class TestNewFeatures(IntegrationTestCase):
 	def test_shop_purchase_books_stock(self):
 		wh = frappe.db.get_value("Fuel Station", STATION, "lube_warehouse")
 		before = flt(frappe.db.get_value("Bin", {"item_code": "COOLANT-1L", "warehouse": wh}, "actual_qty"))
-		sp = frappe.get_doc({"doctype": "Shop Purchase", "supplier": "Servo Lubricants Distributor", "bill_no": "SV-1",
-			"station": STATION, "items": [{"item_code": "COOLANT-1L", "qty": 24, "rate": 190}]}).insert()
+		sp = frappe.get_doc(
+			{
+				"doctype": "Shop Purchase",
+				"supplier": "Servo Lubricants Distributor",
+				"bill_no": "SV-1",
+				"station": STATION,
+				"items": [{"item_code": "COOLANT-1L", "qty": 24, "rate": 190}],
+			}
+		).insert()
 		self.assertEqual(sp.warehouse, wh)
 		self.assertEqual(sp.total_amount, 4560)
 		sp.submit()
 		self.assertTrue(sp.purchase_invoice)
-		self.assertEqual(flt(frappe.db.get_value("Bin", {"item_code": "COOLANT-1L", "warehouse": wh}, "actual_qty")), before + 24)
-		bad = frappe.get_doc({"doctype": "Shop Purchase", "supplier": "Servo Lubricants Distributor", "bill_no": "SV-2",
-			"station": STATION, "items": [{"item_code": "HSD", "qty": 10, "rate": 85}]})
+		self.assertEqual(
+			flt(frappe.db.get_value("Bin", {"item_code": "COOLANT-1L", "warehouse": wh}, "actual_qty")),
+			before + 24,
+		)
+		bad = frappe.get_doc(
+			{
+				"doctype": "Shop Purchase",
+				"supplier": "Servo Lubricants Distributor",
+				"bill_no": "SV-2",
+				"station": STATION,
+				"items": [{"item_code": "HSD", "qty": 10, "rate": 85}],
+			}
+		)
 		self.assertRaises(frappe.ValidationError, bad.insert)
 
 	def test_tank_to_tank_transfer(self):
 		src, dst = "T2-HSD", "T3-HSD"
 		a, b = get_tank_book_stock(src), get_tank_book_stock(dst)
-		ist = frappe.get_doc({"doctype": "Internal Stock Transfer", "station": STATION, "transfer_type": "Fuel Tank to Tank",
-			"from_warehouse": frappe.db.get_value("Fuel Tank Master", src, "warehouse"),
-			"to_warehouse": frappe.db.get_value("Fuel Tank Master", dst, "warehouse"),
-			"items": [{"item_code": "HSD", "qty": 100}]}).insert()
+		ist = frappe.get_doc(
+			{
+				"doctype": "Internal Stock Transfer",
+				"station": STATION,
+				"transfer_type": "Fuel Tank to Tank",
+				"from_warehouse": frappe.db.get_value("Fuel Tank Master", src, "warehouse"),
+				"to_warehouse": frappe.db.get_value("Fuel Tank Master", dst, "warehouse"),
+				"items": [{"item_code": "HSD", "qty": 100}],
+			}
+		).insert()
 		ist.submit()
 		self.assertAlmostEqual(get_tank_book_stock(src), a - 100, places=1)
 		self.assertAlmostEqual(get_tank_book_stock(dst), b + 100, places=1)
-		wh = lambda t: frappe.db.get_value("Fuel Tank Master", t, "warehouse")
+
+		def wh(t):
+			return frappe.db.get_value("Fuel Tank Master", t, "warehouse")
+
 		lube = frappe.db.get_value("Fuel Station", STATION, "lube_warehouse")
 		bad_cases = [
 			# MS tank into an HSD tank, whatever item is named
-			{"transfer_type": "Fuel Tank to Tank", "from_warehouse": wh("T1-MS"), "to_warehouse": wh(dst), "items": [{"item_code": "MS", "qty": 1}]},
-			{"transfer_type": "Fuel Tank to Tank", "from_warehouse": wh("T1-MS"), "to_warehouse": wh(dst), "items": [{"item_code": "HSD", "qty": 1}]},
+			{
+				"transfer_type": "Fuel Tank to Tank",
+				"from_warehouse": wh("T1-MS"),
+				"to_warehouse": wh(dst),
+				"items": [{"item_code": "MS", "qty": 1}],
+			},
+			{
+				"transfer_type": "Fuel Tank to Tank",
+				"from_warehouse": wh("T1-MS"),
+				"to_warehouse": wh(dst),
+				"items": [{"item_code": "HSD", "qty": 1}],
+			},
 			# naming a different fuel than the tanks hold
-			{"transfer_type": "Fuel Tank to Tank", "from_warehouse": wh(src), "to_warehouse": wh(dst), "items": [{"item_code": "MS", "qty": 1}]},
+			{
+				"transfer_type": "Fuel Tank to Tank",
+				"from_warehouse": wh(src),
+				"to_warehouse": wh(dst),
+				"items": [{"item_code": "MS", "qty": 1}],
+			},
 			# shop-stock type used to pull fuel out of a tank
-			{"transfer_type": "Lube / Shop Stock", "from_warehouse": wh(src), "to_warehouse": lube, "items": [{"item_code": "HSD", "qty": 1}]},
-			{"transfer_type": "Lube / Shop Stock", "from_warehouse": wh(src), "to_warehouse": wh(dst), "items": [{"item_code": "HSD", "qty": 1}]},
+			{
+				"transfer_type": "Lube / Shop Stock",
+				"from_warehouse": wh(src),
+				"to_warehouse": lube,
+				"items": [{"item_code": "HSD", "qty": 1}],
+			},
+			{
+				"transfer_type": "Lube / Shop Stock",
+				"from_warehouse": wh(src),
+				"to_warehouse": wh(dst),
+				"items": [{"item_code": "HSD", "qty": 1}],
+			},
 		]
 		for case in bad_cases:
 			doc = frappe.get_doc({"doctype": "Internal Stock Transfer", "station": STATION, **case})
 			self.assertRaises(frappe.ValidationError, doc.insert)
 		# item left blank on a tank transfer is filled with the tank's fuel
-		auto = frappe.get_doc({"doctype": "Internal Stock Transfer", "station": STATION, "transfer_type": "Fuel Tank to Tank",
-			"from_warehouse": wh(src), "to_warehouse": wh(dst), "items": [{"qty": 5}]})
+		auto = frappe.get_doc(
+			{
+				"doctype": "Internal Stock Transfer",
+				"station": STATION,
+				"transfer_type": "Fuel Tank to Tank",
+				"from_warehouse": wh(src),
+				"to_warehouse": wh(dst),
+				"items": [{"qty": 5}],
+			}
+		)
 		auto.run_method("validate")
 		self.assertEqual(auto.items[0].item_code, "HSD")
 
@@ -208,9 +330,16 @@ class TestNewFeatures(IntegrationTestCase):
 		from frappe.desk.query_report import run
 
 		base = {"station": STATION, "from_date": add_days(today(), -30), "to_date": today()}
-		for name, extra in [("Machine-wise Sales", {}), ("Attendant Collection", {}), ("Staff Advance Balance", {}),
-				("Staff Advance Balance", {"employee": self.emp}), ("Cashier Performance", {}),
-				("Expense Category Analysis", {}), ("Monthly Sales Analysis", {}), ("Tank Stock Movement", {}),
-				("Comprehensive Daily Operations", {"posting_date": add_days(today(), -1)})]:
+		for name, extra in [
+			("Machine-wise Sales", {}),
+			("Attendant Collection", {}),
+			("Staff Advance Balance", {}),
+			("Staff Advance Balance", {"employee": self.emp}),
+			("Cashier Performance", {}),
+			("Expense Category Analysis", {}),
+			("Monthly Sales Analysis", {}),
+			("Tank Stock Movement", {}),
+			("Comprehensive Daily Operations", {"posting_date": add_days(today(), -1)}),
+		]:
 			res = run(name, filters={**base, **extra})
 			self.assertIsInstance(res["result"], list, name)
