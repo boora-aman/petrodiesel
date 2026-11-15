@@ -134,6 +134,11 @@ def demo_extras(days: int = 21):
 	"""Records for the screens the daily simulation does not touch: lube purchases, stock
 	transfers, staff advances and recoveries, and credit bills. Idempotent."""
 	start = add_days(today(), -days)
+
+	def on(n):
+		"""Day n of the demo period, never after today (short demos have few days)."""
+		return min(getdate(add_days(start, n)), getdate(today()))
+
 	godown, store = f"Lube Godown - {ABBR}", f"Lube Store - {ABBR}"
 	employees = frappe.flags.demo_employees or {}
 	if not employees:
@@ -147,7 +152,7 @@ def demo_extras(days: int = 21):
 				"doctype": "Shop Purchase",
 				"supplier": "Servo Lubricants Distributor",
 				"bill_no": "SV-DEMO-1",
-				"posting_date": add_days(start, 2),
+				"posting_date": on(2),
 				"station": STATION,
 				"warehouse": godown,
 				"items": [
@@ -162,7 +167,7 @@ def demo_extras(days: int = 21):
 			{
 				"doctype": "Internal Stock Transfer",
 				"transfer_type": "Lube / Shop Stock",
-				"posting_date": add_days(start, 3),
+				"posting_date": on(3),
 				"station": STATION,
 				"from_warehouse": godown,
 				"to_warehouse": store,
@@ -200,7 +205,7 @@ def demo_extras(days: int = 21):
 				{
 					"doctype": "Staff Advance",
 					"employee": emp,
-					"posting_date": add_days(start, 4 + i),
+					"posting_date": on(4 + i),
 					"station": STATION,
 					"amount": amount,
 					"mode_of_payment": "Cash",
@@ -214,7 +219,7 @@ def demo_extras(days: int = 21):
 					{
 						"doctype": "Staff Advance Recovery",
 						"employee": emp,
-						"posting_date": add_days(start, 12 + i),
+						"posting_date": on(12 + i),
 						"station": STATION,
 						"amount": recover,
 						"method": method,
