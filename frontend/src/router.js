@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { session, loadBoot } from "./session";
+import { session, loadBoot, postLoginTarget, hasRole } from "./session";
 
 const routes = [
 	{
@@ -110,7 +110,12 @@ const routes = [
 		component: () => import("./pages/TransferForm.vue"),
 		props: true,
 	},
-	{ path: "/approvals", name: "Approvals", component: () => import("./pages/Approvals.vue") },
+	{
+		path: "/approvals",
+		name: "Approvals",
+		component: () => import("./pages/Approvals.vue"),
+		meta: { roles: ["Pump Manager", "Pump Owner"] },
+	},
 	{ path: "/reports", name: "Reports", component: () => import("./pages/Reports.vue") },
 	{
 		path: "/reports/:report",
@@ -119,7 +124,12 @@ const routes = [
 		props: true,
 	},
 	{ path: "/alerts", name: "Alerts", component: () => import("./pages/Alerts.vue") },
-	{ path: "/setup", name: "Setup", component: () => import("./pages/Setup.vue") },
+	{
+		path: "/setup",
+		name: "Setup",
+		component: () => import("./pages/Setup.vue"),
+		meta: { roles: ["Pump Manager", "Pump Owner"] },
+	},
 	{ path: "/more", name: "More", component: () => import("./pages/More.vue") },
 	{ path: "/:pathMatch(.*)*", redirect: "/" },
 ];
@@ -134,7 +144,16 @@ router.beforeEach(async (to) => {
 	if (!session.ready) await loadBoot();
 	if (!to.meta.public && !session.loggedIn)
 		return { name: "Login", query: { redirect: to.fullPath } };
-	if (to.name === "Login" && session.loggedIn) return { name: "Home" };
+	if (to.name === "Login" && session.loggedIn) {
+		const target = postLoginTarget(to.query);
+		if (target !== "/petrodiesel" && !target.startsWith("/petrodiesel/")) {
+			window.location.href = target;
+			return false;
+		}
+		return target === "/petrodiesel" ? { name: "Home" } : target.slice("/petrodiesel".length);
+	}
+	// pages for managers only (the nav hides them; this stops typed or bookmarked URLs)
+	if (to.meta.roles && !hasRole(...to.meta.roles)) return { name: "Home" };
 });
 
 export default router;

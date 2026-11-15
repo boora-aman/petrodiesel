@@ -21,12 +21,15 @@ from collections import OrderedDict, defaultdict
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate
+from frappe.utils import add_days, cint, flt, getdate
 
 from petrodiesel.petrodiesel.utils import (
+	ensure_no_payments,
 	get_fuel_rate,
 	get_mode_of_payment_account,
 	get_settings,
+	is_pump_manager,
+	validate_not_future,
 )
 
 QTY_PRECISION = 2
@@ -47,12 +50,16 @@ class ShiftSaleEntry(Document):
 	# ------------------------------------------------------------------ validate
 	def validate(self):
 		self.validate_station()
+		validate_not_future(self.posting_date, _("Business date"))
+		self.validate_unique_shift()
 		self.set_missing_rates()
 		self.calculate_nozzle_rows()
 		self.validate_nozzle_rows()
+		self.validate_rates()
 		self.validate_duplicate_nozzles()
 		self.validate_credit_rows()
 		self.calculate_other_rows()
+		self.validate_other_rows()
 		self.allocate_fuel()
 		self.set_opening_float()
 		self.calculate_totals()
@@ -89,6 +96,7 @@ class ShiftSaleEntry(Document):
 
 	def before_submit(self):
 		self.validate_reading_chain()
+		self.refresh_opening_float()
 		self.validate_cash_variance()
 
 	def on_submit(self):
@@ -99,6 +107,12 @@ class ShiftSaleEntry(Document):
 
 	def before_cancel(self):
 		self.validate_cancel_order()
+		self.validate_advances_on_cancel()
+		ensure_no_payments(
+			"Sales Invoice",
+			frappe.get_all("Sales Invoice", {"shift_sale_entry": self.name, "docstatus": 1}, pluck="name"),
+			exclude_journal=self.settlement_journal,
+		)
 
 	def on_cancel(self):
 		self.revert_nozzles()
@@ -111,6 +125,121 @@ class ShiftSaleEntry(Document):
 		if not station.is_active:
 			frappe.throw(_("Fuel Station {0} is inactive.").format(self.station))
 		self.company = station.company
+
+	def validate_unique_shift(self):
+		"""One closing per outlet, business date and shift; all attendants go into the same entry."""
+		other = frappe.db.get_value(
+			"Shift Sale Entry",
+			{
+				"station": self.station,
+				"posting_date": self.posting_date,
+				"shift": self.shift,
+				"docstatus": ["<", 2],
+				"name": ["!=", self.name or ""],
+			},
+			"name",
+		)
+		if other:
+			frappe.throw(
+				_("The {0} shift of {1} is already entered in {2}. Open that entry instead.").format(
+					self.shift, frappe.format(self.posting_date, "Date"), frappe.bold(other)
+				),
+				title=_("Shift already entered"),
+			)
+
+	def validate_rates(self):
+		"""Rates must come from the Fuel Price Update. A night shift may carry the next day's rate
+		on a second row (price change at midnight). Managers may override."""
+		if is_pump_manager():
+			return
+		next_day = add_days(self.posting_date, 1)
+		for label, rows in (("Nozzle", self.nozzle_readings), ("Credit", self.credit_sales)):
+			for row in rows:
+				if not row.fuel_item or not flt(row.rate):
+					continue
+				allowed = {
+					flt(get_fuel_rate(row.fuel_item, self.posting_date), 2),
+					flt(get_fuel_rate(row.fuel_item, next_day), 2),
+				}
+				if flt(row.rate, 2) not in allowed:
+					frappe.throw(
+						_("{0} row {1}: rate {2} for {3} does not match the price list ({4}).").format(
+							_(label),
+							row.idx,
+							row.rate,
+							row.fuel_item,
+							" / ".join(str(r) for r in sorted(allowed)),
+						),
+						title=_("Wrong rate"),
+					)
+
+	def validate_other_rows(self):
+		for row in self.other_sales:
+			if flt(row.qty) <= 0 or flt(row.rate) <= 0:
+				frappe.throw(_("Lube / shop row {0}: quantity and rate must be positive.").format(row.idx))
+		for table, label in (
+			("payments", _("Digital payment")),
+			("expenses", _("Expense")),
+			("employee_advances", _("Staff advance")),
+		):
+			for row in self.get(table):
+				if flt(row.amount) <= 0:
+					frappe.throw(_("{0} row {1}: amount must be positive.").format(label, row.idx))
+		for row in self.payments:
+			if (
+				row.mode_of_payment
+				and frappe.get_cached_value("Mode of Payment", row.mode_of_payment, "type") == "Cash"
+			):
+				frappe.throw(
+					_(
+						"Digital payment row {0}: {1} is cash. Count cash in the denominations instead."
+					).format(row.idx, row.mode_of_payment)
+				)
+
+	def validate_advances_on_cancel(self):
+		from petrodiesel.petrodiesel.advances import advance_outstanding
+
+		per_emp = defaultdict(float)
+		for r in self.employee_advances:
+			per_emp[r.employee] += flt(r.amount)
+		for emp, amount in per_emp.items():
+			if flt(advance_outstanding(emp), 2) < flt(amount, 2):
+				frappe.throw(
+					_(
+						"Advances given to {0} in this shift are already partly recovered. Cancel the recoveries first."
+					).format(frappe.get_cached_value("Employee", emp, "employee_name") or emp)
+				)
+
+	def refresh_opening_float(self):
+		"""Recompute the float at submit: earlier shifts may have been approved since the draft was saved."""
+		pending = frappe.db.sql(
+			"""select s.name from `tabShift Sale Entry` s
+			left join `tabShift Master` sm on sm.name = s.shift
+			where s.station = %(station)s and s.docstatus = 0 and s.name != %(name)s
+			and (s.posting_date < %(date)s or (s.posting_date = %(date)s and ifnull(sm.sequence, 0) < %(seq)s))
+			order by s.posting_date, sm.sequence limit 1""",
+			{
+				"station": self.station,
+				"date": self.posting_date,
+				"seq": frappe.db.get_value("Shift Master", self.shift, "sequence") or 0,
+				"name": self.name,
+			},
+		)
+		if pending:
+			frappe.throw(
+				_("Earlier shift {0} is not approved yet. Approve or delete it first.").format(
+					frappe.bold(pending[0][0])
+				)
+			)
+		if self.flags.keep_float:
+			return
+		prev = get_previous_shift_entry(self.station, self.posting_date, self.shift, exclude=self.name)
+		float_ = flt(prev.cash_to_next_shift) if prev else 0
+		if flt(float_, 2) != flt(self.opening_float, 2):
+			self.previous_entry = prev.name if prev else None
+			self.opening_float = float_
+			self.calculate_totals()
+			self.calculate_machine_summary()
 
 	def set_missing_rates(self):
 		for row in self.nozzle_readings:
@@ -134,8 +263,20 @@ class ShiftSaleEntry(Document):
 	def validate_nozzle_rows(self):
 		if not self.nozzle_readings:
 			frappe.throw(_("Add at least one nozzle reading."))
-		station_nozzles = set(frappe.get_all("Fuel Nozzle Master", {"station": self.station}, pluck="name"))
+		station_nozzles = dict(
+			frappe.get_all("Fuel Nozzle Master", {"station": self.station}, ["name", "status"], as_list=True)
+		)
 		for row in self.nozzle_readings:
+			if (
+				row.nozzle in station_nozzles
+				and station_nozzles[row.nozzle] != "Active"
+				and flt(row.sale_qty) > 0
+			):
+				frappe.throw(
+					_(
+						"Row {0}: nozzle {1} is {2} and cannot sell fuel. Set it Active after the repair."
+					).format(row.idx, row.nozzle, station_nozzles[row.nozzle])
+				)
 			if row.nozzle not in station_nozzles:
 				frappe.throw(
 					_("Row {0}: Nozzle {1} does not belong to station {2}.").format(
@@ -451,7 +592,9 @@ class ShiftSaleEntry(Document):
 					"digital_amount": flt(p["digital"], 2),
 					"expected_cash": due,
 					"cash_handed": cash,
-					"short_excess": flt(cash - due, 2) if cash else 0,
+					# while the draft is being filled, an attendant with nothing handed is not judged yet;
+					# at submit everyone is judged (nothing handed = short by the whole amount due)
+					"short_excess": flt(cash - due, 2) if (cash or self.docstatus == 1) else 0,
 				},
 			)
 
@@ -716,7 +859,6 @@ class ShiftSaleEntry(Document):
 			doc = frappe.get_doc(doctype, name)
 			if doc.docstatus == 1:
 				doc.flags.ignore_permissions = True
-				doc.flags.ignore_links = True
 				doc.cancel()
 
 	# ------------------------------------------------------------------ nozzles

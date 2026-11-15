@@ -35,8 +35,23 @@ PREVIEW_DOCTYPES = (
 )
 
 
+PUMP_ROLES = ("Pump Owner", "Pump Manager", "Pump Cashier", "Pump Stock Keeper", "System Manager")
+
+
 def _station(station=None):
-	return station or get_settings().default_station
+	station = station or get_settings().default_station
+	if station and frappe.session.user != "Administrator":
+		frappe.has_permission("Fuel Station", "read", station, throw=True)
+	return station
+
+
+def _require_pump_user():
+	if not set(frappe.get_roles()) & set(PUMP_ROLES):
+		frappe.throw(_("Not permitted"), frappe.PermissionError)
+
+
+def _can_read_credit():
+	return bool(frappe.has_permission("Customer", "read"))
 
 
 def _role_view(roles):
@@ -137,6 +152,7 @@ def payment_modes(company):
 
 @frappe.whitelist()
 def counts():
+	_require_pump_user()
 	return {
 		"pending_shifts": frappe.db.count(
 			"Shift Sale Entry", {"workflow_state": "Pending Approval", "docstatus": 0}
@@ -151,7 +167,9 @@ def counts():
 # ------------------------------------------------------------------ dashboard
 @frappe.whitelist()
 def dashboard(station=None, date=None):
+	_require_pump_user()
 	station = _station(station)
+	credit_ok = _can_read_credit()
 	date = date or today()
 	f = {"station": station}
 	kpis = {
@@ -165,7 +183,7 @@ def dashboard(station=None, date=None):
 		"gross_month": dash._sse_sum("gross_sales", f, getdate(date).replace(day=1), date),
 		"fuel_month": dash._sse_sum("total_sale_qty", f, getdate(date).replace(day=1), date),
 		"stock_total": dash.fuel_stock_litres(f)["value"],
-		"credit_outstanding": dash.credit_outstanding(f)["value"],
+		"credit_outstanding": dash.credit_outstanding(f)["value"] if credit_ok else 0,
 		"variance_month": dash.month_stock_variance(f)["value"],
 	}
 	return {
@@ -197,7 +215,7 @@ def dashboard(station=None, date=None):
 			(station, date),
 			as_dict=True,
 		),
-		"top_credit": [c for c in credit_customers()][:5],
+		"top_credit": credit_customers()[:5] if credit_ok else [],
 		"attention": attention(station),
 		"prices": [
 			{"item": i.name, "rate": get_fuel_rate(i.name, date)}
@@ -210,6 +228,7 @@ def dashboard(station=None, date=None):
 
 @frappe.whitelist()
 def tanks(station=None):
+	_require_pump_user()
 	station = _station(station)
 	out = []
 	for t in frappe.get_all(
@@ -273,7 +292,7 @@ def shift_timeline(station, date):
 		by_shift.setdefault(e.shift, []).append(e)
 	out = []
 	for s in frappe.get_all(
-		"Shift Master", {"is_active": 1}, ["name", "start_time", "end_time"], order_by="sequence"
+		"Shift Master", {"is_active": 1}, ["name", "start_time", "end_time", "sequence"], order_by="sequence"
 	):
 		out.append(
 			{
@@ -342,7 +361,7 @@ def attention(station):
 				"type": "dsr",
 				"severity": "danger",
 				"doctype": "Daily Stock Register",
-				"name": None,
+				"name": str(yesterday),
 				"title": _("DSR for {0} not submitted").format(frappe.format(yesterday, "Date")),
 				"detail": "",
 			}
@@ -388,7 +407,7 @@ def attention(station):
 					),
 				}
 			)
-	for c in credit_customers():
+	for c in credit_customers() if _can_read_credit() else []:
 		if c["limit"] and c["used_pct"] >= 90:
 			items.append(
 				{
@@ -533,8 +552,15 @@ def save_doc(doc: str | dict, action: str | None = None):
 		and frappe.db.exists(doc["doctype"], doc["name"])
 	):
 		d = frappe.get_doc(doc["doctype"], doc["name"])
-		for key in ("modified",):
-			doc.pop(key, None)
+		sent = doc.pop("modified", None)
+		if sent and str(sent) != str(d.modified):
+			frappe.throw(
+				_("{0} was changed by {1} after you opened it. Reload to see the latest version.").format(
+					d.name, frappe.utils.get_fullname(d.modified_by)
+				),
+				frappe.TimestampMismatchError,
+				title=_("Document changed"),
+			)
 		d.update({k: v for k, v in doc.items() if k not in ("name", "owner", "creation", "docstatus")})
 		d.save()
 	else:
@@ -582,6 +608,7 @@ def list_docs(
 	order_by: str | None = None,
 	search: str | None = None,
 	search_fields: str | list | None = None,
+	sum_fields: str | list | None = None,
 ):
 	if doctype not in PREVIEW_DOCTYPES:
 		frappe.throw(_("Not allowed"))
@@ -610,10 +637,19 @@ def list_docs(
 		limit_page_length=cint(limit),
 		order_by=sort,
 	)
-	total = len(
-		frappe.get_list(doctype, filters=filters, or_filters=or_filters, pluck="name", limit_page_length=0)
+	names = frappe.get_list(
+		doctype, filters=filters, or_filters=or_filters, pluck="name", limit_page_length=0
 	)
-	return {"rows": rows, "total": total}
+	out = {"rows": rows, "total": len(names)}
+	sums = [f for f in (frappe.parse_json(sum_fields) if sum_fields else []) if meta.has_field(f)]
+	if sums and names:
+		# totals over every matching (not cancelled) document, not just this page
+		table = frappe.qb.DocType(doctype)
+		q = frappe.qb.from_(table).where(table.name.isin(names) & (table.docstatus < 2))
+		for f in sums:
+			q = q.select(frappe.query_builder.functions.Sum(table[f]).as_(f))
+		out["totals"] = {k: flt(v) for k, v in (q.run(as_dict=True)[0] or {}).items()}
+	return out
 
 
 @frappe.whitelist()
@@ -841,6 +877,7 @@ def save_vehicle(vehicle: str | dict):
 						"monthly_limit_liters",
 					)
 				},
+				"is_active": 1 if v.get("is_active") in (None, "") else int(bool(v.get("is_active"))),
 			}
 		)
 		d.insert()
@@ -880,6 +917,7 @@ def search(q: str):
 
 @frappe.whitelist()
 def notifications():
+	_require_pump_user()
 	logs = frappe.get_all(
 		"Notification Log",
 		{"for_user": frappe.session.user},

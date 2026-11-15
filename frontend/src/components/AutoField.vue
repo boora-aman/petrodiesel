@@ -1,7 +1,7 @@
 <template>
 	<div class="min-w-0">
-		<div v-if="label" class="lbl mb-1 flex items-center justify-between gap-1">
-			<span class="truncate">{{ label }}</span>
+		<div v-if="label" class="lbl mb-1 flex items-start justify-between gap-1">
+			<span class="leading-tight">{{ label }}</span>
 			<span
 				class="shrink-0 rounded bg-slate-100 px-1 text-[9px] font-semibold uppercase tracking-wider text-slate-400"
 				title="Calculated automatically"
@@ -13,7 +13,7 @@
 			:class="[big ? '!h-11 !text-[18px]' : '', toneClass]"
 			:title="String(value ?? '')"
 		>
-			<span class="truncate">{{ value }}</span>
+			<span class="min-w-0 break-words">{{ value }}</span>
 		</div>
 	</div>
 </template>

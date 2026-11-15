@@ -40,7 +40,8 @@ export function useDocForm({ doctype, name, blank, tables = [], route, onLoaded 
 		if (wf) return wf;
 		if (isNew.value)
 			return session.boot.can?.[doctype]?.submit || hasWorkflow(doctype) ? "auto" : null;
-		if (doc.value?.workflow_state) return null;
+		// a draft left over from when approval was on: submit directly if no workflow applies now
+		if (transitions.value.length) return null;
 		return full.value?.can_submit ? "submit" : null;
 	});
 
@@ -59,14 +60,19 @@ export function useDocForm({ doctype, name, blank, tables = [], route, onLoaded 
 		return d;
 	}
 	async function load() {
-		if (name) {
-			full.value = await api("get_doc_full", { doctype, name });
-			doc.value = withKeys(full.value.doc);
-		} else {
-			full.value = null;
-			doc.value = withKeys(await blank());
+		try {
+			if (name) {
+				full.value = await api("get_doc_full", { doctype, name });
+				doc.value = withKeys(full.value.doc);
+			} else {
+				full.value = null;
+				doc.value = withKeys(await blank());
+			}
+			onLoaded && onLoaded(doc.value);
+		} catch (e) {
+			toast.error(errorText(e));
+			if (name) router.replace(route);
 		}
-		onLoaded && onLoaded(doc.value);
 	}
 	async function preview(apply) {
 		previewing.value = true;
@@ -87,29 +93,41 @@ export function useDocForm({ doctype, name, blank, tables = [], route, onLoaded 
 	}
 
 	async function save(action) {
+		if (busy.value) return;
 		busy.value = true;
+		let n = null;
+		const goTo = async () => {
+			if (isNew.value && n) router.replace(`${route}/${encodeURIComponent(n)}`);
+			else await load();
+		};
 		try {
 			let act = action;
 			if (act === "auto") act = null;
-			const n = await api("save_doc", { doc: payload(), action: act });
+			n = await api("save_doc", { doc: payload(), action: act });
 			let msg = action ? "Submitted" : "Draft saved";
 			if (action === "auto" && isNew.value) {
 				// new document: after first save see if a workflow applies
-				const f = await api("get_doc_full", { doctype, name: n });
-				const wf = f.transitions.find((t) => /Submit for|Send for/.test(t));
-				if (wf) {
-					await api("doc_action", { doctype, name: n, action: wf });
-					msg =
-						wf === "Send for Verification"
-							? "Sent for verification"
-							: "Sent for approval";
-				} else if (f.can_submit)
-					await api("doc_action", { doctype, name: n, action: "submit" });
-				else msg = "Saved as draft. A manager will submit it.";
+				try {
+					const f = await api("get_doc_full", { doctype, name: n });
+					const wf = f.transitions.find((t) => /Submit for|Send for/.test(t));
+					if (wf) {
+						await api("doc_action", { doctype, name: n, action: wf });
+						msg =
+							wf === "Send for Verification"
+								? "Sent for verification"
+								: "Sent for approval";
+					} else if (f.can_submit)
+						await api("doc_action", { doctype, name: n, action: "submit" });
+					else msg = "Saved as draft. A manager will submit it.";
+				} catch (e) {
+					// the draft is saved: open it so a retry does not create a second one
+					toast.error(`Saved as draft ${n}, but not submitted: ${errorText(e)}`);
+					await goTo();
+					return n;
+				}
 			}
 			toast.success(msg);
-			if (isNew.value) router.replace(`${route}/${encodeURIComponent(n)}`);
-			else await load();
+			await goTo();
 			return n;
 		} catch (e) {
 			toast.error(errorText(e));
@@ -118,6 +136,7 @@ export function useDocForm({ doctype, name, blank, tables = [], route, onLoaded 
 		}
 	}
 	async function act(action, reason) {
+		if (busy.value) return;
 		if (action === "Cancel" || action === "cancel_doc") {
 			if (
 				!window.confirm(

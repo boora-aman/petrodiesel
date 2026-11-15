@@ -156,7 +156,7 @@
 									Maintenance
 								</button>
 								<button
-									v-else
+									v-else-if="n.status === 'Under Maintenance'"
 									class="btn-secondary btn-sm !text-green-700"
 									@click="setStatus(n, 'Active')"
 								>
@@ -170,26 +170,30 @@
 
 			<!-- Shifts -->
 			<Section v-else-if="tab === 'Shifts'" title="Shifts" flush>
-				<table class="tbl">
-					<thead>
-						<tr>
-							<th>#</th>
-							<th>Shift</th>
-							<th>Start</th>
-							<th>End</th>
-							<th>Status</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr v-for="s in data.shifts" :key="s.name">
-							<td>{{ s.sequence }}</td>
-							<td class="font-medium">{{ s.name }}</td>
-							<td>{{ timeFmt(s.start_time) }}</td>
-							<td>{{ timeFmt(s.end_time) }}</td>
-							<td><StatusPill :status="s.is_active ? 'Active' : 'Inactive'" /></td>
-						</tr>
-					</tbody>
-				</table>
+				<div class="overflow-x-auto">
+					<table class="tbl">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Shift</th>
+								<th>Start</th>
+								<th>End</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="s in data.shifts" :key="s.name">
+								<td>{{ s.sequence }}</td>
+								<td class="font-medium">{{ s.name }}</td>
+								<td>{{ timeFmt(s.start_time) }}</td>
+								<td>{{ timeFmt(s.end_time) }}</td>
+								<td>
+									<StatusPill :status="s.is_active ? 'Active' : 'Inactive'" />
+								</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
 			</Section>
 
 			<!-- Settings -->
@@ -257,7 +261,7 @@
 
 			<!-- Users -->
 			<Section v-else-if="tab === 'Users'" title="Users & roles" flush>
-				<template #actions
+				<template v-if="data.users.length" #actions
 					><a href="/desk/user/new" class="btn-secondary btn-sm"
 						><i class="lucide-user-plus size-3.5" />Invite user</a
 					></template
@@ -391,12 +395,21 @@ async function saveSettings() {
 	}
 }
 async function setStatus(n, status) {
+	if (busy.value) return;
+	const msg =
+		status === "Active"
+			? `Put ${n.name} back into service? It will appear in new shift closings.`
+			: `Take ${n.name} out of service? It cannot sell fuel until set active again.`;
+	if (!window.confirm(msg)) return;
+	busy.value = true;
 	try {
 		await api("set_nozzle_status", { nozzle: n.name, status });
 		toast.success(`${n.name}: ${status}`);
 		load();
 	} catch (e) {
 		toast.error(errorText(e));
+	} finally {
+		busy.value = false;
 	}
 }
 function openMeter(n) {

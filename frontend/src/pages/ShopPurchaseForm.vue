@@ -46,7 +46,7 @@
 				</button></template
 			>
 			<div v-for="r in d.items" :key="r._key" class="mb-2 grid grid-cols-12 items-end gap-2">
-				<div class="col-span-12 sm:col-span-6">
+				<div class="col-span-12 sm:col-span-5">
 					<Field label="Item"
 						><LinkInput
 							v-model="r.item_code"
@@ -68,7 +68,7 @@
 						><NumInput v-model="r.rate" :disabled="!ed" @update:model-value="calc"
 					/></Field>
 				</div>
-				<div class="col-span-4 sm:col-span-1">
+				<div class="col-span-4 sm:col-span-2">
 					<AutoField label="Amount" :value="num(r.amount)" />
 				</div>
 				<button

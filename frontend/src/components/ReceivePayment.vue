@@ -23,7 +23,7 @@
 					><input v-model="form.reference_no" class="inp" placeholder="UTR / cheque no"
 				/></Field>
 				<Field label="Date"
-					><input v-model="form.posting_date" type="date" class="inp"
+					><input v-model="form.posting_date" type="date" class="inp" :max="today()"
 				/></Field>
 			</div>
 			<p class="text-[12px] text-ink-3">Allocated to the oldest unpaid invoices first.</p>
@@ -56,11 +56,15 @@ const busy = ref(false);
 const form = reactive({
 	customer: "",
 	amount: 0,
-	mode_of_payment: "UPI",
+	mode_of_payment: "Cash",
 	reference_no: "",
 	posting_date: today(),
 });
 async function submit() {
+	if (busy.value) return;
+	if (!(props.fixed || form.customer)) return toast.error("Choose the customer.");
+	if (!(Number(form.amount) > 0)) return toast.error("Enter the amount received.");
+	if (form.posting_date > today()) return toast.error("Date cannot be in the future.");
 	busy.value = true;
 	try {
 		const r = await api("receive_payment", {
@@ -72,7 +76,7 @@ async function submit() {
 		);
 		emit("update:modelValue", false);
 		emit("done");
-		Object.assign(form, { amount: 0, reference_no: "" });
+		Object.assign(form, { amount: 0, reference_no: "", customer: "", posting_date: today() });
 	} catch (e) {
 		toast.error(errorText(e));
 	} finally {

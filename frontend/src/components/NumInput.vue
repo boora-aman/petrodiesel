@@ -13,6 +13,7 @@
 </template>
 <script setup>
 import { computed } from "vue";
+import { num } from "../format";
 const props = defineProps({
 	modelValue: [Number, String],
 	big: Boolean,
@@ -24,6 +25,8 @@ const emit = defineEmits(["update:modelValue"]);
 const display = computed(() =>
 	props.modelValue === null || props.modelValue === undefined || props.modelValue === ""
 		? ""
+		: props.disabled
+		? num(props.modelValue)
 		: props.modelValue
 );
 function onInput(e) {

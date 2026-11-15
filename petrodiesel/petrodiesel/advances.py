@@ -88,3 +88,10 @@ def get_employee_ledger(employee: str) -> list[dict]:
 		bal += flt(r.given) - flt(r.recovered)
 		r["balance"] = flt(bal, 2)
 	return rows
+
+
+def employee_party(account: str, employee: str) -> dict:
+	"""Party fields for an advance account line (needed when the account is Receivable/Payable)."""
+	if frappe.get_cached_value("Account", account, "account_type") in ("Receivable", "Payable"):
+		return {"party_type": "Employee", "party": employee}
+	return {}

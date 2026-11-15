@@ -168,10 +168,12 @@ const tankers = ref([]);
 const loading = ref(true);
 const busy = ref(false);
 const rej = reactive({ open: false, doctype: "", name: "", reason: "" });
-const tol = computed(() => Number(session.boot.settings?.cash_variance_tolerance) || 100);
+// tolerance 0 = no remarks rule on the server; bulk approval then takes only tallied shifts
+const tol = computed(() => Number(session.boot.settings?.cash_variance_tolerance) || 0);
 const withinTol = computed(() =>
-	shifts.value.filter((r) => Math.abs(r.short_excess) <= tol.value)
+	shifts.value.filter((r) => Math.abs(r.short_excess) <= Math.max(tol.value, 1))
 );
+const shiftSeq = (s) => (session.boot.shifts || []).find((x) => x.name === s)?.sequence || 0;
 async function load() {
 	loading.value = true;
 	let a = { rows: [] },
@@ -217,6 +219,7 @@ async function load() {
 	refreshCounts();
 }
 async function approve(doctype, name, action) {
+	if (busy.value) return;
 	busy.value = true;
 	try {
 		await api("doc_action", { doctype, name, action });
@@ -229,28 +232,45 @@ async function approve(doctype, name, action) {
 	}
 }
 async function bulk() {
+	if (busy.value) return;
 	busy.value = true;
-	for (const r of [...withinTol.value].sort((a, b) =>
-		(a.posting_date + a.name).localeCompare(b.posting_date + b.name)
-	)) {
+	let ok = 0,
+		failed = 0;
+	// earlier shifts first: openings must chain from the previous approved closing
+	const rows = [...withinTol.value].sort(
+		(a, b) =>
+			a.posting_date.localeCompare(b.posting_date) ||
+			shiftSeq(a.shift) - shiftSeq(b.shift) ||
+			a.name.localeCompare(b.name)
+	);
+	for (const r of rows) {
 		try {
 			await api("doc_action", {
 				doctype: "Shift Sale Entry",
 				name: r.name,
 				action: "Approve",
 			});
+			ok++;
 		} catch (e) {
+			failed++;
 			toast.error(`${r.name}: ${errorText(e)}`);
 		}
 	}
 	busy.value = false;
-	toast.success("Bulk approval finished");
+	if (ok) toast.success(`${ok} shift${ok > 1 ? "s" : ""} approved and posted`);
+	if (failed && !ok) toast.error("No shift could be approved. See the messages above.");
 	load();
 }
 function reject(doctype, name) {
 	Object.assign(rej, { open: true, doctype, name, reason: "" });
 }
 async function doReject() {
+	if (busy.value) return;
+	if (!rej.reason.trim()) {
+		toast.error("Enter the reason for rejection.");
+		return;
+	}
+	busy.value = true;
 	try {
 		await api("doc_action", {
 			doctype: rej.doctype,
@@ -261,6 +281,8 @@ async function doReject() {
 		toast.success("Rejected");
 	} catch (e) {
 		toast.error(errorText(e));
+	} finally {
+		busy.value = false;
 	}
 	rej.open = false;
 	load();

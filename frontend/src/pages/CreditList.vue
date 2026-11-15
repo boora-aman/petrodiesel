@@ -98,7 +98,8 @@
 <script setup>
 import { ref, computed, onMounted, h } from "vue";
 import { useRoute } from "vue-router";
-import { api } from "../api";
+import { toast } from "frappe-ui";
+import { api, errorText } from "../api";
 import { can } from "../session";
 import { inr, compactInr, dateFmt } from "../format";
 import PageHeader from "../components/PageHeader.vue";
@@ -135,8 +136,13 @@ const filtered = computed(() =>
 const total = computed(() => rows.value.reduce((a, r) => a + r.outstanding, 0));
 async function load() {
 	loading.value = true;
-	rows.value = await api("credit_customers");
-	loading.value = false;
+	try {
+		rows.value = await api("credit_customers");
+	} catch (e) {
+		toast.error(errorText(e));
+	} finally {
+		loading.value = false;
+	}
 }
 onMounted(load);
 </script>

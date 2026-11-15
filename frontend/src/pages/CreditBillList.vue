@@ -1,5 +1,6 @@
 <template>
 	<DocList
+		table-from="xl"
 		title="Credit bills"
 		subtitle="Periodic consolidated bills for credit customers"
 		doctype="Credit Bill"
@@ -49,16 +50,28 @@ import { inr, dateFmt, num } from "../format";
 const columns = [
 	{ key: "name", label: "Bill" },
 	{ key: "customer", label: "Customer" },
-	{ key: "bill_date", label: "Bill date", format: dateFmt },
+	{ key: "bill_date", label: "Bill date", format: dateFmt, cls: "hidden 2xl:table-cell" },
 	{
 		key: "from_date",
 		label: "Period",
 		format: (v, r) => `${dateFmt(r.from_date)} – ${dateFmt(r.to_date)}`,
 		sort: false,
 	},
-	{ key: "total_qty", label: "Litres", num: true, format: (v) => num(v) },
+	{
+		key: "total_qty",
+		label: "Litres",
+		num: true,
+		format: (v) => num(v),
+		cls: "hidden 2xl:table-cell",
+	},
 	{ key: "total_billed", label: "Billed", num: true, format: (v) => inr(v) },
-	{ key: "total_received", label: "Received", num: true, format: (v) => inr(v) },
+	{
+		key: "total_received",
+		label: "Received",
+		num: true,
+		format: (v) => inr(v),
+		cls: "hidden 2xl:table-cell",
+	},
 	{ key: "closing_balance", label: "Amount due", num: true, format: (v) => inr(v) },
 	{ key: "docstatus", label: "Status" },
 ];

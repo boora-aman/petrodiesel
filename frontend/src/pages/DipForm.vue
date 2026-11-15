@@ -6,7 +6,13 @@
 			:subtitle="`${d.reading_type} · ${dateFmt(d.posting_date)} ${timeFmt(d.posting_time)}`"
 		>
 			<template #badge><StatusPill :status="f.state.value" /></template>
-			<template #actions><FormActions :form="f" /></template>
+			<template #actions
+				><FormActions
+					:form="f"
+					:blocked="!!problem"
+					:blocked-reason="problem"
+					@blocked="tried = true"
+			/></template>
 		</PageHeader>
 		<div
 			v-if="f.serverError.value && ed"
@@ -38,14 +44,18 @@
 						v-model="d.posting_date"
 						type="date"
 						class="inp"
+						:max="today()"
 						:disabled="!ed"
 						@change="calc"
 				/></Field>
 				<Field label="Time"
 					><input
-						v-model="d.posting_time"
+						:value="String(d.posting_time || '').slice(0, 5)"
 						type="time"
-						step="1"
+						@input="
+							d.posting_time = $event.target.value ? $event.target.value + ':00' : ''
+						"
+						step="60"
 						class="inp"
 						:disabled="!ed"
 						@change="calc"
@@ -70,6 +80,12 @@
 			mm). Inform the OMC and arrange removal.
 		</div>
 
+		<div
+			v-if="ed && rowProblems.length"
+			class="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-800"
+		>
+			<div v-for="m in rowProblems" :key="m">{{ m }}</div>
+		</div>
 		<EmptyState
 			v-if="!d.readings.length"
 			title="No tanks loaded"
@@ -82,6 +98,14 @@
 					<FuelChip :item="r.fuel_item" /><span class="text-[15px] font-semibold">{{
 						r.tank
 					}}</span>
+					<button
+						v-if="ed && d.readings.length > 1"
+						class="ml-auto text-[12px] text-ink-3 hover:text-red-600"
+						title="Tank not dipped"
+						@click="removeRow(r)"
+					>
+						Remove
+					</button>
 				</div>
 				<div class="flex gap-4">
 					<TankSection :fill="fillPct(r)" :water="waterPct(r)" :color="color(r)" />
@@ -90,6 +114,7 @@
 							><NumInput
 								v-model="r.dip_mm"
 								big
+								:invalid="ed && rowIssue(r, tried) !== ''"
 								:disabled="!ed"
 								@update:model-value="calc"
 						/></Field>
@@ -115,8 +140,8 @@
 					<AutoField label="Book stock (L)" :value="num(r.book_stock)" />
 					<AutoField
 						label="Variance (L)"
-						:value="num(r.variance)"
-						:tone="r.variance < -0.5 ? 'bad' : 'good'"
+						:value="flt(r.dip_mm) > 0 ? num(r.variance) : '—'"
+						:tone="flt(r.dip_mm) > 0 ? (r.variance < -0.5 ? 'bad' : 'good') : ''"
 					/>
 				</div>
 			</div>
@@ -138,8 +163,9 @@
 </template>
 <script setup>
 import { computed, onMounted, ref, h } from "vue";
+import { toast } from "frappe-ui";
 import { useDocForm, nextKey } from "../composables/useDocForm";
-import { api, getList } from "../api";
+import { api, getList, errorText } from "../api";
 import { session } from "../session";
 import { num, litres, dateFmt, timeFmt, today, flt, fuelClass, FUEL_COLORS } from "../format";
 import PageHeader from "../components/PageHeader.vue";
@@ -147,7 +173,6 @@ import Section from "../components/Section.vue";
 import Field from "../components/Field.vue";
 import AutoField from "../components/AutoField.vue";
 import NumInput from "../components/NumInput.vue";
-import LinkInput from "../components/LinkInput.vue";
 import FuelChip from "../components/FuelChip.vue";
 import EmployeeSelect from "../components/EmployeeSelect.vue";
 import StatusPill from "../components/StatusPill.vue";
@@ -208,13 +233,59 @@ const color = (r) => FUEL_COLORS[fuelClass(r.fuel_item)];
 const fillPct = (r) => Math.min(100, (flt(r.dip_stock) * 100) / (caps.value[r.tank] || 1));
 const waterPct = (r) => Math.min(100, (flt(r.water_volume) * 100) / (caps.value[r.tank] || 1));
 
-async function loadTanks() {
-	const rows = await api(
-		"petrodiesel.petrodiesel.doctype.tank_dip_reading.tank_dip_reading.get_tanks",
-		{ station: d.value.station }
-	);
-	d.value.readings = rows.map((r) => ({ ...r, dip_mm: 0, water_dip_mm: 0, _key: nextKey() }));
+// mirrors the server: no negative dips, water dip not above product dip
+function rowIssue(r, forSubmit = true) {
+	if (flt(r.dip_mm) < 0 || flt(r.water_dip_mm) < 0) return `${r.tank}: dips cannot be negative.`;
+	if (flt(r.dip_mm) && flt(r.water_dip_mm) > flt(r.dip_mm))
+		return `${r.tank}: water dip cannot be more than the product dip.`;
+	if (forSubmit && flt(r.dip_mm) <= 0)
+		return `${r.tank}: enter the product dip, or remove the tank if it was not dipped.`;
+	return "";
+}
+// "enter the dip" hints wait until the user tries to submit; real errors show at once
+const tried = ref(false);
+const rowProblems = computed(() =>
+	f.doc.value ? d.value.readings.map((r) => rowIssue(r, tried.value)).filter(Boolean) : []
+);
+const submitProblems = computed(() =>
+	f.doc.value ? d.value.readings.map((r) => rowIssue(r)).filter(Boolean) : []
+);
+const problem = computed(() => {
+	if (!d.value.readings.length) return "Load tanks first";
+	if (d.value.posting_date > today()) return "Date cannot be in the future";
+	return submitProblems.value[0] || "";
+});
+const serverSave = f.save;
+f.save = (action) => {
+	const p = d.value.readings.map((r) => rowIssue(r, false)).filter(Boolean);
+	if (d.value.posting_date > today()) p.unshift("Date cannot be in the future.");
+	if (p.length) {
+		toast.error(p[0]);
+		return;
+	}
+	return serverSave(action);
+};
+function removeRow(r) {
+	d.value.readings.splice(d.value.readings.indexOf(r), 1);
 	calc();
+}
+
+async function loadTanks() {
+	try {
+		const rows = await api(
+			"petrodiesel.petrodiesel.doctype.tank_dip_reading.tank_dip_reading.get_tanks",
+			{ station: d.value.station }
+		);
+		d.value.readings = rows.map((r) => ({
+			...r,
+			dip_mm: 0,
+			water_dip_mm: 0,
+			_key: nextKey(),
+		}));
+		calc();
+	} catch (e) {
+		toast.error(errorText(e));
+	}
 }
 function calc() {
 	if (!ed.value || !d.value.readings.length) return;
@@ -235,11 +306,15 @@ function calc() {
 	}, 400);
 }
 onMounted(async () => {
-	const t = await getList("Fuel Tank Master", {
-		filters: { station: session.station },
-		fields: ["name", "capacity_liters"],
-	});
-	caps.value = Object.fromEntries(t.map((x) => [x.name, x.capacity_liters]));
+	try {
+		const t = await getList("Fuel Tank Master", {
+			filters: { station: session.station },
+			fields: ["name", "capacity_liters"],
+		});
+		caps.value = Object.fromEntries(t.map((x) => [x.name, x.capacity_liters]));
+	} catch (e) {
+		toast.error(errorText(e));
+	}
 	await f.load();
 	if (f.isNew.value) loadTanks();
 });

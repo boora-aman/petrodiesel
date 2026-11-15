@@ -6,18 +6,28 @@
 		@change="pick($event.target.value)"
 	>
 		<option value="">{{ placeholder || "Select" }}</option>
-		<option v-for="e in list" :key="e.name" :value="e.name">
-			{{ e.employee_name }}{{ e.designation ? " · " + e.designation : "" }}
-		</option>
+		<!-- grouped by designation so each option is just the name (no cut-off text) -->
+		<optgroup v-for="g in groups" :key="g.label" :label="g.label">
+			<option v-for="e in g.items" :key="e.name" :value="e.name">
+				{{ e.employee_name }}
+			</option>
+		</optgroup>
 	</select>
 </template>
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { getList } from "../api";
 import { session } from "../session";
 const props = defineProps({ modelValue: String, disabled: Boolean, placeholder: String });
 const emit = defineEmits(["update:modelValue", "change"]);
 const list = ref([]);
+const groups = computed(() => {
+	const g = {};
+	for (const e of list.value) (g[e.designation || "Staff"] ||= []).push(e);
+	return Object.entries(g)
+		.sort(([a], [b]) => a.localeCompare(b))
+		.map(([label, items]) => ({ label, items }));
+});
 let cache = window.__pdEmployees;
 function pick(v) {
 	emit("update:modelValue", v);

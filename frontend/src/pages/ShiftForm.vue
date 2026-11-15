@@ -78,9 +78,10 @@
 					:title="serverError"
 					@click="step = 4"
 				>
-					<i class="lucide-triangle-alert size-3.5 shrink-0" /><span class="truncate">{{
-						serverError
-					}}</span>
+					<i class="lucide-triangle-alert size-3.5 shrink-0" /><span
+						class="line-clamp-2 text-left"
+						>{{ serverError }}</span
+					>
 				</button>
 			</div>
 		</div>
@@ -95,11 +96,11 @@
 					:disabled="!editable"
 					@change="onHeader"
 			/></Field>
-			<Field label="Shift" required>
+			<Field label="Shift" required :hint="shiftHours">
 				<select v-model="doc.shift" class="inp" :disabled="!editable" @change="onHeader">
 					<option value="" disabled>Select</option>
 					<option v-for="s in session.boot.shifts" :key="s.name" :value="s.name">
-						{{ s.name }} ({{ timeFmt(s.start_time) }}–{{ timeFmt(s.end_time) }})
+						{{ s.name }}
 					</option>
 					<option
 						v-if="doc.shift && !session.boot.shifts.some((x) => x.name === doc.shift)"
@@ -109,7 +110,7 @@
 					</option>
 				</select>
 			</Field>
-			<Field label="Cashier / in-charge"
+			<Field label="Cashier / in-charge" class="col-span-2 md:col-span-1"
 				><EmployeeSelect v-model="doc.cashier" :disabled="!editable" @change="schedule"
 			/></Field>
 			<AutoField label="Outlet" :value="session.boot.station?.station_name" />
@@ -266,30 +267,32 @@
 
 			<Section v-if="fuelSummary.length" title="Fuel-wise summary" flush>
 				<div class="overflow-x-auto">
-					<table class="tbl">
-						<thead>
-							<tr>
-								<th>Fuel</th>
-								<th class="!text-right">Meter</th>
-								<th class="!text-right">Test</th>
-								<th class="!text-right">Sale</th>
-								<th class="!text-right">Credit</th>
-								<th class="!text-right">Retail</th>
-								<th class="!text-right">Amount</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="f in fuelSummary" :key="f.fuel_item">
-								<td><FuelChip :item="f.fuel_item" /></td>
-								<td class="r">{{ num(f.meter_qty) }}</td>
-								<td class="r">{{ num(f.test_qty) }}</td>
-								<td class="r font-semibold">{{ num(f.sale_qty) }}</td>
-								<td class="r">{{ num(f.credit_qty) }}</td>
-								<td class="r">{{ num(f.retail_qty) }}</td>
-								<td class="r">{{ inr(f.amount) }}</td>
-							</tr>
-						</tbody>
-					</table>
+					<div class="overflow-x-auto">
+						<table class="tbl">
+							<thead>
+								<tr>
+									<th>Fuel</th>
+									<th class="!text-right">Meter</th>
+									<th class="!text-right">Test</th>
+									<th class="!text-right">Sale</th>
+									<th class="!text-right">Credit</th>
+									<th class="!text-right">Retail</th>
+									<th class="!text-right">Amount</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr v-for="f in fuelSummary" :key="f.fuel_item">
+									<td><FuelChip :item="f.fuel_item" /></td>
+									<td class="r">{{ num(f.meter_qty) }}</td>
+									<td class="r">{{ num(f.test_qty) }}</td>
+									<td class="r font-semibold">{{ num(f.sale_qty) }}</td>
+									<td class="r">{{ num(f.credit_qty) }}</td>
+									<td class="r">{{ num(f.retail_qty) }}</td>
+									<td class="r">{{ inr(f.amount) }}</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</Section>
 		</div>
@@ -304,7 +307,7 @@
 					><button
 						v-if="editable"
 						class="btn-secondary btn-sm"
-						@click="addRow('credit_sales', { fuel_item: 'HSD' })"
+						@click="addRow('credit_sales', { fuel_item: defaultFuel() })"
 					>
 						<i class="lucide-plus size-3.5" />Add slip
 					</button></template
@@ -357,7 +360,7 @@
 								<Field label="Filled by"
 									><select
 										v-model="r.attendant"
-										class="inp !px-2"
+										class="inp !pl-2 !pr-7"
 										:disabled="!editable"
 										@change="recalc"
 									>
@@ -372,7 +375,7 @@
 								<Field label="Fuel"
 									><select
 										v-model="r.fuel_item"
-										class="inp !px-2"
+										class="inp !pl-2 !pr-7"
 										:disabled="!editable"
 										@change="setCreditRate(r)"
 									>
@@ -649,6 +652,46 @@
 				</div>
 			</Section>
 			<Section
+				v-if="orphanPayments.length"
+				title="Unassigned payments"
+				subtitle="Collected by someone who is no longer on any nozzle — pick the attendant or remove"
+			>
+				<div class="space-y-2">
+					<div
+						v-for="p in orphanPayments"
+						:key="p._key"
+						class="flex flex-wrap items-center gap-2 text-[13px]"
+					>
+						<i
+							:class="modeIcon(p.mode_of_payment || '')"
+							class="size-4 text-brand-600"
+						/>
+						<span class="font-medium">{{ p.mode_of_payment }}</span>
+						<span class="num">{{ inr(p.amount) }}</span>
+						<span class="text-ink-3">was {{ empName(p.attendant) }}</span>
+						<select
+							class="inp !h-8 !w-auto !pl-2 !pr-7 text-[12px]"
+							:disabled="!editable"
+							value=""
+							@change="reassignPayment(p, $event.target.value)"
+						>
+							<option value="" disabled>Move to…</option>
+							<option v-for="who in shiftPeople" :key="who" :value="who">
+								{{ empName(who) }}
+							</option>
+							<option value="__counter">Counter (no attendant)</option>
+						</select>
+						<button
+							v-if="editable"
+							class="ml-auto text-red-600 hover:underline"
+							@click="removeRow('payments', p)"
+						>
+							Remove
+						</button>
+					</div>
+				</div>
+			</Section>
+			<Section
 				title="Counter collections (not tied to an attendant)"
 				subtitle="e.g. lube / shop counter UPI or card at the cashier"
 			>
@@ -901,6 +944,27 @@
 						: 'lg:col-span-3'
 				"
 			>
+				<div
+					v-if="checks.length"
+					class="mb-4 space-y-1 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2"
+				>
+					<div class="text-[13px] font-semibold text-amber-800">
+						Fix before submitting
+					</div>
+					<div
+						v-for="c in checks"
+						:key="c"
+						class="flex items-start gap-2 text-[13px] text-amber-800"
+					>
+						<i class="lucide-circle-alert mt-0.5 size-4 shrink-0" />{{ c }}
+					</div>
+				</div>
+				<div
+					v-else-if="editable"
+					class="mb-4 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2 text-[13px] text-green-800"
+				>
+					<i class="lucide-circle-check size-4" />Ready to submit.
+				</div>
 				<div class="grid grid-cols-2 gap-3 md:grid-cols-4">
 					<AutoField label="Total sale (L)" :value="num(t.total_sale_qty)" />
 					<AutoField label="Test (L)" :value="num(t.total_test_qty)" />
@@ -980,21 +1044,6 @@
 						</tbody>
 					</table>
 				</div>
-				<div v-if="checks.length" class="mt-4 space-y-1">
-					<div
-						v-for="c in checks"
-						:key="c"
-						class="flex items-center gap-2 text-[13px] text-amber-700"
-					>
-						<i class="lucide-circle-alert size-4" />{{ c }}
-					</div>
-				</div>
-				<div
-					v-else-if="editable"
-					class="mt-4 flex items-center gap-2 text-[13px] text-green-700"
-				>
-					<i class="lucide-circle-check size-4" />Ready to submit.
-				</div>
 			</Section>
 			<div class="space-y-4">
 				<Section v-if="full?.events?.length" title="Approval trail" flush>
@@ -1066,7 +1115,18 @@ import { useRoute, useRouter } from "vue-router";
 import { toast } from "frappe-ui";
 import { api, errorText, getList, printUrl, deskUrl } from "../api";
 import { session } from "../session";
-import { inr, num, litres, signedInr, dateFmt, timeFmt, dateTimeFmt, flt, today } from "../format";
+import {
+	inr,
+	num,
+	litres,
+	signedInr,
+	dateFmt,
+	timeFmt,
+	dateTimeFmt,
+	flt,
+	today,
+	addDays,
+} from "../format";
 import PageHeader from "../components/PageHeader.vue";
 import Section from "../components/Section.vue";
 import Field from "../components/Field.vue";
@@ -1118,6 +1178,10 @@ let key = 0;
 let timer;
 
 const isNew = computed(() => !props.name);
+const shiftHours = computed(() => {
+	const s = (session.boot.shifts || []).find((x) => x.name === doc.value?.shift);
+	return s ? `${timeFmt(s.start_time)} – ${timeFmt(s.end_time)}` : "";
+});
 const machines = computed(() => session.boot.machines || []);
 const machineRows = computed(() => doc.value?.machine_summary || []);
 const attRows = computed(() => doc.value?.attendant_collection || []);
@@ -1154,7 +1218,8 @@ const empNames = ref({});
 const nozzleDu = {};
 const empName = (e) => empNames.value[e] || e || "—";
 
-const tolerance = computed(() => flt(session.boot.settings?.cash_variance_tolerance) || 100);
+// same rule as the server: a tolerance of 0 (or unset) means no reason is ever required
+const tolerance = computed(() => flt(session.boot.settings?.cash_variance_tolerance));
 const editable = computed(
 	() =>
 		isNew.value ||
@@ -1178,7 +1243,14 @@ const submitAction = computed(() => {
 			? "submit"
 			: null;
 	if (transitions.value.includes("Submit for Approval")) return "Submit for Approval";
-	if (!doc.value.workflow_state && doc.value.docstatus === 0 && full.value?.can_submit)
+	// no workflow (or one switched off after this draft was made, leaving workflow_state = "Draft"):
+	// a plain submit is possible when the user may submit and no workflow action is on offer
+	if (
+		doc.value.docstatus === 0 &&
+		full.value?.can_submit &&
+		!transitions.value.length &&
+		["Draft", "", null, undefined].includes(doc.value.workflow_state)
+	)
 		return "submit";
 	return null;
 });
@@ -1186,7 +1258,9 @@ const otherTransitions = computed(() =>
 	transitions.value.filter((x) => x !== "Submit for Approval")
 );
 const t = computed(() => doc.value || {});
-const needsRemarks = computed(() => Math.abs(t.value.short_excess || 0) > tolerance.value);
+const needsRemarks = computed(
+	() => tolerance.value > 0 && Math.abs(t.value.short_excess || 0) > tolerance.value
+);
 const steps = computed(() => [
 	{ key: "meter", label: "Meter readings", count: doc.value?.nozzle_readings.length },
 	{
@@ -1212,6 +1286,13 @@ const groups = computed(() => {
 });
 const cashTone = computed(() => {
 	const se = t.value.short_excess || 0;
+	if (!t.value.cash_counted && !t.value.total_sale_qty)
+		return {
+			label: "Not counted yet",
+			cls: "border-slate-200 bg-slate-50 text-ink-2",
+			dot: "bg-slate-400",
+			box: "bg-slate-50 text-ink-2",
+		};
 	if (Math.abs(se) < 1)
 		return {
 			label: "Cash tallied",
@@ -1250,18 +1331,139 @@ const checks = computed(() => {
 	if (!t.value.cash_counted) c.push("Count the cash.");
 	if (needsRemarks.value && !doc.value.remarks)
 		c.push("Enter the reason for the cash difference.");
-	if (doc.value.credit_sales.some((r) => !r.customer || !r.qty))
-		c.push("Complete every credit slip (customer and quantity).");
+	const partial = (table) =>
+		(doc.value[table] || []).some((r) => !isBlankRow(table, r) && !isValidRow(table, r));
+	if (partial("credit_sales")) c.push("Complete every credit slip (customer and quantity).");
+	if (doc.value.credit_sales.some((r) => r._attCleared && !r.attendant))
+		c.push(
+			"Some credit slips were filled by someone no longer on a nozzle — pick who filled them."
+		);
+	if (partial("other_sales"))
+		c.push("Complete every lube / shop sale (item, quantity and rate).");
+	if (partial("driver_cash")) c.push("Complete every driver cash row (customer and amount).");
+	if (partial("expenses")) c.push("Complete every expense (expense head and amount).");
+	if (partial("employee_advances"))
+		c.push("Complete every staff advance (employee and amount).");
+	if (partial("payments")) c.push("Every digital payment needs a mode and a positive amount.");
+	if (orphanPayments.value.length)
+		c.push(
+			"Some UPI / card payments belong to someone no longer on a nozzle — reassign or remove them (Attendant collections step)."
+		);
 	if (serverError.value) c.push(serverError.value);
 	return c;
 });
 
+// ---- child-table row rules (required fields per table)
+const ROW_RULES = {
+	credit_sales: {
+		keys: ["customer", "vehicle", "slip_no"],
+		nums: ["qty"],
+		valid: (r) => r.customer && flt(r.qty) > 0,
+	},
+	// qty defaults to 1 on a new row, so it does not count as "typed"
+	other_sales: {
+		keys: ["item_code"],
+		nums: ["rate"],
+		valid: (r) => r.item_code && flt(r.qty) > 0 && flt(r.rate) > 0,
+	},
+	driver_cash: {
+		keys: ["customer", "vehicle"],
+		nums: ["amount"],
+		valid: (r) => r.customer && flt(r.amount) > 0,
+	},
+	expenses: {
+		keys: ["expense_account", "description"],
+		nums: ["amount"],
+		valid: (r) => r.expense_account && flt(r.amount) > 0,
+	},
+	employee_advances: {
+		keys: ["employee", "remarks"],
+		nums: ["amount"],
+		valid: (r) => r.employee && flt(r.amount) > 0,
+	},
+	// a payment row with no amount is just an untouched input
+	payments: { keys: [], nums: ["amount"], valid: (r) => r.mode_of_payment && flt(r.amount) > 0 },
+};
+function isBlankRow(table, r) {
+	const rule = ROW_RULES[table];
+	if (!rule) return false;
+	return !rule.keys.some((k) => r[k]) && !rule.nums.some((k) => flt(r[k]));
+}
+function isValidRow(table, r) {
+	const rule = ROW_RULES[table];
+	return !rule || !!rule.valid(r);
+}
+const orphanPayments = computed(() => {
+	const ppl = shiftPeople.value;
+	return (doc.value?.payments || []).filter(
+		(p) => p.attendant && flt(p.amount) && !ppl.includes(p.attendant)
+	);
+});
+function reassignPayment(p, who) {
+	if (!who) return;
+	const target = who === "__counter" ? "" : who;
+	const existing = doc.value.payments.find(
+		(x) => x !== p && x.mode_of_payment === p.mode_of_payment && (x.attendant || "") === target
+	);
+	if (existing) {
+		existing.amount = flt(flt(existing.amount) + flt(p.amount));
+		if (!existing.reference_no && p.reference_no) existing.reference_no = p.reference_no;
+		doc.value.payments.splice(doc.value.payments.indexOf(p), 1);
+	} else {
+		p.attendant = target || null;
+	}
+	recalc();
+}
+// most common diesel-like fuel on the nozzles, else the first nozzle's fuel, else the first fuel
+function defaultFuel() {
+	const rows = doc.value?.nozzle_readings || [];
+	const diesel = /hsd|diesel/i;
+	const count = {};
+	rows.forEach((r) => {
+		if (r.fuel_item && diesel.test(r.fuel_item))
+			count[r.fuel_item] = (count[r.fuel_item] || 0) + 1;
+	});
+	const best = Object.entries(count).sort((a, b) => b[1] - a[1])[0];
+	if (best) return best[0];
+	if (rows[0]?.fuel_item) return rows[0].fuel_item;
+	const fuels = session.boot.fuels || [];
+	return (
+		fuels.find((f) => diesel.test(f.name) || diesel.test(f.item_name || ""))?.name ||
+		fuels[0]?.name ||
+		""
+	);
+}
+// when an attendant leaves the nozzles, his credit slips lose their "filled by"
+watch(
+	() => [doc.value, shiftPeople.value.join("|")],
+	([d, people], [od, oldPeople]) => {
+		if (!d || d !== od || people === oldPeople || !editable.value) return;
+		const ppl = shiftPeople.value;
+		d.credit_sales.forEach((r) => {
+			if (r.attendant && !ppl.includes(r.attendant)) {
+				r.attendant = "";
+				r._attCleared = true;
+			}
+		});
+		recalc();
+	}
+);
+
+// a night shift (22:00-06:00) closed after midnight belongs to the previous business day
+function businessDate(shiftName) {
+	const s = (session.boot.shifts || []).find((x) => x.name === shiftName);
+	if (!s) return today();
+	const st = timeFmt(s.start_time),
+		en = timeFmt(s.end_time),
+		now = new Date().toTimeString().slice(0, 5);
+	return st > en && now < en ? addDays(today(), -1) : today();
+}
 function blank() {
 	const sh = route.query.shift || currentShift();
 	return {
 		doctype: "Shift Sale Entry",
 		station: session.station,
-		posting_date: today(),
+		posting_date: route.query.date || businessDate(sh),
 		shift: sh || "",
 		cashier: session.boot.employee?.name || "",
 		cashier_name: session.boot.employee?.employee_name || "",
@@ -1320,6 +1522,14 @@ function withKeys(d) {
 }
 
 async function load() {
+	try {
+		await loadInner();
+	} catch (e) {
+		toast.error(errorText(e));
+		if (props.name) router.replace("/shifts");
+	}
+}
+async function loadInner() {
 	modes.value = session.boot.payment_modes || [];
 	const [nz, emps] = await Promise.all([
 		getList("Fuel Nozzle Master", {
@@ -1348,6 +1558,14 @@ async function load() {
 	}
 	loadLimits();
 	recalc(false);
+	// a new closing starts with the outlet's active nozzles and their opening readings
+	if (isNew.value && doc.value.station && !doc.value.nozzle_readings.length) {
+		try {
+			await loadNozzles();
+		} catch (e) {
+			toast.error(errorText(e));
+		}
+	}
 }
 
 async function loadLimits() {
@@ -1387,10 +1605,16 @@ async function loadNozzles() {
 		!window.confirm("Replace the entered readings with fresh nozzle data?")
 	)
 		return;
-	const rows = await api(
-		"petrodiesel.petrodiesel.doctype.shift_sale_entry.shift_sale_entry.get_nozzles",
-		{ station: doc.value.station, posting_date: doc.value.posting_date }
-	);
+	let rows;
+	try {
+		rows = await api(
+			"petrodiesel.petrodiesel.doctype.shift_sale_entry.shift_sale_entry.get_nozzles",
+			{ station: doc.value.station, posting_date: doc.value.posting_date }
+		);
+	} catch (e) {
+		toast.error(errorText(e));
+		return;
+	}
 	doc.value.nozzle_readings = rows.map((r) => ({
 		...r,
 		test_qty: 0,
@@ -1430,11 +1654,12 @@ function removeRow(table, r) {
 	recalc();
 }
 function rateFor(item) {
-	return (
-		doc.value.nozzle_readings.find((n) => n.fuel_item === item)?.rate ||
-		session.boot.fuels.find((f) => f.name === item)?.rate ||
-		0
-	);
+	// boot fuel rates are today's price; for another date leave 0 and let the server fill it
+	const bootRate =
+		doc.value.posting_date === session.boot.today
+			? (session.boot.fuels || []).find((f) => f.name === item)?.rate
+			: 0;
+	return doc.value.nozzle_readings.find((n) => n.fuel_item === item)?.rate || bootRate || 0;
 }
 function setCreditRate(r) {
 	r.rate = rateFor(r.fuel_item);
@@ -1495,10 +1720,19 @@ function modeIcon(m) {
 }
 function onHeader() {
 	if (!editable.value) return;
-	if (isNew.value && doc.value.nozzle_readings.length) {
-		doc.value.nozzle_readings.forEach((r) => {
-			if (!r._priceRow) r.rate = 0;
-		});
+	// rates belong to the business date: drop them so the server price list refills them
+	// (manual price-change rows keep what the user typed)
+	doc.value.nozzle_readings.forEach((r) => {
+		if (!r._priceRow) r.rate = 0;
+	});
+	doc.value.credit_sales.forEach((r) => (r.rate = 0));
+	// nothing typed yet: reload nozzles so openings and rates match the new date
+	if (
+		isNew.value &&
+		!doc.value.nozzle_readings.some((r) => r.closing_reading !== r.opening_reading)
+	) {
+		loadNozzles().catch((e) => toast.error(errorText(e)));
+		return;
 	}
 	recalc();
 }
@@ -1620,6 +1854,8 @@ function schedule() {
 }
 function payload(forPreview = false) {
 	const d = JSON.parse(JSON.stringify(doc.value));
+	// rows nobody typed into would fail the server's required fields: drop them
+	for (const f of Object.keys(ROW_RULES)) d[f] = (d[f] || []).filter((r) => !isBlankRow(f, r));
 	if (forPreview) {
 		d.credit_sales = d.credit_sales.filter((r) => r.customer && flt(r.qty) > 0);
 		d.other_sales = d.other_sales.filter((r) => r.item_code && flt(r.qty) > 0);
@@ -1642,7 +1878,7 @@ function payload(forPreview = false) {
 	]) {
 		d[f] = (d[f] || [])
 			.filter((r) => f !== "payments" || flt(r.amount))
-			.map(({ _key, _priceRow, ...r }) => r);
+			.map((r) => Object.fromEntries(Object.entries(r).filter(([k]) => !k.startsWith("_"))));
 	}
 	delete d.fuel_summary;
 	return d;
@@ -1668,10 +1904,28 @@ async function preview() {
 		]) {
 			if (r.doc[f] !== undefined && r.doc[f] !== null) doc.value[f] = r.doc[f];
 		}
+		let filled = false;
 		r.doc.nozzle_readings?.forEach((sr, i) => {
 			const lr = doc.value.nozzle_readings[i];
-			if (lr && !lr.rate) lr.rate = sr.rate;
+			if (lr && !flt(lr.rate) && flt(sr.rate)) {
+				lr.rate = sr.rate;
+				filled = true;
+			}
 		});
+		// credit rows are filtered in the preview payload, so match them by fuel
+		const serverCreditRate = {};
+		(r.doc.credit_sales || []).forEach((sr) => {
+			if (flt(sr.rate)) serverCreditRate[sr.fuel_item] = sr.rate;
+		});
+		doc.value.credit_sales.forEach((cr) => {
+			if (flt(cr.rate)) return;
+			const rate = rateFor(cr.fuel_item) || serverCreditRate[cr.fuel_item];
+			if (rate) {
+				cr.rate = rate;
+				filled = true;
+			}
+		});
+		if (filled) recalc(false);
 	} catch (e) {
 		serverError.value = errorText(e);
 	} finally {
@@ -1680,9 +1934,13 @@ async function preview() {
 }
 
 async function save(action) {
+	if (busy.value) return;
 	if (action && checks.value.length) {
 		step.value = 4;
-		toast.error("Fix the items listed on the Review step first.");
+		toast.error(
+			checks.value[0] +
+				(checks.value.length > 1 ? ` (+${checks.value.length - 1} more)` : "")
+		);
 		return;
 	}
 	busy.value = true;
@@ -1704,7 +1962,9 @@ async function save(action) {
 	}
 }
 function transition(tn) {
+	if (busy.value) return;
 	if (tn === "Reject") {
+		rejectReason.value = "";
 		rejectOpen.value = true;
 		return;
 	}
@@ -1718,6 +1978,7 @@ function transition(tn) {
 	doTransition(tn);
 }
 async function doTransition(tn, reason) {
+	if (busy.value) return;
 	busy.value = true;
 	try {
 		await api("doc_action", {
@@ -1728,6 +1989,7 @@ async function doTransition(tn, reason) {
 		});
 		toast.success(tn === "Approve" ? "Approved and posted to ERPNext" : `${tn} done`);
 		rejectOpen.value = false;
+		rejectReason.value = "";
 		await load();
 	} catch (e) {
 		toast.error(errorText(e));

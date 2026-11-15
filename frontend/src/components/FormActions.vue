@@ -14,9 +14,10 @@
 		<button
 			v-if="f.sendAction.value"
 			class="btn-primary"
-			:disabled="f.busy.value || blocked"
+			:disabled="f.busy.value"
+			:class="blocked ? 'opacity-60' : ''"
 			:title="blocked ? blockedReason : ''"
-			@click="f.save(f.sendAction.value)"
+			@click="send"
 		>
 			<i class="lucide-send size-4" />{{ sendLabel }}
 		</button>
@@ -44,10 +45,11 @@
 			<button class="btn-secondary" @click="rejecting = false">Close</button>
 			<button
 				class="btn-danger"
-				:disabled="!reason"
+				:disabled="!reason.trim() || f.busy.value"
 				@click="
 					rejecting = false;
 					f.act('Reject', reason);
+					reason = '';
 				"
 			>
 				Reject
@@ -56,6 +58,7 @@
 	</Modal>
 </template>
 <script setup>
+import { toast } from "frappe-ui";
 import { computed, ref } from "vue";
 import Modal from "./Modal.vue";
 import Field from "./Field.vue";
@@ -68,6 +71,16 @@ const props = defineProps({
 const f = props.form;
 const rejecting = ref(false);
 const reason = ref("");
+const emit = defineEmits(["blocked"]);
+// a blocked submit says why instead of sitting there greyed out
+function send() {
+	if (props.blocked) {
+		toast.error(props.blockedReason || "Complete the form first.");
+		emit("blocked");
+		return;
+	}
+	props.form.save(props.form.sendAction.value);
+}
 const sendLabel = computed(() => {
 	const a = f.sendAction.value;
 	if (a === "auto" || a === "submit") return "Submit";

@@ -1,5 +1,6 @@
 <template>
 	<DocList
+		table-from="xl"
 		:search-fields="['name', 'truck_no', 'supplier_invoice_no']"
 		search-placeholder="Search lorry no or OMC invoice…"
 		title="Tanker receipts"
@@ -84,7 +85,7 @@ const columns = [
 	{ key: "name", label: "Receipt" },
 	{ key: "posting_date", label: "Date", format: dateFmt },
 	{ key: "truck_no", label: "Tank lorry" },
-	{ key: "supplier_invoice_no", label: "OMC invoice" },
+	{ key: "supplier_invoice_no", label: "OMC invoice", cls: "hidden 2xl:table-cell" },
 	{ key: "total_invoice_qty", label: "Invoiced (L)", num: true, format: (v) => num(v) },
 	{ key: "total_received_qty", label: "Received (L)", num: true, format: (v) => num(v) },
 	{ key: "total_shortage_qty", label: "Short (L)", num: true },

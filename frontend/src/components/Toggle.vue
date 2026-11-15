@@ -2,7 +2,10 @@
 	<button
 		type="button"
 		class="flex items-center justify-between gap-3 rounded-lg border border-line px-3 py-2.5 text-left text-[13px]"
-		:class="modelValue ? 'bg-green-50/60' : 'bg-white'"
+		:class="[
+			modelValue ? 'bg-green-50/60' : 'bg-white',
+			disabled ? 'cursor-not-allowed opacity-60' : '',
+		]"
 		:disabled="disabled"
 		@click="$emit('update:modelValue', modelValue ? 0 : 1)"
 	>

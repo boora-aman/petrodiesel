@@ -11,7 +11,7 @@ from frappe.utils import add_days, flt
 class CreditBill(Document):
 	def validate(self):
 		self.company = frappe.get_cached_value("Fuel Station", self.station, "company")
-		if self.from_date > self.to_date:
+		if str(self.from_date) > str(self.to_date):
 			frappe.throw(_("From date cannot be after To date."))
 		overlap = frappe.db.sql(
 			"""select name from `tabCredit Bill` where customer=%s and docstatus=1 and name!=%s
@@ -24,7 +24,12 @@ class CreditBill(Document):
 				indicator="orange",
 				alert=True,
 			)
-		if not self.items and not self.payments:
+		if self.docstatus == 0:
+			# a draft always lists the entries of its own customer and period
+			self.set("items", [])
+			self.set("payments", [])
+			self.set_entries()
+		elif not self.items and not self.payments:
 			self.set_entries()
 		self.calculate()
 

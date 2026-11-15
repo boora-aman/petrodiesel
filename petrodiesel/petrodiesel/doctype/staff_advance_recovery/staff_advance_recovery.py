@@ -7,8 +7,8 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, get_first_day, getdate
 
-from petrodiesel.petrodiesel.advances import advance_outstanding
-from petrodiesel.petrodiesel.utils import get_mode_of_payment_account
+from petrodiesel.petrodiesel.advances import advance_outstanding, employee_party
+from petrodiesel.petrodiesel.utils import get_mode_of_payment_account, validate_not_future
 
 RECOVERY_COMPONENT = "Advance Recovery"
 
@@ -18,6 +18,7 @@ class StaffAdvanceRecovery(Document):
 
 	def validate(self):
 		self.company = frappe.get_cached_value("Fuel Station", self.station, "company")
+		validate_not_future(self.posting_date)
 		self.outstanding = advance_outstanding(self.employee, exclude=self.name)
 		if flt(self.amount) <= 0:
 			frappe.throw(_("Amount must be positive."))
@@ -68,6 +69,7 @@ class StaffAdvanceRecovery(Document):
 							"credit_in_account_currency": self.amount,
 							"cost_center": station.cost_center,
 							"user_remark": self.employee_name,
+							**employee_party(station.employee_advance_account, self.employee),
 						},
 					],
 				}

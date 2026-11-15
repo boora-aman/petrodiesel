@@ -73,18 +73,23 @@
 				label="Fuel sale today"
 				:loading="loading"
 				:value="litres(k.fuel_today, 0)"
-				:caption="`Yesterday ${litres(k.fuel_yesterday, 0)}`"
+				:caption="`${date === today() ? 'So far · yesterday' : 'Day before'} ${litres(
+					k.fuel_yesterday,
+					0
+				)}`"
 				:badge="pct(k.fuel_today, k.fuel_yesterday)"
-				:tone="k.fuel_today >= k.fuel_yesterday ? 'good' : 'warn'"
+				:tone="date === today() || k.fuel_today >= k.fuel_yesterday ? 'good' : 'warn'"
 				:spark="fuelSpark"
 			/>
 			<KpiCard
 				label="Gross sales today"
 				:loading="loading"
 				:value="compactInr(k.gross_today)"
-				:caption="`Yesterday ${compactInr(k.gross_yesterday)}`"
+				:caption="`${date === today() ? 'So far · yesterday' : 'Day before'} ${compactInr(
+					k.gross_yesterday
+				)}`"
 				:badge="pct(k.gross_today, k.gross_yesterday)"
-				:tone="k.gross_today >= k.gross_yesterday ? 'good' : 'warn'"
+				:tone="date === today() || k.gross_today >= k.gross_yesterday ? 'good' : 'warn'"
 			/>
 			<KpiCard
 				label="Credit sales today"
@@ -420,7 +425,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { api } from "../api";
+import { toast } from "frappe-ui";
+import { api, errorText } from "../api";
 import { session, can } from "../session";
 import { inr, num, litres, compactInr, signedInr, dateFmt, today, timeFmt } from "../format";
 import KpiCard from "../components/KpiCard.vue";
@@ -488,17 +494,21 @@ const actions = computed(() =>
 			icon: "lucide-flask-conical",
 		},
 		["owner", "manager"].includes(view.value) && {
+			first: true,
 			label: "Approvals",
 			to: "/approvals",
 			icon: "lucide-badge-check",
 		},
 	]
 		.filter(Boolean)
+		// managers always keep the Approvals shortcut among the four
+		.sort((a, b) => (b.first ? 1 : 0) - (a.first ? 1 : 0))
 		.slice(0, 4)
 );
 
 function pct(a, b) {
-	if (!b) return "";
+	// today is still running: a % against all of yesterday only alarms
+	if (!b || date.value === today()) return "";
 	const p = ((a - b) * 100) / b;
 	return `${p >= 0 ? "+" : ""}${p.toFixed(1)}%`;
 }
@@ -506,7 +516,7 @@ function linkFor(a) {
 	const m = {
 		shift: `/shifts/${a.name}`,
 		tanker: `/tankers/${a.name}`,
-		dsr: "/dsr/new",
+		dsr: a.name ? `/dsr/new?date=${a.name}` : "/dsr/new",
 		nozzle: "/setup",
 		compliance: "/setup",
 		stock: "/tankers/new",
@@ -531,6 +541,8 @@ async function load() {
 	loading.value = true;
 	try {
 		data.value = await api("dashboard", { date: date.value });
+	} catch (e) {
+		toast.error(errorText(e));
 	} finally {
 		loading.value = false;
 	}

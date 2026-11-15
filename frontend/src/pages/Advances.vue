@@ -102,7 +102,7 @@
 						<div
 							v-for="r in recent"
 							:key="r.name"
-							class="flex justify-between px-4 py-2 text-[12px]"
+							class="flex justify-between gap-3 px-4 py-2 text-[12px]"
 						>
 							<span
 								><b>{{ r.employee_name }}</b
@@ -121,7 +121,7 @@
 						<div
 							v-for="r in recoveries"
 							:key="r.name"
-							class="flex justify-between px-4 py-2 text-[12px]"
+							class="flex justify-between gap-3 px-4 py-2 text-[12px]"
 						>
 							<span
 								><b>{{ r.employee_name }}</b

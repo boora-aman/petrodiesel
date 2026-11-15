@@ -33,10 +33,25 @@ export async function refreshCounts() {
 	}
 }
 
-export async function login(usr, pwd) {
+// Where to go after sign-in. `redirect` is an in-app path (set by the router guard);
+// `redirect-to` is a site path (set by Frappe, e.g. /desk/...). Only same-site paths are honoured.
+export function postLoginTarget(query = {}) {
+	const safe = (p) => typeof p === "string" && p.startsWith("/") && !p.startsWith("//");
+	const siteTarget = query["redirect-to"];
+	if (safe(siteTarget) && !/^\/(login|petrodiesel\/login)\b/.test(siteTarget)) return siteTarget;
+	if (safe(query.redirect) && query.redirect !== "/login")
+		return "/petrodiesel" + query.redirect;
+	return "/petrodiesel";
+}
+
+export async function login(usr, pwd, target = "/petrodiesel") {
 	await call("login", { usr, pwd });
 	// a new CSRF token is issued for the logged-in session; reload to pick it up
-	window.location.href = "/petrodiesel";
+	window.location.href = target;
+}
+
+export async function resetPassword(user) {
+	await call("frappe.core.doctype.user.user.reset_password", { user });
 }
 
 export async function logout() {

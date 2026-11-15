@@ -122,10 +122,129 @@ def setup_demo(days: int = 21, seed: int = 42):
 	frappe.db.commit()
 	simulate(company, accounts, days)
 	frappe.db.commit()
+	demo_extras(days)
+	frappe.db.commit()
 	print(f"Demo ready: company {COMPANY}, station {STATION}, {days} days simulated.")
 
 
 # ---------------------------------------------------------------------- setup
+def demo_extras(days: int = 21):
+	"""Records for the screens the daily simulation does not touch: lube purchases, stock
+	transfers, staff advances and recoveries, and credit bills. Idempotent."""
+	start = add_days(today(), -days)
+	godown, store = f"Lube Godown - {ABBR}", f"Lube Store - {ABBR}"
+	employees = frappe.flags.demo_employees or {}
+	if not employees:
+		for d in frappe.get_all("Employee", fields=["name", "designation"], filters={"status": "Active"}):
+			employees.setdefault(d.designation, []).append(d.name)
+
+	# lube purchase into the godown, then part of it moved to the forecourt store
+	if not frappe.db.exists("Shop Purchase", {"bill_no": "SV-DEMO-1"}):
+		sp = frappe.get_doc(
+			{
+				"doctype": "Shop Purchase",
+				"supplier": "Servo Lubricants Distributor",
+				"bill_no": "SV-DEMO-1",
+				"posting_date": add_days(start, 2),
+				"station": STATION,
+				"warehouse": godown,
+				"items": [
+					{"item_code": code, "qty": qty, "rate": LUBES[code][3]}
+					for code, qty in (("SERVO-4T-1L", 48), ("SERVO-PRIDE-5L", 12), ("DEF-10L", 20))
+				],
+			}
+		).insert()
+		sp.submit()
+	if not frappe.db.exists("Internal Stock Transfer", {"transfer_type": "Lube / Shop Stock"}):
+		ist = frappe.get_doc(
+			{
+				"doctype": "Internal Stock Transfer",
+				"transfer_type": "Lube / Shop Stock",
+				"posting_date": add_days(start, 3),
+				"station": STATION,
+				"from_warehouse": godown,
+				"to_warehouse": store,
+				"remarks": "Forecourt shelf refill",
+				"items": [{"item_code": "SERVO-4T-1L", "qty": 24}, {"item_code": "DEF-10L", "qty": 8}],
+			}
+		).insert()
+		ist.submit()
+	if not frappe.db.exists("Internal Stock Transfer", {"transfer_type": "Fuel Tank to Tank"}):
+		src, dst = (frappe.db.get_value("Fuel Tank Master", t, "warehouse") for t in ("T2-HSD", "T3-HSD"))
+		ist = frappe.get_doc(
+			{
+				"doctype": "Internal Stock Transfer",
+				"transfer_type": "Fuel Tank to Tank",
+				"posting_date": today(),
+				"station": STATION,
+				"from_warehouse": src,
+				"to_warehouse": dst,
+				"remarks": "Balance HSD before T2 cleaning",
+				"items": [{"item_code": "HSD", "qty": 500}],
+			}
+		).insert()
+		ist.submit()
+
+	# staff advances: one repaid in cash, one recovered from salary, one open
+	attendants = employees.get("Attendant", [])
+	if attendants and not frappe.db.exists("Staff Advance", {"purpose": "Festival advance (demo)"}):
+		plans = [
+			(attendants[0], 5000, "Festival advance (demo)", "Cash Return", 2000),
+			(attendants[1 % len(attendants)], 3000, "Medical (demo)", "Salary Deduction", 1000),
+			(attendants[2 % len(attendants)], 2500, "School fees (demo)", "Salary Deduction", 0),
+		]
+		for i, (emp, amount, purpose, method, recover) in enumerate(plans):
+			adv = frappe.get_doc(
+				{
+					"doctype": "Staff Advance",
+					"employee": emp,
+					"posting_date": add_days(start, 4 + i),
+					"station": STATION,
+					"amount": amount,
+					"mode_of_payment": "Cash",
+					"purpose": purpose,
+					"recovery_method": method,
+				}
+			).insert()
+			adv.submit()
+			if recover:
+				rec = frappe.get_doc(
+					{
+						"doctype": "Staff Advance Recovery",
+						"employee": emp,
+						"posting_date": add_days(start, 12 + i),
+						"station": STATION,
+						"amount": recover,
+						"method": method,
+						"mode_of_payment": "Cash" if method == "Cash Return" else None,
+					}
+				).insert()
+				frappe.db.savepoint("demo_recovery")
+				try:
+					rec.submit()
+				except frappe.ValidationError:
+					# salary deduction needs a salary structure; keep the draft so the screen shows it
+					frappe.db.rollback(save_point="demo_recovery")
+
+	# fortnightly credit bills: first half submitted, the running fortnight left as draft
+	mid = add_days(start, days // 2)
+	for customer in CREDIT_CUSTOMERS:
+		if frappe.db.exists("Credit Bill", {"customer": customer, "docstatus": ["<", 2]}):
+			continue
+		for frm, to, submit in ((start, mid, True), (add_days(mid, 1), today(), False)):
+			bill = frappe.get_doc(
+				{
+					"doctype": "Credit Bill",
+					"customer": customer,
+					"station": STATION,
+					"from_date": frm,
+					"to_date": to,
+				}
+			).insert()
+			if submit and bill.items:
+				bill.submit()
+
+
 def ensure_setup_complete():
 	if cint(frappe.db.get_single_value("System Settings", "setup_complete")):
 		return

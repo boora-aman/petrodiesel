@@ -15,7 +15,13 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt
 
-from petrodiesel.petrodiesel.utils import dip_to_volume, get_settings
+from petrodiesel.petrodiesel.utils import (
+	dip_to_volume,
+	ensure_no_payments,
+	get_settings,
+	is_pump_manager,
+	validate_not_future,
+)
 
 
 class TankerReceipt(Document):
@@ -32,6 +38,9 @@ class TankerReceipt(Document):
 	def validate(self):
 		station = frappe.get_cached_doc("Fuel Station", self.station)
 		self.company = station.company
+		validate_not_future(self.posting_date)
+		if not self.items:
+			frappe.throw(_("Add at least one tank."))
 		tolerance = flt(get_settings().density_tolerance) or 3.0
 		density_fail = []
 		for row in self.items:
@@ -41,7 +50,14 @@ class TankerReceipt(Document):
 					_("Row {0}: tank {1} is not at station {2}.").format(row.idx, row.tank, self.station)
 				)
 			row.fuel_item = tank.fuel_item
+			if flt(row.invoice_qty) <= 0 or flt(row.rate) <= 0:
+				frappe.throw(_("Row {0}: invoice quantity and rate must be positive.").format(row.idx))
 			row.amount = flt(flt(row.invoice_qty) * flt(row.rate), 2)
+			if self.docstatus == 1 and not (flt(row.challan_density) and flt(row.density_at_15)):
+				frappe.throw(
+					_("Row {0}: enter the challan density and the observed density at 15°C.").format(row.idx),
+					title=_("Density check missing"),
+				)
 
 			if flt(row.challan_density) and flt(row.density_at_15):
 				row.density_variance = flt(flt(row.density_at_15) - flt(row.challan_density), 1)
@@ -60,6 +76,12 @@ class TankerReceipt(Document):
 				)
 			elif not flt(row.received_qty):
 				row.received_qty = flt(row.invoice_qty)
+			if flt(row.received_qty) < 0:
+				frappe.throw(
+					_("Row {0}: dip after decantation is below the dip before. Check the dips.").format(
+						row.idx
+					)
+				)
 			row.shortage_qty = flt(flt(row.invoice_qty) - flt(row.received_qty), 2)
 
 			capacity = flt(tank.capacity_liters) * (flt(tank.safe_fill_percent) or 100) / 100
@@ -91,26 +113,22 @@ class TankerReceipt(Document):
 		self.total_amount = flt(sum(flt(r.amount) for r in self.items), 2)
 
 	def before_submit(self):
-		if self.override_density_check and not frappe.db.get_value(
-			"Has Role",
-			{"parent": frappe.session.user, "role": ["in", ["Pump Owner", "Pump Manager", "System Manager"]]},
-		):
+		if self.override_density_check and not is_pump_manager():
 			frappe.throw(_("Only a Pump Manager or Owner can accept a density variance."))
 
 	def on_submit(self):
 		self.make_purchase_invoice()
 		self.make_transit_adjustment()
+		from petrodiesel.petrodiesel.doctype.tank_dip_reading.tank_dip_reading import set_last_dip_if_newer
+
 		for row in self.items:
 			if flt(row.dip_after_mm):
-				frappe.db.set_value(
-					"Fuel Tank Master",
-					row.tank,
-					{
-						"last_dip_mm": row.dip_after_mm,
-						"last_dip_stock": row.stock_after,
-						"last_dip_on": f"{self.posting_date} {self.posting_time}",
-					},
+				set_last_dip_if_newer(
+					row.tank, row.dip_after_mm, row.stock_after, self.posting_date, self.posting_time
 				)
+
+	def before_cancel(self):
+		ensure_no_payments("Purchase Invoice", [self.purchase_invoice])
 
 	def on_cancel(self):
 		docs = [
@@ -124,8 +142,11 @@ class TankerReceipt(Document):
 			if name and frappe.db.get_value(doctype, name, "docstatus") == 1:
 				doc = frappe.get_doc(doctype, name)
 				doc.flags.ignore_permissions = True
-				doc.flags.ignore_links = True
 				doc.cancel()
+		from petrodiesel.petrodiesel.doctype.tank_dip_reading.tank_dip_reading import refresh_last_dip
+
+		for tank in {r.tank for r in self.items if flt(r.dip_after_mm)}:
+			refresh_last_dip(tank)
 
 	def make_purchase_invoice(self):
 		cost_center = frappe.get_cached_value("Fuel Station", self.station, "cost_center")

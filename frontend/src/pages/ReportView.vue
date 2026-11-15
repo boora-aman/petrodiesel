@@ -19,55 +19,98 @@
 		</PageHeader>
 
 		<div class="card mb-4 p-3 print:hidden">
-			<div class="flex flex-wrap items-end gap-2">
+			<div class="flex flex-wrap items-center gap-x-3 gap-y-2">
 				<template v-if="has('dates')">
-					<Field label="From"
-						><input
-							v-model="f.from_date"
-							type="date"
-							class="inp w-[150px]"
-							@change="run"
-					/></Field>
-					<Field label="To"
-						><input
-							v-model="f.to_date"
-							type="date"
-							class="inp w-[150px]"
-							@change="run"
-					/></Field>
-					<div class="flex flex-wrap gap-1">
+					<div
+						class="inline-flex max-w-full flex-wrap rounded-lg border border-line bg-slate-50 p-0.5"
+						role="group"
+						aria-label="Date range"
+					>
 						<button
 							v-for="p in presets"
 							:key="p.l"
-							class="btn-ghost btn-sm"
-							@click="preset(p.d)"
+							class="h-8 whitespace-nowrap rounded-md px-3 text-[13px] font-medium transition"
+							:class="
+								activePreset === p.l
+									? 'bg-white text-brand-700 shadow-sm ring-1 ring-line'
+									: 'text-ink-2 hover:text-ink'
+							"
+							@click="preset(p)"
 						>
 							{{ p.l }}
 						</button>
 					</div>
+					<div class="flex flex-wrap items-center gap-2 text-[13px] text-ink-2">
+						<label class="flex items-center gap-1.5"
+							><span class="w-9 sm:w-auto">From</span
+							><input
+								v-model="f.from_date"
+								type="date"
+								class="inp !h-9 w-[150px]"
+								:max="f.to_date || undefined"
+								@change="
+									activePreset = '';
+									run();
+								"
+						/></label>
+						<label class="flex items-center gap-1.5"
+							><span class="w-9 sm:w-auto">To</span
+							><input
+								v-model="f.to_date"
+								type="date"
+								class="inp !h-9 w-[150px]"
+								:min="f.from_date || undefined"
+								@change="
+									activePreset = '';
+									run();
+								"
+						/></label>
+					</div>
 				</template>
-				<Field v-if="has('date')" label="Business date"
+				<label v-if="has('date')" class="flex items-center gap-1.5 text-[13px] text-ink-2"
+					><span>Business date</span
 					><input
 						v-model="f.posting_date"
 						type="date"
-						class="inp w-[160px]"
+						class="inp !h-9 w-[150px]"
 						@change="run"
-				/></Field>
-				<Field v-if="has('asof')" label="As on"
-					><input v-model="f.to_date" type="date" class="inp w-[160px]" @change="run"
-				/></Field>
-				<Field v-if="has('customer')" label="Customer" required
-					><LinkInput v-model="f.customer" doctype="Customer" @change="run"
-				/></Field>
-				<Field v-if="has('employee')" label="Employee (ledger)"
-					><EmployeeSelect
-						v-model="f.employee"
-						placeholder="All employees"
+				/></label>
+				<label v-if="has('asof')" class="flex items-center gap-1.5 text-[13px] text-ink-2"
+					><span>As on</span
+					><input
+						v-model="f.to_date"
+						type="date"
+						class="inp !h-9 w-[150px]"
 						@change="run"
-				/></Field>
-				<Field v-if="has('days')" label="Expiring within (days)"
-					><NumInput v-model="f.days" class="w-28" @update:model-value="debouncedRun"
-				/></Field>
+				/></label>
+				<label
+					v-if="has('customer')"
+					class="flex items-center gap-1.5 text-[13px] text-ink-2 w-full sm:w-auto"
+					><span class="whitespace-nowrap"
+						>Customer <span class="text-red-500">*</span></span
+					>
+					<div class="min-w-0 flex-1 sm:w-64">
+						<LinkInput v-model="f.customer" doctype="Customer" @change="run" /></div
+				></label>
+				<label
+					v-if="has('employee')"
+					class="flex items-center gap-1.5 text-[13px] text-ink-2 w-full sm:w-auto"
+					><span class="whitespace-nowrap">Employee</span>
+					<div class="min-w-0 flex-1 sm:w-56">
+						<EmployeeSelect
+							v-model="f.employee"
+							placeholder="All employees"
+							@change="run"
+						/></div
+				></label>
+				<label v-if="has('days')" class="flex items-center gap-1.5 text-[13px] text-ink-2"
+					><span class="whitespace-nowrap">Expiring within</span
+					><NumInput
+						v-model="f.days"
+						class="!h-9 w-20"
+						@update:model-value="debouncedRun"
+					/><span>days</span></label
+				>
 				<div class="relative ml-auto w-full sm:w-56">
 					<i
 						class="lucide-search absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3"
@@ -220,7 +263,7 @@
 						>Rows
 						<select
 							v-model.number="pageSize"
-							class="inp !h-7 w-20 !px-1.5 text-[12px]"
+							class="inp !h-8 w-[76px] !pl-2.5 !pr-7 text-[13px]"
 							@change="page = 1"
 						>
 							<option :value="50">50</option>
@@ -259,7 +302,6 @@ import { REPORTS } from "../reports";
 import { inr, num, dateFmt, today, addDays, compactInr } from "../format";
 import PageHeader from "../components/PageHeader.vue";
 import Section from "../components/Section.vue";
-import Field from "../components/Field.vue";
 import NumInput from "../components/NumInput.vue";
 import LinkInput from "../components/LinkInput.vue";
 import EmployeeSelect from "../components/EmployeeSelect.vue";
@@ -405,7 +447,10 @@ function sortBy(c) {
 		sort.dir = isNum(c) ? -1 : 1;
 	}
 }
-function preset(d) {
+const activePreset = ref("");
+function preset(p) {
+	const d = p.d;
+	activePreset.value = p.l;
 	f.to_date = today();
 	f.from_date = d === "m" ? today().slice(0, 8) + "01" : addDays(today(), -d);
 	run();

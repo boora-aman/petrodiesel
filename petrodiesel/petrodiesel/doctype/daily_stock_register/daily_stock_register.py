@@ -17,7 +17,12 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import add_days, flt, get_first_day, getdate
 
-from petrodiesel.petrodiesel.utils import dip_to_volume, get_settings, get_tank_book_stock
+from petrodiesel.petrodiesel.utils import (
+	dip_to_volume,
+	get_settings,
+	get_tank_book_stock,
+	validate_not_future,
+)
 
 
 class DailyStockRegister(Document):
@@ -42,19 +47,46 @@ class DailyStockRegister(Document):
 		)
 		if dup:
 			frappe.throw(_("Daily Stock Register {0} already exists for this date.").format(dup))
-		if not self.items:
+		validate_not_future(self.posting_date)
+		if self.docstatus == 0:
+			self.refresh_data()
+		elif not self.items:
 			self.set_data()
 		self.calculate()
+
+	def refresh_data(self):
+		"""Drafts always carry the figures of their own date (the date may have been changed after
+		fetching). Closing dips typed by the user are kept."""
+		typed = {
+			r.tank: (flt(r.closing_dip_mm), flt(r.closing_stock), flt(r.permissible_percent))
+			for r in self.items
+		}
+		self.set("items", [])
+		self.set_data()
+		for row in self.items:
+			if row.tank in typed:
+				dip, stock, perm = typed[row.tank]
+				if dip:
+					row.closing_dip_mm = dip
+					row.closing_stock = 0  # recomputed from the dip in calculate()
+				elif stock:
+					row.closing_stock = stock
+				if perm:
+					row.permissible_percent = perm
 
 	def calculate(self):
 		default_perm = flt(get_settings().default_permissible_loss) or 0.6
 		month_start = get_first_day(self.posting_date)
 		for row in self.items:
 			row.fuel_item = frappe.get_cached_value("Fuel Tank Master", row.tank, "fuel_item")
-			if flt(row.closing_dip_mm) and not flt(row.closing_stock):
-				row.closing_stock = dip_to_volume(row.tank, row.closing_dip_mm)
+			if flt(row.closing_dip_mm) < 0:
+				frappe.throw(_("Tank {0}: closing dip cannot be negative.").format(row.tank))
+			if flt(row.closing_dip_mm):
+				row.closing_stock = flt(dip_to_volume(row.tank, row.closing_dip_mm), 2)
 			row.net_sales = flt(flt(row.meter_sales) - flt(row.test_qty), 2)
-			row.book_closing = flt(flt(row.opening_stock) + flt(row.receipts) - row.net_sales, 2)
+			row.book_closing = flt(
+				flt(row.opening_stock) + flt(row.receipts) + flt(row.transfers) - row.net_sales, 2
+			)
 			if not flt(row.permissible_percent):
 				row.permissible_percent = (
 					flt(frappe.get_cached_value("Item", row.fuel_item, "permissible_loss_percent"))
@@ -129,6 +161,23 @@ class DailyStockRegister(Document):
 		):
 			receipts[r.tank] = flt(r.qty)
 
+		transfers = defaultdict(float)
+		for r in frappe.db.sql(
+			"""
+			select ist.from_warehouse src, ist.to_warehouse dst, sum(i.qty) qty
+			from `tabInternal Stock Transfer` ist join `tabInternal Stock Transfer Item` i on i.parent = ist.name
+			where ist.docstatus = 1 and ist.station = %s and ist.posting_date = %s
+			and ist.transfer_type = 'Fuel Tank to Tank' group by ist.from_warehouse, ist.to_warehouse
+		""",
+			(self.station, date),
+			as_dict=True,
+		):
+			transfers[r.src] -= flt(r.qty)
+			transfers[r.dst] += flt(r.qty)
+		tank_wh = dict(
+			frappe.get_all("Fuel Tank Master", {"station": self.station}, ["name", "warehouse"], as_list=True)
+		)
+
 		for t in tanks:
 			opening = self._previous_closing(t.name, date)
 			morning = self._dip(t.name, date, first=True, types=("Morning (Opening)",))
@@ -146,6 +195,7 @@ class DailyStockRegister(Document):
 					"fuel_item": t.fuel_item,
 					"opening_stock": flt(opening, 2),
 					"receipts": receipts[t.name],
+					"transfers": flt(transfers.get(tank_wh.get(t.name), 0), 2),
 					"meter_sales": flt(sales[t.name][0], 2),
 					"test_qty": flt(sales[t.name][1], 2),
 					"closing_dip_mm": closing.dip_mm if closing else 0,
@@ -200,7 +250,6 @@ class DailyStockRegister(Document):
 		):
 			doc = frappe.get_doc("Stock Reconciliation", self.stock_reconciliation)
 			doc.flags.ignore_permissions = True
-			doc.flags.ignore_links = True
 			doc.cancel()
 
 	def make_stock_reconciliation(self):

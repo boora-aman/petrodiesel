@@ -40,7 +40,7 @@
 						@change="refreshOld"
 				/></Field>
 				<Field label="Effective from"
-					><input v-model="draft.effective_time" type="time" class="inp"
+					><input v-model="draft.effective_time" type="time" step="60" class="inp"
 				/></Field>
 				<Field label="Source"
 					><select v-model="draft.source" class="inp">
@@ -82,7 +82,10 @@
 				<button class="btn-secondary" @click="editing = false">Cancel</button>
 				<button
 					class="btn-primary"
-					:disabled="busy || draft.items.some((r) => !r.new_price)"
+					:disabled="
+						busy || draft.items.some((r) => !(r.new_price > 0)) || !changed.length
+					"
+					:title="changed.length ? '' : 'No price changed yet'"
 					@click="submit"
 				>
 					<i class="lucide-check size-4" />Submit prices
@@ -112,9 +115,10 @@
 							>{{ dateFmt(u.effective_date) }}
 							<FuelChip :item="u.fuel_item" size="xs"
 						/></span>
-						<span class="num"
+						<span class="num whitespace-nowrap"
 							><b>{{ inr(u.new_price) }}</b>
 							<span
+								class="ml-1.5 inline-block min-w-[52px] text-right text-[12px]"
 								:class="
 									u.change_amount > 0
 										? 'text-red-600'
@@ -123,7 +127,9 @@
 										: 'text-ink-3'
 								"
 								>{{ u.change_amount > 0 ? "▲" : u.change_amount < 0 ? "▼" : "" }}
-								{{ num(Math.abs(u.change_amount)) }}</span
+								{{
+									u.change_amount ? num(Math.abs(u.change_amount)) : "no change"
+								}}</span
 							></span
 						>
 					</div>
@@ -184,7 +190,18 @@ async function startNew() {
 	await refreshOld();
 	editing.value = true;
 }
+const changed = computed(() =>
+	(draft.value?.items || []).filter(
+		(r) => Math.abs(Number(r.new_price) - Number(r.old_price)) >= 0.005
+	)
+);
 async function submit() {
+	if (busy.value || !changed.value.length) return;
+	const lines = changed.value
+		.map((r) => `${r.fuel_item}: ${r.old_price} → ${r.new_price}`)
+		.join("\n");
+	if (!window.confirm(`Submit new prices from ${draft.value.effective_date}?\n\n${lines}`))
+		return;
 	busy.value = true;
 	try {
 		const pl = await api("frappe.client.get_single_value", {
@@ -195,7 +212,7 @@ async function submit() {
 			doc: {
 				...draft.value,
 				price_list: pl,
-				items: draft.value.items.map(({ fuel_item, new_price }) => ({
+				items: changed.value.map(({ fuel_item, new_price }) => ({
 					fuel_item,
 					new_price,
 				})),

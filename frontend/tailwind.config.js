@@ -13,6 +13,8 @@ export default {
 	],
 	theme: {
 		extend: {
+			// frappe-ui stops at xl (1280px); wide-screen layouts need 2xl
+			screens: { "2xl": "1536px" },
 			fontFamily: { sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"] },
 			borderRadius: {
 				none: "0",

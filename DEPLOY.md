@@ -136,6 +136,7 @@ Backups are written to `sites/pump.example.com/private/backups/`. Copy them off 
 ## Notes
 
 - **URLs:** the app is at `/petrodiesel`; old `/petrodesk` links redirect there. The ERPNext desk stays at `/desk`. The user guide PDF is at `/assets/petrodiesel/docs/PetroDesk-User-Guide.pdf` and is linked from the app's user menu.
+- **Sign-in page:** `/login` redirects to the PetroDesk sign-in at `/petrodiesel/login` (old `/login#forgot` links open its reset form). A `?redirect-to=` target is kept, so `/login?redirect-to=/desk` signs in and opens the desk.
 - **Landing page:** the `role_home_page` hook sends Pump Owner, Manager, Cashier and Stock Keeper users to `/petrodiesel` after login. Setup also sets *System Settings → Default App* to Petrodiesel if it is empty.
 - **Accounts setting:** setup turns off *Accounts Settings → Automatically Add Taxes from Item Tax Template*. Fuel items carry a VAT template for sales; without this, VAT would also be added to fuel purchase invoices.
 - **Payroll:** the demo gives the staff a basic salary structure, so advances can be recovered from salary. On a real outlet, assign salary structures in HR first.

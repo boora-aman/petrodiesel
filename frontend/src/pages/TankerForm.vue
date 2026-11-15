@@ -7,7 +7,11 @@
 		>
 			<template #badge><StatusPill :status="f.state.value" /></template>
 			<template #actions
-				><FormActions :form="f" :blocked="blocked" :blocked-reason="blockReason"
+				><FormActions
+					:form="f"
+					:blocked="blocked"
+					:blocked-reason="blockReason"
+					@blocked="tried = true"
 			/></template>
 		</PageHeader>
 
@@ -20,17 +24,23 @@
 								v-model="d.posting_date"
 								type="date"
 								class="inp"
+								:max="today()"
 								:disabled="!ed"
 						/></Field>
 						<Field label="Time"
 							><input
-								v-model="d.posting_time"
+								:value="String(d.posting_time || '').slice(0, 5)"
 								type="time"
-								step="1"
+								@input="
+									d.posting_time = $event.target.value
+										? $event.target.value + ':00'
+										: ''
+								"
+								step="60"
 								class="inp"
 								:disabled="!ed"
 						/></Field>
-						<Field label="Supplier (OMC)" required
+						<Field label="Supplier (OMC)" required class="col-span-2 sm:col-span-1"
 							><LinkInput v-model="d.supplier" doctype="Supplier" :disabled="!ed"
 						/></Field>
 						<Field label="OMC invoice no" required
@@ -118,8 +128,13 @@
 										:disabled="!ed"
 										@change="onTank(r)"
 									>
+										<option value="" disabled>Choose tank</option>
 										<option v-for="t in tanks" :key="t.name" :value="t.name">
-											{{ t.name }} ({{ t.fuel_item }})
+											{{
+												t.name.includes(t.fuel_item)
+													? t.name
+													: `${t.name} · ${t.fuel_item}`
+											}}
 										</option>
 									</select>
 								</Field>
@@ -219,8 +234,21 @@
 							</div>
 						</div>
 					</div>
+					<div
+						v-if="ed && shownProblems.length"
+						class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[12px] text-amber-800"
+					>
+						<div v-for="m in shownProblems" :key="m">{{ m }}</div>
+					</div>
+					<div
+						v-if="hasDensityFail && ed && !isManager"
+						class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 text-[13px] text-red-700"
+					>
+						Density outside tolerance. Do not decant. Ask the Pump Manager to review
+						this receipt.
+					</div>
 					<label
-						v-if="hasDensityFail && ed"
+						v-if="hasDensityFail && ed && isManager"
 						class="mt-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-[13px]"
 					>
 						<input
@@ -235,6 +263,12 @@
 							reason below and raise a complaint with the OMC.</span
 						>
 					</label>
+					<div
+						v-if="hasDensityFail && ed && d.override_density_check && !d.remarks"
+						class="mt-2 text-[12px] text-red-600"
+					>
+						Enter remarks explaining why the density variance was accepted.
+					</div>
 				</Section>
 				<Section title="Remarks">
 					<textarea v-model="d.remarks" class="inp h-20 py-2" :disabled="!ed" />
@@ -289,9 +323,10 @@
 </template>
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { toast } from "frappe-ui";
 import { useDocForm, nextKey } from "../composables/useDocForm";
-import { api, getList, deskUrl } from "../api";
-import { session } from "../session";
+import { getList, deskUrl, errorText } from "../api";
+import { session, hasRole } from "../session";
 import { inr, num, litres, dateFmt, today, flt } from "../format";
 import PageHeader from "../components/PageHeader.vue";
 import Section from "../components/Section.vue";
@@ -341,16 +376,67 @@ const densityOk = (r) => Math.abs(flt(r.density_at_15) - flt(r.challan_density))
 const hasDensityFail = computed(() =>
 	d.value.items.some((r) => r.challan_density && r.density_at_15 && !densityOk(r))
 );
-const blocked = computed(
-	() =>
-		(hasDensityFail.value && !d.value.override_density_check) ||
-		(!d.value.seals_intact && !d.value.remarks)
+const isManager = computed(() => hasRole("Pump Manager", "Pump Owner"));
+const rowLabel = (r, i) => `Row ${i + 1}${r.tank ? ` (${r.tank})` : ""}`;
+// rules the server enforces on every save (draft too)
+function draftProblems() {
+	const out = [];
+	if (!d.value.items.length) out.push("Add at least one tank.");
+	d.value.items.forEach((r, i) => {
+		const l = rowLabel(r, i);
+		if (!r.tank) out.push(`${l}: choose the tank.`);
+		if (flt(r.invoice_qty) <= 0) out.push(`${l}: enter the invoice quantity.`);
+		if (flt(r.rate) <= 0) out.push(`${l}: enter the rate per litre.`);
+		if (
+			flt(r.dip_before_mm) &&
+			flt(r.dip_after_mm) &&
+			(flt(r.dip_after_mm) < flt(r.dip_before_mm) || flt(r.received_qty) < 0)
+		)
+			out.push(`${l}: dip after decantation is below the dip before. Check the dips.`);
+	});
+	if (d.value.posting_date > today()) out.push("Date cannot be in the future.");
+	return out;
+}
+const rowProblems = computed(() => (f.doc.value ? draftProblems() : []));
+// "enter ..." hints for empty fields wait until a save or submit is tried; wrong values show at once
+const tried = ref(false);
+const shownProblems = computed(() =>
+	tried.value ? rowProblems.value : rowProblems.value.filter((m) => !/: (enter|choose) /.test(m))
 );
-const blockReason = computed(() =>
-	hasDensityFail.value && !d.value.override_density_check
-		? "Density outside tolerance"
-		: "Seals not intact: add remarks"
-);
+const problem = computed(() => {
+	const p = rowProblems.value;
+	if (p.length) return p[0];
+	const noDensity = d.value.items.findIndex(
+		(r) => !flt(r.challan_density) || !flt(r.density_at_15)
+	);
+	if (noDensity >= 0)
+		return `${rowLabel(
+			d.value.items[noDensity],
+			noDensity
+		)}: enter challan density and density at 15°C.`;
+	if (hasDensityFail.value && !d.value.override_density_check)
+		return isManager.value
+			? "Density outside tolerance: tick 'Accept despite density variance' with remarks"
+			: "Density outside tolerance: a Pump Manager must review";
+	if (hasDensityFail.value && d.value.override_density_check && !d.value.remarks)
+		return "Enter remarks explaining why the density variance was accepted";
+	if (!d.value.seals_intact && !d.value.remarks) return "Seals not intact: add remarks";
+	return "";
+});
+const blocked = computed(() => !!problem.value);
+const blockReason = computed(() => problem.value);
+
+// refuse a draft the server would reject anyway, with a friendly message
+const serverSave = f.save;
+f.save = (action) => {
+	tried.value = true;
+	const p = draftProblems();
+	if (p.length) {
+		toast.error(p[0]);
+		return;
+	}
+	return serverSave(action);
+};
 
 function addItem() {
 	d.value.items.push({ tank: "", invoice_qty: 0, rate: 0, _key: nextKey() });
@@ -359,11 +445,15 @@ async function onTank(r) {
 	const t = tanks.value.find((x) => x.name === r.tank);
 	r.fuel_item = t?.fuel_item;
 	if (!r.rate && r.fuel_item) {
-		const it = await getList("Item", {
-			filters: { name: r.fuel_item },
-			fields: ["last_purchase_rate", "valuation_rate"],
-		});
-		r.rate = flt(it[0]?.last_purchase_rate || it[0]?.valuation_rate);
+		try {
+			const it = await getList("Item", {
+				filters: { name: r.fuel_item },
+				fields: ["last_purchase_rate", "valuation_rate"],
+			});
+			r.rate = flt(it[0]?.last_purchase_rate || it[0]?.valuation_rate);
+		} catch (e) {
+			toast.error(errorText(e));
+		}
 	}
 	calc();
 }
@@ -396,11 +486,15 @@ function calc() {
 	}, 400);
 }
 onMounted(async () => {
-	tanks.value = await getList("Fuel Tank Master", {
-		filters: { station: session.station, status: "Active" },
-		fields: ["name", "fuel_item"],
-		order_by: "name",
-	});
+	try {
+		tanks.value = await getList("Fuel Tank Master", {
+			filters: { station: session.station, status: "Active" },
+			fields: ["name", "fuel_item"],
+			order_by: "name",
+		});
+	} catch (e) {
+		toast.error(errorText(e));
+	}
 	await f.load();
 });
 </script>

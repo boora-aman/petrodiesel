@@ -361,7 +361,9 @@ class TestPetrolPump(IntegrationTestCase):
 		self.assertEqual(len(dsr.items), len(demo.TANKS))
 		for row in dsr.items:
 			self.assertAlmostEqual(
-				row.book_closing, row.opening_stock + row.receipts - row.net_sales, places=1
+				row.book_closing,
+				row.opening_stock + row.receipts + row.transfers - row.net_sales,
+				places=1,
 			)
 			self.assertAlmostEqual(row.variance, row.closing_stock - row.book_closing, places=1)
 		dsr.submit()

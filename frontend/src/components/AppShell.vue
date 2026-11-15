@@ -77,15 +77,18 @@
 						</div>
 					</div>
 					<div class="hidden min-w-0 items-center gap-2 lg:flex">
-						<span class="pill border-brand-100 bg-brand-50 text-brand-700"
+						<span
+							class="pill shrink-0 whitespace-nowrap border-brand-100 bg-brand-50 text-brand-700"
 							>{{ boot.station?.omc }} {{ boot.station?.ro_code }}</span
 						>
-						<span class="truncate text-[13px] text-ink-2">{{
-							boot.station?.address
-						}}</span>
+						<span
+							class="hidden truncate text-[13px] text-ink-2 2xl:inline"
+							:title="boot.station?.address"
+							>{{ boot.station?.address }}</span
+						>
 					</div>
 
-					<div class="relative ml-auto hidden w-72 md:block">
+					<div class="relative ml-auto hidden w-56 md:block xl:w-60 2xl:w-72">
 						<i
 							class="lucide-search absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ink-3"
 						/>
@@ -120,11 +123,11 @@
 						</div>
 					</div>
 
-					<div class="hidden items-center gap-3 xl:flex">
+					<div class="hidden shrink-0 items-center gap-3 xl:flex">
 						<span
 							v-for="f in boot.fuels"
 							:key="f.name"
-							class="num text-[12px] text-ink-2"
+							class="num inline-flex items-center gap-1 whitespace-nowrap text-[12px] text-ink-2"
 						>
 							<FuelChip :item="f.name" size="xs" /> {{ inr(f.rate) }}
 						</span>
@@ -151,10 +154,11 @@
 								class="flex size-8 items-center justify-center rounded-full bg-brand-600 text-[12px] font-semibold text-white"
 								>{{ initials }}</span
 							>
-							<span class="hidden text-left md:block">
-								<span class="block text-[13px] font-medium leading-4">{{
-									boot.full_name
-								}}</span>
+							<span class="hidden max-w-[140px] text-left md:block">
+								<span
+									class="block truncate whitespace-nowrap text-[13px] font-medium leading-4"
+									>{{ boot.full_name }}</span
+								>
 								<span class="block text-[11px] capitalize text-ink-3">{{
 									roleLabel
 								}}</span>
@@ -191,7 +195,7 @@
 				</div>
 			</header>
 
-			<main class="mx-auto max-w-app px-4 pb-28 pt-4 lg:px-6 lg:pb-10 lg:pt-6">
+			<main class="mx-auto max-w-app px-4 pb-28 pt-4 lg:px-6 lg:pb-24 lg:pt-6">
 				<slot />
 			</main>
 		</div>

@@ -31,7 +31,13 @@
 			</div>
 			<div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
 				<Field label="Date"
-					><input v-model="d.posting_date" type="date" class="inp" :disabled="!ed"
+					><input
+						v-model="d.posting_date"
+						type="date"
+						class="inp"
+						:max="today()"
+						:disabled="!ed"
+						@change="calc"
 				/></Field>
 				<template v-if="isTank">
 					<Field label="From tank" required>
@@ -80,7 +86,7 @@
 							v-model="d.from_warehouse"
 							class="inp"
 							:disabled="!ed"
-							@change="calc"
+							@change="onFromStore"
 						>
 							<option value="" disabled>Select</option>
 							<option v-for="w in stores" :key="w.name" :value="w.name">
@@ -213,8 +219,9 @@
 </template>
 <script setup>
 import { computed, onMounted, ref } from "vue";
+import { toast } from "frappe-ui";
 import { useDocForm, nextKey } from "../composables/useDocForm";
-import { api, getList, deskUrl } from "../api";
+import { api, getList, deskUrl, errorText } from "../api";
 import { session } from "../session";
 import { num, today, flt } from "../format";
 import PageHeader from "../components/PageHeader.vue";
@@ -272,7 +279,9 @@ const sameFuelTargets = computed(() =>
 const label = (w) => tanks.value.find((t) => t.warehouse === w)?.name || w;
 const problem = computed(() => {
 	const x = d.value;
+	if (x.posting_date > today()) return "Date cannot be in the future.";
 	if (!x.from_warehouse || !x.to_warehouse) return "Choose where the stock moves from and to.";
+	if (x.from_warehouse === x.to_warehouse) return "From and To must be different.";
 	if (isTank.value && !sameFuelTargets.value.some((t) => t.warehouse === x.to_warehouse))
 		return "The target tank must hold the same fuel.";
 	if (x.items.some((r) => !r.item_code || !flt(r.qty))) return "Enter the quantity to move.";
@@ -294,32 +303,49 @@ async function onFromTank() {
 		d.value.to_warehouse = sameFuelTargets.value[0].warehouse;
 	await calc();
 }
+function onFromStore() {
+	if (d.value.to_warehouse === d.value.from_warehouse) d.value.to_warehouse = "";
+	calc();
+}
 async function calc() {
-	for (const r of d.value.items) {
-		if (r.item_code && d.value.from_warehouse) {
-			r.available_qty = await api(
-				"petrodiesel.petrodiesel.doctype.internal_stock_transfer.internal_stock_transfer.get_available",
-				{ item_code: r.item_code, warehouse: d.value.from_warehouse }
-			);
+	try {
+		for (const r of d.value.items) {
+			if (r.item_code && d.value.from_warehouse) {
+				r.available_qty = await api(
+					"petrodiesel.petrodiesel.doctype.internal_stock_transfer.internal_stock_transfer.get_available",
+					{
+						item_code: r.item_code,
+						warehouse: d.value.from_warehouse,
+						posting_date: d.value.posting_date || null,
+					}
+				);
+			}
 		}
+	} catch (e) {
+		toast.error(errorText(e));
 	}
 }
 onMounted(async () => {
-	tanks.value = await getList("Fuel Tank Master", {
-		filters: { station: session.station, status: ["!=", "Inactive"] },
-		fields: ["name", "warehouse", "fuel_item"],
-		order_by: "name",
-	});
-	const tankWh = tanks.value.map((t) => t.warehouse);
-	stores.value = (
-		await getList("Warehouse", {
-			filters: { company: session.boot.station?.company, is_group: 0 },
-			fields: ["name"],
-			limit_page_length: 200,
-		})
-	).filter(
-		(w) => !tankWh.includes(w.name) && !/Transit|Work In Progress|Finished Goods/.test(w.name)
-	);
+	try {
+		tanks.value = await getList("Fuel Tank Master", {
+			filters: { station: session.station, status: ["!=", "Inactive"] },
+			fields: ["name", "warehouse", "fuel_item"],
+			order_by: "name",
+		});
+		const tankWh = tanks.value.map((t) => t.warehouse);
+		stores.value = (
+			await getList("Warehouse", {
+				filters: { company: session.boot.station?.company, is_group: 0 },
+				fields: ["name"],
+				limit_page_length: 200,
+			})
+		).filter(
+			(w) =>
+				!tankWh.includes(w.name) && !/Transit|Work In Progress|Finished Goods/.test(w.name)
+		);
+	} catch (e) {
+		toast.error(errorText(e));
+	}
 	await f.load();
 	if (!f.isNew.value) calc();
 });

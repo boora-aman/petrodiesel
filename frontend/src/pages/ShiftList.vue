@@ -1,5 +1,6 @@
 <template>
 	<DocList
+		table-from="xl"
 		:search-fields="['name', 'cashier_name', 'shift']"
 		search-placeholder="Search entry, cashier or shift…"
 		title="Shift closing"
@@ -26,6 +27,7 @@
 		route-base="/shifts"
 		:statuses="['Draft', 'Pending Approval', 'Approved', 'Rejected', 'Cancelled']"
 		:summary="summary"
+		:sum-fields="['total_sale_qty', 'gross_sales', 'credit_sales_amount', 'short_excess']"
 		empty-title="No shift closings"
 	>
 		<template #cell-short_excess="{ row }"
@@ -89,8 +91,20 @@ const columns = [
 	{ key: "total_sale_qty", label: "Sale (L)", num: true, format: (v) => num(v) },
 	{ key: "gross_sales", label: "Gross", num: true, format: (v) => inr(v) },
 	{ key: "credit_sales_amount", label: "Credit", num: true, format: (v) => inr(v) },
-	{ key: "digital_amount", label: "Digital", num: true, format: (v) => inr(v) },
-	{ key: "cash_counted", label: "Cash counted", num: true, format: (v) => inr(v) },
+	{
+		key: "digital_amount",
+		label: "Digital",
+		num: true,
+		format: (v) => inr(v),
+		cls: "hidden 2xl:table-cell",
+	},
+	{
+		key: "cash_counted",
+		label: "Cash counted",
+		num: true,
+		format: (v) => inr(v),
+		cls: "hidden 2xl:table-cell",
+	},
 	{ key: "short_excess", label: "Short/Excess", num: true },
 	{ key: "workflow_state", label: "Status" },
 ];

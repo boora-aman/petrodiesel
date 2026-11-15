@@ -104,21 +104,21 @@
 		</div>
 
 		<div v-else-if="tab === 'Vehicles'">
-			<div class="mb-3 flex justify-end">
-				<button
-					class="btn-secondary"
-					@click="
-						editV = {
-							vehicle_no: '',
-							vehicle_type: 'Truck',
-							fuel_item: 'HSD',
-							is_active: 1,
-						}
-					"
-				>
+			<div v-if="canEditVehicle" class="mb-3 flex justify-end">
+				<button class="btn-secondary" @click="newVehicle">
 					<i class="lucide-plus size-4" />Add vehicle
 				</button>
 			</div>
+			<EmptyState
+				v-if="data && !data.vehicles?.length"
+				title="No vehicles yet"
+				:text="
+					canEditVehicle
+						? 'Add the vehicles this customer fills on credit.'
+						: 'No vehicles registered for this customer.'
+				"
+				icon="lucide-truck"
+			/>
 			<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
 				<div v-for="v in data?.vehicles" :key="v.name" class="card card-pad">
 					<div class="flex items-center justify-between">
@@ -131,6 +131,7 @@
 						{{ v.driver_name || "No driver" }}
 					</div>
 					<button
+						v-if="canEditVehicle"
 						class="mt-2 text-[12px] text-brand-600 hover:underline"
 						@click="editV = { ...v, vehicle_no: v.name }"
 					>
@@ -177,6 +178,7 @@
 					</tr>
 				</tbody>
 			</table>
+			<EmptyState v-if="data && !data.invoices?.length" title="No invoices yet" />
 		</div>
 
 		<div v-else class="card overflow-x-auto">
@@ -207,7 +209,7 @@
 					</tr>
 				</tbody>
 			</table>
-			<EmptyState v-if="!data?.payments?.length" title="No payments yet" />
+			<EmptyState v-if="data && !data.payments?.length" title="No payments yet" />
 		</div>
 
 		<Modal
@@ -251,7 +253,11 @@
 			</div>
 			<template #footer
 				><button class="btn-secondary" @click="editV = null">Close</button
-				><button class="btn-primary" :disabled="!editV?.vehicle_no" @click="saveVehicle">
+				><button
+					class="btn-primary"
+					:disabled="!editV?.vehicle_no || savingVehicle"
+					@click="saveVehicle"
+				>
 					Save
 				</button></template
 			>
@@ -263,7 +269,7 @@
 import { ref, computed, onMounted } from "vue";
 import { toast } from "frappe-ui";
 import { api, errorText, deskUrl } from "../api";
-import { session, can } from "../session";
+import { session, can, hasRole } from "../session";
 import { inr, num, dateFmt, today, addDays } from "../format";
 import PageHeader from "../components/PageHeader.vue";
 import KpiCard from "../components/KpiCard.vue";
@@ -304,22 +310,48 @@ const reportLink = computed(
 			to.value
 		}`
 );
+// Customer Vehicle: create/write for Pump Owner, Manager and Cashier (doctype permissions)
+const canEditVehicle = computed(() => hasRole("Pump Owner", "Pump Manager", "Pump Cashier"));
+const savingVehicle = ref(false);
+function newVehicle() {
+	editV.value = {
+		vehicle_no: "",
+		vehicle_type: "Truck",
+		fuel_item: session.boot?.fuels?.[0]?.name || "",
+		is_active: 1,
+	};
+}
 async function load() {
-	data.value = await api("customer_detail", {
-		customer: props.customer,
-		from_date: from.value,
-		to_date: to.value,
-		vehicle: vehicle.value || null,
-	});
+	try {
+		data.value = await api("customer_detail", {
+			customer: props.customer,
+			from_date: from.value,
+			to_date: to.value,
+			vehicle: vehicle.value || null,
+		});
+	} catch (e) {
+		toast.error(errorText(e));
+	}
 }
 async function saveVehicle() {
+	if (savingVehicle.value || !editV.value?.vehicle_no) return;
+	savingVehicle.value = true;
 	try {
-		await api("save_vehicle", { vehicle: { ...editV.value, customer: props.customer } });
+		await api("save_vehicle", {
+			vehicle: {
+				...editV.value,
+				vehicle_no: String(editV.value.vehicle_no).trim().toUpperCase(),
+				is_active: editV.value.is_active ? 1 : 0,
+				customer: props.customer,
+			},
+		});
 		toast.success("Vehicle saved");
 		editV.value = null;
 		load();
 	} catch (e) {
 		toast.error(errorText(e));
+	} finally {
+		savingVehicle.value = false;
 	}
 }
 onMounted(load);

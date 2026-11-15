@@ -1,5 +1,5 @@
 <template>
-	<div class="card card-pad flex min-w-[170px] flex-col gap-1">
+	<div class="card card-pad flex min-w-0 flex-col gap-1">
 		<div class="flex items-start justify-between gap-2">
 			<span class="text-[12px] text-ink-2">{{ label }}</span>
 			<span
@@ -9,11 +9,14 @@
 				>{{ badge }}</span
 			>
 		</div>
-		<div class="num text-[22px] font-semibold leading-8 tracking-tight" :class="valueClass">
+		<div
+			class="num break-words text-[20px] font-semibold leading-7 tracking-tight sm:text-[22px] sm:leading-8"
+			:class="valueClass"
+		>
 			<Skeleton v-if="loading" class="h-7 w-28" />
 			<template v-else>{{ value }}</template>
 		</div>
-		<div v-if="caption" class="truncate text-[11px] text-ink-3">{{ caption }}</div>
+		<div v-if="caption" class="text-[11px] leading-snug text-ink-3">{{ caption }}</div>
 		<Sparkline
 			v-if="spark && spark.length > 1"
 			:values="spark"

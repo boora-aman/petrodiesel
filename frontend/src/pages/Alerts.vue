@@ -73,7 +73,8 @@
 </template>
 <script setup>
 import { ref, onMounted } from "vue";
-import { api } from "../api";
+import { toast } from "frappe-ui";
+import { api, errorText } from "../api";
 import { refreshCounts } from "../session";
 import { relTime } from "../format";
 import PageHeader from "../components/PageHeader.vue";
@@ -94,10 +95,15 @@ const icon = (t) =>
 		credit: "lucide-credit-card",
 	}[t] || "lucide-info");
 async function load() {
-	const r = await api("notifications");
-	alerts.value = r.alerts;
-	logs.value = r.logs;
-	loading.value = false;
+	try {
+		const r = await api("notifications");
+		alerts.value = r.alerts;
+		logs.value = r.logs;
+	} catch (e) {
+		toast.error(errorText(e));
+	} finally {
+		loading.value = false;
+	}
 }
 async function markRead() {
 	await api("mark_notifications_read");

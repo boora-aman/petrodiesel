@@ -5,11 +5,23 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt
+from frappe.utils import flt, getdate
+
+from petrodiesel.petrodiesel.utils import validate_not_future
 
 
 class NozzleMeterChange(Document):
 	def validate(self):
+		validate_not_future(self.posting_date)
+		if flt(self.new_meter_start_reading) < 0:
+			frappe.throw(_("New meter start reading cannot be negative."))
+		last_on = frappe.db.get_value("Fuel Nozzle Master", self.nozzle, "last_reading_on")
+		if last_on and getdate(self.posting_date) < getdate(last_on):
+			frappe.throw(
+				_(
+					"Nozzle {0} already has readings up to {1}. Date the meter change on or after that day."
+				).format(self.nozzle, frappe.format(last_on, "Date"))
+			)
 		last = flt(frappe.db.get_value("Fuel Nozzle Master", self.nozzle, "last_reading"))
 		if self.docstatus == 0:
 			self.previous_last_reading = last
@@ -55,4 +67,17 @@ class NozzleMeterChange(Document):
 			frappe.throw(_("Shifts were recorded on the new meter. Cancel them first."))
 
 	def on_cancel(self):
-		frappe.db.set_value("Fuel Nozzle Master", self.nozzle, "last_reading", self.previous_last_reading)
+		from petrodiesel.petrodiesel.doctype.shift_sale_entry.shift_sale_entry import (
+			get_previous_entry_for_nozzle,
+		)
+
+		prev = get_previous_entry_for_nozzle(self.nozzle)
+		frappe.db.set_value(
+			"Fuel Nozzle Master",
+			self.nozzle,
+			{
+				"last_reading": self.previous_last_reading,
+				"last_reading_on": prev.posting_date if prev else None,
+				"last_shift_entry": prev.name if prev else None,
+			},
+		)

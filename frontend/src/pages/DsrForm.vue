@@ -18,8 +18,8 @@
 							  )
 							: ''
 					"
-					:blocked="missingDips.length > 0"
-					:blocked-reason="'Enter closing dips: ' + missingDips.join(', ')"
+					:blocked="!!problem"
+					:blocked-reason="problem"
 				/>
 			</template>
 		</PageHeader>
@@ -32,7 +32,13 @@
 
 		<div class="card card-pad mb-4 flex flex-wrap items-end gap-3">
 			<Field label="Business date"
-				><input v-model="d.posting_date" type="date" class="inp w-44" :disabled="!ed"
+				><input
+					v-model="d.posting_date"
+					type="date"
+					class="inp w-44"
+					:max="today()"
+					:disabled="!ed"
+					@change="onDateChange"
 			/></Field>
 			<button v-if="ed" class="btn-primary" :disabled="fetching" @click="fetchData">
 				<i class="lucide-refresh-cw size-4" :class="fetching ? 'animate-spin' : ''" />Fetch
@@ -76,17 +82,18 @@
 						<th>Tank</th>
 						<th class="!text-right">Opening</th>
 						<th class="!text-right">Receipts</th>
-						<th class="!text-right">Meter sales</th>
-						<th class="!text-right">Testing</th>
+						<th v-if="hasTransfers" class="!text-right">Transfers</th>
+						<th class="!text-right hidden 2xl:table-cell">Meter sales</th>
+						<th class="!text-right hidden 2xl:table-cell">Testing</th>
 						<th class="!text-right">Net sales</th>
 						<th class="!text-right">Book closing</th>
 						<th class="!text-right">Closing dip mm</th>
 						<th class="!text-right">Closing stock</th>
 						<th class="!text-right">Gain/Loss</th>
-						<th class="!text-right">% sales</th>
-						<th class="!text-right">Allowed %</th>
+						<th class="!text-right hidden 2xl:table-cell">% sales</th>
+						<th class="!text-right hidden 2xl:table-cell">Allowed %</th>
 						<th>Check</th>
-						<th class="!text-right">MTD</th>
+						<th class="!text-right hidden 2xl:table-cell">MTD</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -98,11 +105,12 @@
 						</td>
 						<td class="r">{{ num(r.opening_stock) }}</td>
 						<td class="r">{{ num(r.receipts) }}</td>
-						<td class="r">{{ num(r.meter_sales) }}</td>
-						<td class="r">{{ num(r.test_qty) }}</td>
+						<td v-if="hasTransfers" class="r">{{ num(r.transfers) }}</td>
+						<td class="r hidden 2xl:table-cell">{{ num(r.meter_sales) }}</td>
+						<td class="r hidden 2xl:table-cell">{{ num(r.test_qty) }}</td>
 						<td class="r">{{ num(r.net_sales) }}</td>
 						<td class="r font-semibold">{{ num(r.book_closing) }}</td>
-						<td class="r w-28">
+						<td class="r w-24">
 							<NumInput
 								v-if="ed"
 								v-model="r.closing_dip_mm"
@@ -117,8 +125,10 @@
 						>
 							{{ hasClosing(r) ? num(r.variance) : "—" }}
 						</td>
-						<td class="r">{{ num(r.variance_percent, 3) }}</td>
-						<td class="r">{{ num(r.permissible_percent, 2) }}</td>
+						<td class="r hidden 2xl:table-cell">{{ num(r.variance_percent, 3) }}</td>
+						<td class="r hidden 2xl:table-cell">
+							{{ num(r.permissible_percent, 2) }}
+						</td>
 						<td>
 							<StatusPill
 								v-if="hasClosing(r)"
@@ -126,7 +136,7 @@
 								:tone="r.within_limit ? 'green' : 'red'"
 							/><span v-else class="text-[12px] text-ink-3">dip pending</span>
 						</td>
-						<td class="r">{{ num(r.cumulative_variance) }}</td>
+						<td class="r hidden 2xl:table-cell">{{ num(r.cumulative_variance) }}</td>
 					</tr>
 				</tbody>
 			</table>
@@ -205,6 +215,7 @@ import { computed, onMounted, ref } from "vue";
 import { toast } from "frappe-ui";
 import { useDocForm, nextKey } from "../composables/useDocForm";
 import { api, errorText, printUrl } from "../api";
+import { useRoute } from "vue-router";
 import { session } from "../session";
 import { num, litres, dateFmt, today, addDays, flt } from "../format";
 import PageHeader from "../components/PageHeader.vue";
@@ -217,7 +228,13 @@ import StatusPill from "../components/StatusPill.vue";
 import FormActions from "../components/FormActions.vue";
 
 const props = defineProps({ name: String });
+const route = useRoute();
 const fetching = ref(false);
+function defaultDate() {
+	const q = route.query.date;
+	if (typeof q === "string" && /^\d{4}-\d{2}-\d{2}$/.test(q) && q <= today()) return q;
+	return new Date().getHours() < 12 ? addDays(today(), -1) : today();
+}
 const f = useDocForm({
 	doctype: "Daily Stock Register",
 	name: props.name,
@@ -226,19 +243,40 @@ const f = useDocForm({
 	blank: () => ({
 		doctype: "Daily Stock Register",
 		station: session.station,
-		posting_date: new Date().getHours() < 12 ? addDays(today(), -1) : today(),
+		posting_date: defaultDate(),
 		items: [],
 	}),
 });
+const hasTransfers = computed(() => (f.doc.value?.items || []).some((r) => Number(r.transfers)));
 const d = computed(() => f.doc.value);
 const ed = computed(() => f.editable.value);
 const missingDips = computed(() =>
 	d.value.items.filter((r) => !flt(r.closing_stock) && !flt(r.closing_dip_mm)).map((r) => r.tank)
 );
+const problem = computed(() => {
+	if (!d.value.posting_date) return "Choose the business date";
+	if (d.value.posting_date > today()) return "Business date cannot be in the future";
+	if (!d.value.items.length) return "No tank data for this date. Fetch the day's data first.";
+	if (missingDips.value.length) return "Enter closing dips: " + missingDips.value.join(", ");
+	return "";
+});
 const hasClosing = (r) => flt(r.closing_stock) || flt(r.closing_dip_mm);
 const beyond = computed(() => d.value.items.filter((r) => !r.within_limit).map((r) => r.tank));
 
+function onDateChange() {
+	if (!ed.value) return;
+	if (d.value.posting_date > today()) {
+		toast.error("Business date cannot be in the future");
+		d.value.posting_date = today();
+	}
+	// rows belong to the old date: clear them and load the new day's data
+	d.value.items = [];
+	for (const k of ["total_receipts", "total_sales", "total_variance"]) d.value[k] = 0;
+	d.value.all_within_limit = 0;
+	if (d.value.posting_date) fetchData();
+}
 async function fetchData() {
+	if (!d.value.posting_date) return;
 	fetching.value = true;
 	try {
 		const r = await api("fetch_dsr", {
